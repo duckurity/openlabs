@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/logo-openlabs.svg?v=1">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/logo-openlabs-light.svg?v=1" alt="open labs" height="14">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/logo-openlabs.svg?v=31625fd3">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/logo-openlabs-light.svg?v=c7b8b59b" alt="open labs" height="14">
   </picture>
 </p>
 

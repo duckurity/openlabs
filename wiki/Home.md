@@ -1,27 +1,27 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/banner.png?v=1" alt="open labs" width="100%">
+  <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/banner.png?v=874ad199" alt="open labs" width="100%">
 </p>
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/code-license-dark.svg?v=1">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/code-license-light.svg?v=1" alt="code: Apache-2.0" height="20">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/code-license-dark.svg?v=6164d6e0">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/code-license-light.svg?v=d7baa62a" alt="code: Apache-2.0" height="20">
   </picture>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/content-license-dark.svg?v=1">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/content-license-light.svg?v=1" alt="content: CC-BY-4.0" height="20">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/content-license-dark.svg?v=b83304a6">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/content-license-light.svg?v=b42ada1f" alt="content: CC-BY-4.0" height="20">
   </picture>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-count-dark.svg?v=1">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-count-light.svg?v=1" alt="labs: 1 live" height="20">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-count-dark.svg?v=5a5aee28">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-count-light.svg?v=91d62f45" alt="labs: 1 live" height="20">
   </picture>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/docker-dark.svg?v=1">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/docker-light.svg?v=1" alt="docker: compose v2" height="20">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/docker-dark.svg?v=2b6c885f">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/docker-light.svg?v=d7abbc30" alt="docker: compose v2" height="20">
   </picture>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/checker-dark.svg?v=1">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/checker-light.svg?v=1" alt="checker: python3" height="20">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/checker-dark.svg?v=cff908fc">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/checker-light.svg?v=6052eb0b" alt="checker: python3" height="20">
   </picture>
 </p>
 

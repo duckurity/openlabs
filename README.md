@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/banner.png" alt="open labs" width="100%">
+  <img src=".github/assets/banner.png?v=874ad199" alt="open labs" width="100%">
 </p>
 
 <p align="center">
@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/code-license-dark.svg"><img src=".github/assets/badges/code-license-light.svg" alt="code: Apache-2.0" height="20"></picture></a>
-  <a href="LICENSE-CONTENT"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/content-license-dark.svg"><img src=".github/assets/badges/content-license-light.svg" alt="content: CC-BY-4.0" height="20"></picture></a>
-  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-count-dark.svg"><img src=".github/assets/badges/labs-count-light.svg" alt="labs: 1 live" height="20"></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/docker-dark.svg"><img src=".github/assets/badges/docker-light.svg" alt="docker: compose v2" height="20"></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/checker-dark.svg"><img src=".github/assets/badges/checker-light.svg" alt="checker: python3" height="20"></picture>
+  <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/code-license-dark.svg?v=6164d6e0"><img src=".github/assets/badges/code-license-light.svg?v=d7baa62a" alt="code: Apache-2.0" height="20"></picture></a>
+  <a href="LICENSE-CONTENT"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/content-license-dark.svg?v=b83304a6"><img src=".github/assets/badges/content-license-light.svg?v=b42ada1f" alt="content: CC-BY-4.0" height="20"></picture></a>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-count-dark.svg?v=5a5aee28"><img src=".github/assets/badges/labs-count-light.svg?v=91d62f45" alt="labs: 1 live" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/docker-dark.svg?v=2b6c885f"><img src=".github/assets/badges/docker-light.svg?v=d7abbc30" alt="docker: compose v2" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/checker-dark.svg?v=cff908fc"><img src=".github/assets/badges/checker-light.svg?v=6052eb0b" alt="checker: python3" height="20"></picture>
 </p>
 
 <p align="center">
@@ -84,10 +84,10 @@ not how long it takes.
 
 | Level | Expectation |
 |:---:|:---|
-| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg"><img src=".github/assets/badges/chip-easy-light.svg" alt="EASY" height="18"></picture> | one vector, minimal recon |
-| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg"><img src=".github/assets/badges/chip-medium-light.svg" alt="MEDIUM" height="18"></picture> | chained steps, some enumeration |
-| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg"><img src=".github/assets/badges/chip-hard-light.svg" alt="HARD" height="18"></picture> | multiple systems, custom tooling |
-| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-insane-dark.svg"><img src=".github/assets/badges/chip-insane-light.svg" alt="INSANE" height="18"></picture> | research-level, an original technique |
+| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg?v=78286c0b"><img src=".github/assets/badges/chip-easy-light.svg?v=cb5cf439" alt="EASY" height="18"></picture> | one vector, minimal recon |
+| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | chained steps, some enumeration |
+| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | multiple systems, custom tooling |
+| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-insane-dark.svg?v=02faac30"><img src=".github/assets/badges/chip-insane-light.svg?v=51dfad19" alt="INSANE" height="18"></picture> | research-level, an original technique |
 
 </div>
 
@@ -97,13 +97,13 @@ not how long it takes.
 
 | Lab | Track | Difficulty | Description |
 |:---:|:---:|:---:|:---|
-| [`duck-cross`](labs/web/duck-cross) | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg"><img src=".github/assets/badges/chip-easy-light.svg" alt="EASY" height="18"></picture> | a reports portal with a missing object-level authorization check |
+| [`duck-cross`](labs/web/duck-cross) | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg?v=78286c0b"><img src=".github/assets/badges/chip-easy-light.svg?v=cb5cf439" alt="EASY" height="18"></picture> | a reports portal with a missing object-level authorization check |
 
 </div>
 
 ## Flag format
 
-<picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/mark-cross.svg"><img src=".github/assets/mark-cross-light.svg" alt="the openlabs mark" height="16" align="top"></picture> Every flag carries the mark: `duck{...}`. Lowercase letters, digits, and underscores between the braces, 16 to 40 characters.[^2]
+<picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/mark-cross.svg?v=c2c360ee"><img src=".github/assets/mark-cross-light.svg?v=5db79627" alt="the openlabs mark" height="16" align="top"></picture> Every flag carries the mark: `duck{...}`. Lowercase letters, digits, and underscores between the braces, 16 to 40 characters.[^2]
 
 The plaintext flag lives inside the lab; the repository stores only its
 SHA-256 hash. Reading lab source to find the flag is a legitimate solve.
@@ -167,8 +167,8 @@ Details in [SECURITY.md](SECURITY.md).
 <p align="center">
   <a href="https://github.com/Duckurity">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/powered-by.svg">
-      <img src=".github/assets/powered-by-light.svg" alt="powered by duckurity" width="110">
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/powered-by.svg?v=f3ab6294">
+      <img src=".github/assets/powered-by-light.svg?v=cda0d793" alt="powered by duckurity" width="110">
     </picture>
   </a>
 </p>
