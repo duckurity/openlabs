@@ -48,13 +48,17 @@ The brief points at the surface. It does not hand over the solve.
 
 `lab.yml` is flat YAML. Every field required.
 
+<div align="center">
+
 | Key | Rules |
-|---|---|
+|:---:|:---|
 | `name` | matches the directory name, lowercase, hyphens |
 | `track` | one of `web`, `binary`, `crypto`, `network`, `osint` |
 | `difficulty` | one of `easy`, `medium`, `hard`, `insane` |
 | `description` | one line, shown in the lab index |
 | `flag_hash` | SHA-256 of the full flag string, 64 lowercase hex |
+
+</div>
 
 ## The brief
 
