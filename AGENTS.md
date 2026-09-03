@@ -19,6 +19,8 @@ verifies a player's flag against the stored SHA-256 hash.
 | `scripts/validate.py` | CI validator, zero dependencies |
 | `scripts/check.py` | player flag checker, zero dependencies |
 | `scripts/make_badges.py` | badge and chip generator, needs `fonttools` and vendored fonts |
+| `scripts/test_brand.sh` | integration-test the brand pipeline in a temp clone |
+| `BRAND.md` | color, type, badge, and pipeline reference |
 | `scripts/sync_wiki.py` | asset version bumps and wiki repo sync, zero dependencies |
 | `.github/assets/fonts/` | vendored Funnel Display cuts, SIL OFL 1.1 |
 | `wiki/` | GitHub wiki source: player, authoring, and review guides |
@@ -53,6 +55,7 @@ python3 scripts/check.py labs/web/duck-cross
 python3 scripts/make_badges.py           # regenerate badges and chips
 python3 scripts/sync_wiki.py bump        # hash-stamp asset refs (?v=)
 python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo
+bash scripts/test_brand.sh               # integration-test the brand pipeline
 ```
 
 CI runs the badge regeneration, version bumps, and wiki sync on every push
