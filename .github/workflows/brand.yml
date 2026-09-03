@@ -10,6 +10,7 @@ on:
       - "scripts/**"
       - ".github/assets/**"
       - ".github/workflows/brand.yml"
+      - "requirements-dev.txt"
 
 permissions:
   contents: write
@@ -21,20 +22,31 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
 
-      - name: Install fonttools
-        run: pip install "fonttools==4.63.0"
+      - name: Install build dependency
+        run: pip install -r requirements-dev.txt
 
       - name: Regenerate badges
         run: python3 scripts/make_badges.py
 
-      - name: Bump asset versions
+      - name: Bump asset version parameters
         run: python3 scripts/sync_wiki.py bump
 
       - name: Commit refreshed assets
@@ -42,16 +54,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet; then
+          if git diff --quiet; then
+            echo "changes=none" >> "$GITHUB_OUTPUT"
+            echo "no changes to commit"
+          else
             git add -A
             git commit -m "chore: refresh brand assets"
             git push
-            echo "pushed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            echo "changes=committed" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Sync wiki
+        if: always()
         env:
           WIKI_PUSH_TOKEN: ${{ secrets.WIKI_PUSH_TOKEN }}
         run: python3 scripts/sync_wiki.py wiki
