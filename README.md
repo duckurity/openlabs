@@ -8,8 +8,6 @@
   <a href="https://github.com/Duckurity/openlabs/actions/workflows/labs.yml"><img alt="CI status for the lab validator" src="https://img.shields.io/github/actions/workflow/status/Duckurity/openlabs/labs.yml?style=flat-square&label=CI&color=1C1916&labelColor=1C1916"></a>
 </p>
 
----
-
 ## What openlabs is
 
 Each lab is a self-contained security exercise: one vulnerable service, one
