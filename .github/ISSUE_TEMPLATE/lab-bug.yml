@@ -1,0 +1,32 @@
+name: Lab bug
+description: A lab does not work as documented
+labels: ["bug"]
+body:
+  - type: input
+    id: lab
+    attributes:
+      label: Lab
+      description: Full path, for example labs/web/duck-cross
+    validations:
+      required: true
+  - type: textarea
+    id: what-breaks
+    attributes:
+      label: What breaks
+      description: What happens, and what does the brief say should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Docker version, and the relevant command output
+    validations:
+      required: true
+  - type: input
+    id: flag-hash
+    attributes:
+      label: Did the checker accept your flag?
+      description: Run python3 scripts/check.py <lab path> and state the result. Optional.
+    validations:
+      required: false

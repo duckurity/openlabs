@@ -1,0 +1,43 @@
+name: Lab idea
+description: Propose a lab for the library
+labels: ["lab idea"]
+body:
+  - type: dropdown
+    id: track
+    attributes:
+      label: Track
+      description: Which track does the lab belong to?
+      options:
+        - web
+        - binary
+        - crypto
+        - network
+        - osint
+    validations:
+      required: true
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty
+      description: Grade against the rubric in CONTRIBUTING.md.
+      options:
+        - easy
+        - medium
+        - hard
+        - insane
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does the player do? What is the intended vector? What service or environment does it need?
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Papers, CVEs, talks, or prior art that support the design. Optional.
+    validations:
+      required: false

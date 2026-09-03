@@ -1,0 +1,32 @@
+name: labs
+
+on:
+  pull_request:
+    paths:
+      - "labs/**"
+      - "scripts/**"
+      - ".github/workflows/labs.yml"
+  push:
+    branches: [main]
+    paths:
+      - "labs/**"
+      - "scripts/**"
+
+jobs:
+  validate:
+    name: Validate labs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate lab structure and metadata
+        run: python3 scripts/validate.py
+
+      - name: Validate compose files
+        run: |
+          docker compose version
+          python3 scripts/validate.py --compose

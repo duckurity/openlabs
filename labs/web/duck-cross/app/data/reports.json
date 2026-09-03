@@ -1,0 +1,38 @@
+{
+  "1": {
+    "location": "mill lane",
+    "warden": "r. hale",
+    "note": "mallard family crossing at dawn, 7 ducklings",
+    "status": "cleared"
+  },
+  "2": {
+    "location": "orchard row",
+    "warden": "s. irenick",
+    "note": "sign repainted after wear, traffic steady",
+    "status": "cleared"
+  },
+  "3": {
+    "location": "stone bridge",
+    "warden": "r. hale",
+    "note": "teal pair roosting under the arch, give them room",
+    "status": "monitored"
+  },
+  "4": {
+    "location": "rail crossing",
+    "warden": "m. ossler",
+    "note": "gate timing checked, ducks use the culvert now",
+    "status": "closed"
+  },
+  "5": {
+    "location": "harbor road",
+    "warden": "s. irenick",
+    "note": "eider hen with brood near the slipway",
+    "status": "monitored"
+  },
+  "6": {
+    "location": "restricted",
+    "warden": "r. hale",
+    "note": "duck{e33e890e98ef7a574c1406f1}",
+    "status": "admin"
+  }
+}

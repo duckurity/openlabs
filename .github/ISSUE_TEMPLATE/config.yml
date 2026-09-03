@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question about solving or setup
+    url: https://github.com/duckurity/openlabs/discussions
+    about: Ask in Discussions. Public answers help the next person.
