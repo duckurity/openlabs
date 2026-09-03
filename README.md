@@ -1,13 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-openlabs.svg">
-    <img src=".github/assets/logo-openlabs-light.svg" alt="open labs" width="320">
-  </picture>
-</p>
-
-<p align="center">
-  Open-source cybersecurity labs that run in Docker.<br>
-  <sub><samp>no accounts · no scoring server · flags verified by hash</samp></sub>
+  <img src=".github/assets/banner.png" alt="open labs" width="100%">
 </p>
 
 <p align="center">
