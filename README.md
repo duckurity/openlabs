@@ -137,8 +137,6 @@ Weaknesses in lab infrastructure, repo tooling, or CI go through
 [GitHub Private Vulnerability Reporting](https://github.com/Duckurity/openlabs/security/advisories/new).
 Details in [SECURITY.md](SECURITY.md).
 
----
-
 <p align="center">
   <a href="https://github.com/Duckurity">
     <picture>
