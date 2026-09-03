@@ -8,6 +8,18 @@
   A <a href="https://github.com/Duckurity">duckurity</a> project.
 </p>
 
+<p align="center">
+  <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/code-license-dark.svg"><img src=".github/assets/badges/code-license-light.svg" alt="code: Apache-2.0" height="20"></picture></a>
+  <a href="LICENSE-CONTENT"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/content-license-dark.svg"><img src=".github/assets/badges/content-license-light.svg" alt="content: CC-BY-4.0" height="20"></picture></a>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-count-dark.svg"><img src=".github/assets/badges/labs-count-light.svg" alt="labs: 1 live" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/docker-dark.svg"><img src=".github/assets/badges/docker-light.svg" alt="docker: compose v2" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/checker-dark.svg"><img src=".github/assets/badges/checker-light.svg" alt="checker: python3" height="20"></picture>
+</p>
+
+<p align="center">
+  <a href="#get-solving">Quick start</a> · <a href="#labs-1-live">Labs</a> · <a href="https://github.com/Duckurity/openlabs/wiki">Wiki</a> · <a href="#contribute">Contribute</a>
+</p>
+
 ## Get solving
 
 Three things stand between you and your first flag.
@@ -28,47 +40,66 @@ python3 scripts/check.py labs/web/duck-cross
 The checker hashes your input with SHA-256 and compares it against
 `flag_hash` in `lab.yml`. It prints `solved` or `not solved`.[^1]
 
+> [!TIP]
+> After images are pulled, nothing leaves your machine. Labs are
+> self-contained and fully offline.
+
 Every lab is a self-contained exercise: one vulnerable service, one brief,
-one flag inside. Labs run on your machine with Docker Compose. You solve at
-your own pace, and honesty is built in. The repository stores only the
-SHA-256 hash of each flag, never the plaintext.
+one flag inside. You solve at your own pace, and honesty is built in. The
+repository stores only the SHA-256 hash of each flag, never the plaintext.
 
 ## What makes a lab
 
+<div align="center">
+
 | | |
-|---|---|
+|:---|:---|
 | **Self-contained** | Runs offline once images are pulled. No phone-home. |
 | **Reproducible** | Pinned base images, one documented host port. |
 | **Honest** | Plaintext flags stay inside lab internals; only the hash ships. |
 | **Graded** | A four-step difficulty ladder from `easy` to `insane`. |
 
+</div>
+
 ## Tracks
 
+<div align="center">
+
 | Track | Focus |
-|---|---|
+|:---:|:---|
 | `web` | injection, broken access control, auth bypass, SSRF |
 | `binary` | memory corruption, exploitation, reverse engineering |
 | `crypto` | weak primitives, protocol misuse, implementation faults |
 | `network` | protocol abuse, traffic analysis, pivoting |
 | `osint` | recon, source analysis, signature tracing |
 
+</div>
+
 ## Difficulty
 
 `easy` → `medium` → `hard` → `insane`. Grades describe what a player does,
 not how long it takes.
 
+<div align="center">
+
 | Level | Expectation |
-|---|---|
-| `EASY` | one vector, minimal recon |
-| `MEDIUM` | chained steps, some enumeration |
-| `HARD` | multiple systems, custom tooling |
-| `INSANE` | research-level, an original technique |
+|:---:|:---|
+| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg"><img src=".github/assets/badges/chip-easy-light.svg" alt="EASY" height="18"></picture> | one vector, minimal recon |
+| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg"><img src=".github/assets/badges/chip-medium-light.svg" alt="MEDIUM" height="18"></picture> | chained steps, some enumeration |
+| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg"><img src=".github/assets/badges/chip-hard-light.svg" alt="HARD" height="18"></picture> | multiple systems, custom tooling |
+| <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-insane-dark.svg"><img src=".github/assets/badges/chip-insane-light.svg" alt="INSANE" height="18"></picture> | research-level, an original technique |
+
+</div>
 
 ## Labs <sub>1 live</sub>
 
+<div align="center">
+
 | Lab | Track | Difficulty | Description |
-|---|---|---|---|
-| [`duck-cross`](labs/web/duck-cross) | web | easy | a reports portal with a missing object-level authorization check |
+|:---:|:---:|:---:|:---|
+| [`duck-cross`](labs/web/duck-cross) | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg"><img src=".github/assets/badges/chip-easy-light.svg" alt="EASY" height="18"></picture> | a reports portal with a missing object-level authorization check |
+
+</div>
 
 ## Flag format
 
