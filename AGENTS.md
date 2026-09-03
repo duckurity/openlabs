@@ -18,8 +18,12 @@ verifies a player's flag against the stored SHA-256 hash.
 | `labs/_template/` | skeleton for new labs, skipped by validation |
 | `scripts/validate.py` | CI validator, zero dependencies |
 | `scripts/check.py` | player flag checker, zero dependencies |
+| `scripts/make_badges.py` | badge and chip generator, needs `fonttools` and vendored fonts |
+| `scripts/sync_wiki.py` | asset version bumps and wiki repo sync, zero dependencies |
+| `.github/assets/fonts/` | vendored Funnel Display cuts, SIL OFL 1.1 |
 | `wiki/` | GitHub wiki source: player, authoring, and review guides |
 | `.github/workflows/labs.yml` | CI, runs the validator on labs and scripts changes |
+| `.github/workflows/brand.yml` | regenerates badges, bumps asset versions, syncs the wiki |
 
 ## Voice rules for any text you write
 
@@ -46,4 +50,12 @@ verifies a player's flag against the stored SHA-256 hash.
 python3 scripts/validate.py              # structure + metadata
 python3 scripts/validate.py --compose    # + docker compose config
 python3 scripts/check.py labs/web/duck-cross
+python3 scripts/make_badges.py           # regenerate badges and chips
+python3 scripts/sync_wiki.py bump        # hash-stamp asset refs (?v=)
+python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo
 ```
+
+CI runs the badge regeneration, version bumps, and wiki sync on every push
+to `main` that touches labs, wiki, README, scripts, or assets. Never edit
+generated badges by hand; edit `scripts/make_badges.py` and regenerate.
+Never hand-edit `?v=` values; run `sync_wiki.py bump`.
