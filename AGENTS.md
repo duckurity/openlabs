@@ -59,3 +59,8 @@ CI runs the badge regeneration, version bumps, and wiki sync on every push
 to `main` that touches labs, wiki, README, scripts, or assets. Never edit
 generated badges by hand; edit `scripts/make_badges.py` and regenerate.
 Never hand-edit `?v=` values; run `sync_wiki.py bump`.
+
+The `Sync wiki` step reads the `WIKI_PUSH_TOKEN` repository secret. A
+fine-grained PAT with `Contents: Read and write` on
+`Duckurity/openlabs.wiki` works; `GITHUB_TOKEN` is scoped to the main
+repo and cannot reach the wiki.

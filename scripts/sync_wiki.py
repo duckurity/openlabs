@@ -112,11 +112,11 @@ def cmd_bump() -> int:
 
 
 def wiki_url() -> tuple[str, str]:
-    """Return (clone url, push url). Push url embeds a token in CI."""
+    """Return (clone url, push url). Push url embeds a token when one is set."""
     import os
     url = os.environ.get("WIKI_URL", DEFAULT_WIKI_URL)
     push = url
-    token = os.environ.get("GITHUB_TOKEN")
+    token = os.environ.get("WIKI_PUSH_TOKEN") or os.environ.get("GITHUB_TOKEN")
     if token:
         repo = os.environ.get("GITHUB_REPOSITORY", "Duckurity/openlabs")
         push = f"https://x-access-token:{token}@github.com/{repo}.wiki.git"
