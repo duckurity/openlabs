@@ -3,47 +3,44 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="code license: Apache-2.0" src="https://img.shields.io/badge/code-Apache--2.0-1C1916?style=flat-square&labelColor=1C1916"></a>
-  <a href="LICENSE-CONTENT"><img alt="content license: CC-BY-4.0" src="https://img.shields.io/badge/content-CC--BY--4.0-1C1916?style=flat-square&labelColor=1C1916"></a>
-  <a href="https://github.com/Duckurity/openlabs/actions/workflows/labs.yml"><img alt="CI status for the lab validator" src="https://img.shields.io/github/actions/workflow/status/Duckurity/openlabs/labs.yml?style=flat-square&label=CI&color=1C1916&labelColor=1C1916"></a>
+  Open-source cybersecurity labs that run in Docker. Exploit a real service,
+  find the flag, verify the solve. No accounts, no scoring server.
+  A <a href="https://github.com/Duckurity">duckurity</a> project.
 </p>
 
-## What openlabs is
+## Get solving
 
-Each lab is a self-contained security exercise: one vulnerable service, one
-brief, one flag inside. Labs run on your machine with Docker Compose. You
-solve at your own pace and verify every solve locally.
+Three things stand between you and your first flag.
 
-The repository is the lab library. Anything that helps you solve harder
-problems on your own belongs here: clean briefs, reproducible environments,
-and honest difficulty grades.
+```bash
+git clone https://github.com/Duckurity/openlabs
+cd openlabs/labs/web/duck-cross
+docker compose up -d
+```
 
-## Requirements
+Open `http://localhost:8080`, work the brief until the flag turns up, then
+check the solve:
 
-- Docker with Compose v2
-- `python3` for the flag checker
+```bash
+python3 scripts/check.py labs/web/duck-cross
+```
 
-## Solve a lab
+The checker hashes your input with SHA-256 and compares it against
+`flag_hash` in `lab.yml`. It prints `solved` or `not solved`.[^1]
 
-1. Clone the repository and enter a lab:[^1]
+Every lab is a self-contained exercise: one vulnerable service, one brief,
+one flag inside. Labs run on your machine with Docker Compose. You solve at
+your own pace, and honesty is built in. The repository stores only the
+SHA-256 hash of each flag, never the plaintext.
 
-   ```bash
-   git clone https://github.com/Duckurity/openlabs
-   cd openlabs/labs/web/duck-cross
-   docker compose up -d
-   ```
+## What makes a lab
 
-2. Open the service in your browser and work it until the flag turns up.
-   The brief under each lab directory states the setup and the goal.
-
-3. Check the solve:
-
-   ```bash
-   python3 scripts/check.py labs/web/duck-cross
-   ```
-
-   The checker hashes your input with SHA-256 and compares it against
-   `flag_hash` in `lab.yml`. It prints `solved` or `not solved`.
+| | |
+|---|---|
+| **Self-contained** | Runs offline once images are pulled. No phone-home. |
+| **Reproducible** | Pinned base images, one documented host port. |
+| **Honest** | Plaintext flags stay inside lab internals; only the hash ships. |
+| **Graded** | A four-step difficulty ladder from `easy` to `insane`. |
 
 ## Tracks
 
@@ -57,7 +54,8 @@ and honest difficulty grades.
 
 ## Difficulty
 
-`easy` → `medium` → `hard` → `insane`
+`easy` → `medium` → `hard` → `insane`. Grades describe what a player does,
+not how long it takes.
 
 | Level | Expectation |
 |---|---|
@@ -100,20 +98,12 @@ change.
 A writeup is your own explanation of a solve. Publish them anywhere. Link
 the lab so other people can follow the path you took.
 
-## Licensing
-
-Two licenses, one repository:
-
-| Scope | License |
-|---|---|
-| Code, configuration, scripts | [Apache-2.0](LICENSE) |
-| Lab briefs, docs, prose | [CC-BY-4.0](LICENSE-CONTENT) |
-
-## Contributing
+## Contribute
 
 Labs are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a
 pull request. For behavior standards, see
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). The full player and authoring
+guides live on the [project wiki](https://github.com/Duckurity/openlabs/wiki).
 
 <details>
 <summary><samp>How a lab ships</samp></summary>
@@ -129,6 +119,12 @@ flowchart LR
 ```
 
 </details>
+
+## Licensing
+
+Code, configuration, and scripts fall under [Apache-2.0](LICENSE). Lab
+briefs, docs, and prose fall under [CC-BY-4.0](LICENSE-CONTENT). One
+repository, two licenses.
 
 ## Security
 
