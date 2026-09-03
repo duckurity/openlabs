@@ -18,6 +18,7 @@ verifies a player's flag against the stored SHA-256 hash.
 | `labs/_template/` | skeleton for new labs, skipped by validation |
 | `scripts/validate.py` | CI validator, zero dependencies |
 | `scripts/check.py` | player flag checker, zero dependencies |
+| `wiki/` | GitHub wiki source: player, authoring, and review guides |
 | `.github/workflows/labs.yml` | CI, runs the validator on labs and scripts changes |
 
 ## Voice rules for any text you write
@@ -33,8 +34,8 @@ verifies a player's flag against the stored SHA-256 hash.
 ## Hard rules
 
 - Flag format: `^duck\{[a-z0-9_]{16,40}\}$`. Plaintext flags appear only
-  inside lab service files, never in `lab.yml`, lab `README.md`, or
-  anything outside `labs/`.
+  inside lab service files, never in `lab.yml`, lab `README.md`, `wiki/`,
+  or anything outside `labs/`.
 - Base images pinned to full version tags. No runtime network calls.
 - One documented host port per lab.
 - Code is Apache-2.0, written content is CC-BY-4.0. Do not relicense.
