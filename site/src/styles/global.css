@@ -29,16 +29,13 @@ body {
   text-rendering: optimizeLegibility;
   font-feature-settings: 'kern' 1;
   overflow-x: clip;
-  transition: background-color 300ms var(--ease-out), color 300ms var(--ease-out);
 }
 
-/* Theming transitions are disabled during a switch to avoid the color-jump
-   that interfaces.dev warns about. */
-html.theme-anim-allowed *,
-html.theme-anim-allowed *::before,
-html.theme-anim-allowed *::after {
-  transition: background-color 300ms var(--ease-out), border-color 300ms var(--ease-out),
-    color 300ms var(--ease-out), fill 300ms var(--ease-out) !important;
+/* Theme flips land instantly. Transitions never run across light/dark. */
+html.theming-flip *,
+html.theming-flip *::before,
+html.theming-flip *::after {
+  transition: none !important;
 }
 
 img,
@@ -84,7 +81,7 @@ ol[role='list'] {
   font-size: var(--text-display);
   line-height: var(--text-display-leading);
   letter-spacing: var(--text-display-tracking);
-  font-weight: 700;
+  font-weight: var(--text-display-weight);
   text-wrap: balance;
 }
 
@@ -92,9 +89,8 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   text-wrap: balance;
-  letter-spacing: -0.015em;
 }
 
 h1 {
@@ -141,33 +137,24 @@ h3 {
   font-family: var(--font-mono);
 }
 
-/* ---------- Focus ---------- */
+/* ---------- Focus: 2px accent outline, 2px offset. Instant, no glow. ---------- */
 
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-  border-radius: 2px;
-}
-
-[data-whatinput='mouse'] :focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
   box-shadow: none;
+  border-radius: 0;
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
+  background: var(--color-surface-hover);
+  color: inherit;
 }
 
-/* ---------- Motion defaults ----------
-
-   Sites that reduce motion get cross-fades, never position motion. */
+/* ---------- Reduced motion: gentler, never a wipe ----------
+   Opacity cross-fades stay. Trips, springs, and blur go. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  html {
+    scroll-behavior: auto;
   }
 }

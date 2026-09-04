@@ -8,7 +8,7 @@
 /* ---------- Skip link ---------- */
 .skip-link {
   position: absolute;
-  top: -100px;
+  top: var(--space-4);
   left: var(--space-4);
   z-index: 100;
   padding: var(--space-2) var(--space-4);
@@ -16,11 +16,11 @@
   color: var(--color-page);
   font-size: var(--text-sm);
   font-weight: 600;
-  transition: top var(--dur-fast) var(--ease-out);
+  transform: translateY(-300%);
+  transition: transform var(--dur-fast) var(--ease-out);
 }
 .skip-link:focus-visible {
-  top: var(--space-4);
-  box-shadow: var(--focus-ring);
+  transform: none;
 }
 
 /* ---------- Layout helpers ---------- */
@@ -58,16 +58,16 @@
     border-color var(--dur-fast) var(--ease-out);
 }
 .btn:active {
-  transform: scale(0.97);
+  transform: scale(var(--motion-press-scale));
 }
 .btn--primary {
   background: var(--color-text);
   color: var(--color-page);
 }
 .btn--primary:hover {
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  border-color: var(--color-accent);
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
 }
 .btn--ghost {
   border-color: var(--color-border-strong);
@@ -81,8 +81,10 @@
   display: inline-block;
   transition: transform var(--dur-fast) var(--ease-out);
 }
-.btn:hover .btn__arrow {
-  transform: translateX(3px);
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover .btn__arrow {
+    transform: translateX(3px);
+  }
 }
 
 /* ---------- Chips / filters ---------- */
@@ -109,21 +111,32 @@ button.chip:hover {
   border-color: var(--color-border-strong);
 }
 button.chip:active {
-  transform: scale(0.97);
+  transform: scale(var(--motion-press-scale));
 }
 .chip[aria-pressed='true'] {
   background: var(--color-text);
   border-color: var(--color-text);
   color: var(--color-page);
 }
-.chip--accent[aria-pressed='true'] {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-accent-contrast);
-}
 .chip__count {
   font-variant-numeric: tabular-nums;
   opacity: 0.7;
+}
+
+/* ---------- Link sweep: underline travels 0 to 100% ---------- */
+.link-sweep {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  padding-block-end: 2px;
+  transition: background-size var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .link-sweep:hover {
+    background-size: 100% 1px;
+  }
 }
 
 /* ---------- Cards ---------- */
@@ -131,7 +144,7 @@ button.chip:active {
   position: relative;
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--space-4);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   transition: transform var(--dur-base) var(--ease-out),
@@ -140,12 +153,17 @@ button.chip:active {
 }
 a.card:hover,
 .card--link:hover {
-  transform: translateY(-2px);
   border-color: var(--color-border-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  a.card:hover,
+  .card--link:hover {
+    transform: translateY(-2px);
+  }
 }
 a.card:active,
 .card--link:active {
-  transform: scale(0.99);
+  transform: scale(var(--motion-press-scale));
 }
 .card__top {
   display: flex;
@@ -179,12 +197,17 @@ a.card:active,
 }
 .card__go .go-arrow {
   display: inline-block;
-  transition: transform var(--dur-fast) var(--ease-out);
+  transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
-a.card:hover .go-arrow,
-.card--link:hover .go-arrow {
-  transform: translateX(4px);
-  color: var(--color-accent-text);
+.card[hidden] {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  a.card:hover .go-arrow,
+  .card--link:hover .go-arrow {
+    transform: translateX(4px);
+    color: var(--color-accent-text);
+  }
 }
 
 /* ---------- Code ---------- */
@@ -216,18 +239,20 @@ a.card:hover .go-arrow,
   border: 1px solid var(--color-border);
   color: var(--color-text-secondary);
   background: var(--color-page);
-  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  transition: transform var(--dur-press) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 .copybtn:hover {
   color: var(--color-text);
   border-color: var(--color-border-strong);
 }
 .copybtn:active {
-  transform: scale(0.97);
+  transform: scale(var(--motion-press-scale));
 }
 .copybtn[data-copied='true'] {
-  color: var(--color-accent-text);
-  border-color: var(--color-accent);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
 }
 
 /* ---------- Scroll reveal ----------
@@ -240,20 +265,22 @@ a.card:hover .go-arrow,
 }
 html.js [data-reveal] {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(var(--motion-enter-y)) scale(var(--motion-enter-scale));
+  filter: blur(var(--motion-enter-blur));
   transition: opacity var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms),
-    transform var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
+    transform var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms),
+    filter var(--dur-reveal) var(--ease-out) var(--reveal-delay, 0ms);
 }
 html.js [data-reveal].is-visible {
   opacity: 1;
   transform: none;
-  will-change: auto;
+  filter: none;
 }
 @media (prefers-reduced-motion: reduce) {
   html.js [data-reveal] {
     opacity: 0;
     transform: none;
+    filter: none;
     transition: opacity var(--dur-fast) var(--ease-out) var(--reveal-delay, 0ms);
   }
   html.js [data-reveal].is-visible {
@@ -289,10 +316,11 @@ html.js [data-reveal].is-visible {
   background: var(--color-surface);
   padding: var(--space-2) var(--space-3);
   min-width: min(22rem, 100%);
-  transition: border-color var(--dur-fast) var(--ease-out);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 .searchbox:focus-within {
-  border-color: var(--color-border-strong);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
 }
 .searchbox input {
   flex: 1;
@@ -317,6 +345,11 @@ html.js [data-reveal].is-visible {
 .empty p {
   color: var(--color-text-secondary);
   max-width: 46ch;
+}
+.empty__void {
+  height: var(--space-6);
+  align-self: stretch;
+  justify-self: stretch;
 }
 .empty[hidden] {
   display: none;
@@ -344,32 +377,72 @@ html.js [data-reveal].is-visible {
   place-items: center;
   background: var(--color-text);
   color: var(--color-page);
+  border: 1px solid var(--color-text);
   transition: transform var(--dur-press) var(--ease-out), background-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+    color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
 .listen__play:hover {
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
+  background: var(--color-page);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
 }
 .listen__play:active {
-  transform: scale(0.95);
+  transform: scale(var(--motion-press-scale));
 }
 .listen__glyph {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+}
+.listen__glyph::before,
+.listen__glyph::after {
+  content: '';
+  grid-area: 1 / 1;
+  transition: opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    filter var(--dur-base) var(--ease-out);
+}
+/* Play triangle: enters from a blurred quarter-scale pop. */
+.listen__glyph::before {
   width: 0;
   height: 0;
   border-style: solid;
   border-width: 8px 0 8px 13px;
   border-color: transparent transparent transparent currentColor;
   margin-left: 2px;
-  transition: opacity var(--dur-fast) var(--ease-out);
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
 }
-.listen.is-playing .listen__glyph {
+/* Pause bars: parked at quarter scale + blur until playing. */
+.listen__glyph::after {
   width: 14px;
   height: 16px;
-  border: 0;
   border-left: 4px solid currentColor;
   border-right: 4px solid currentColor;
-  margin-left: 0;
+  opacity: 0;
+  transform: scale(var(--motion-icon-in-scale));
+  filter: blur(var(--motion-icon-in-blur));
+}
+.listen.is-playing .listen__glyph::before {
+  opacity: 0;
+  transform: scale(var(--motion-icon-in-scale));
+  filter: blur(var(--motion-icon-in-blur));
+}
+.listen.is-playing .listen__glyph::after {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .listen__glyph::before,
+  .listen__glyph::after {
+    transition: opacity var(--dur-fast) var(--ease-out);
+    transform: none;
+    filter: none;
+  }
 }
 .listen__wave {
   flex: 1;
@@ -388,18 +461,11 @@ html.js [data-reveal].is-visible {
   height: 30%;
 }
 .listen__wave span.is-hot {
-  background: var(--color-accent);
+  background: var(--color-border-strong);
   opacity: 1;
 }
 .listen.is-playing .listen__wave span {
-  animation: listenPulse 1.1s var(--ease-in-out) infinite alternate;
-}
-.listen.is-playing .listen__wave span:nth-child(3n) { animation-delay: -0.3s; }
-.listen.is-playing .listen__wave span:nth-child(3n + 1) { animation-delay: -0.6s; }
-.listen.is-playing .listen__wave span:nth-child(4n) { animation-delay: -0.15s; }
-@keyframes listenPulse {
-  from { transform: scaleY(0.55); }
-  to { transform: scaleY(1); }
+  animation: none;
 }
 .listen__track {
   position: relative;
@@ -411,16 +477,17 @@ html.js [data-reveal].is-visible {
   left: 0;
   right: 0;
   bottom: 7px;
-  height: 2px;
+  height: 6px;
   background: var(--color-border);
 }
 .listen__fill {
   position: absolute;
   left: 0;
   bottom: 7px;
-  height: 2px;
+  height: 6px;
   width: 0%;
   background: var(--color-accent);
+  transition: width var(--dur-base) var(--ease-out);
 }
 .listen__time {
   display: flex;
@@ -454,7 +521,7 @@ html.js [data-reveal].is-visible {
   counter-increment: step;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: var(--color-accent-text);
+  color: var(--color-text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 .step__num::before {
@@ -482,19 +549,20 @@ html.js [data-reveal].is-visible {
   gap: var(--space-4);
   padding: var(--space-5) 0;
   border-bottom: 1px solid var(--color-border);
-  transition: background-color var(--dur-fast) var(--ease-out), padding-left var(--dur-base) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .rule:hover {
     background: var(--color-surface);
-    padding-left: var(--space-3);
+    border-bottom-color: transparent;
   }
 }
 .rule__mark {
   width: 8px;
   height: 8px;
   margin-top: 8px;
-  background: var(--color-accent);
+  background: var(--color-border-strong);
 }
 .rule p {
   color: var(--color-text-secondary);
@@ -514,7 +582,8 @@ html.js [data-reveal].is-visible {
   border-bottom: 1px solid var(--color-border);
   text-align: left;
   width: 100%;
-  transition: background-color var(--dur-fast) var(--ease-out), padding-left var(--dur-base) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
 }
 @media (min-width: 640px) {
   .track {
@@ -526,12 +595,12 @@ html.js [data-reveal].is-visible {
 @media (hover: hover) and (pointer: fine) {
   button.track:hover {
     background: var(--color-surface);
-    padding-left: var(--space-3);
+    border-bottom-color: transparent;
   }
 }
 .track__name {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   font-size: var(--text-h3);
 }
 .track__focus {
@@ -545,6 +614,173 @@ html.js [data-reveal].is-visible {
   color: var(--color-text-tertiary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* ---------- Frame grammar: notch, hatch, readout ----------
+   One job per device. Notch marks primary surfaces (one per region).
+   Hatch marks voids. Readouts state facts in mono. */
+
+/* Pixel notch: 2-step staircase cut at the top-left corner. */
+.notch {
+  clip-path: polygon(
+    0 calc(var(--frame-notch-step) * 2),
+    var(--frame-notch-step) calc(var(--frame-notch-step) * 2),
+    var(--frame-notch-step) var(--frame-notch-step),
+    calc(var(--frame-notch-step) * 2) var(--frame-notch-step),
+    calc(var(--frame-notch-step) * 2) 0,
+    100% 0, 100% 100%, 0 100%
+  );
+}
+
+/* Hatch: 45-degree void texture. Never animated, never behind text. */
+.hatch {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0,
+    transparent calc(var(--frame-hatch-period) - var(--line-hairline)),
+    var(--color-border) calc(var(--frame-hatch-period) - var(--line-hairline)),
+    var(--color-border) var(--frame-hatch-period)
+  );
+}
+
+/* Readout: factual mono metadata. Accent forbidden; facts only. */
+.readout {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  letter-spacing: var(--text-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+/* ---------- Toast stack (confirmation lands, then withdraws) ---------- */
+.toasts {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: var(--z-toast);
+  display: grid;
+  gap: var(--space-2);
+  justify-items: end;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  font-size: var(--text-sm);
+  max-width: min(22rem, calc(100vw - 2rem));
+  opacity: 0;
+  transform: translateY(6px) scale(0.95);
+  filter: blur(4px);
+}
+.toast[data-open] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    filter var(--dur-base) var(--ease-out);
+}
+.toast[data-closing] {
+  opacity: 0;
+  transform: translateY(-6px);
+  filter: none;
+  transition: opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+.toast__mark {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--color-border-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast[data-open],
+  .toast[data-closing] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  .toast[data-closing] {
+    opacity: 0;
+  }
+}
+
+/* ---------- Digit pop: counts resolve digit by digit ---------- */
+.digit-pop .tick {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.digit-pop .tick > span {
+  display: inline-block;
+}
+.digit-pop.armed .tick > span {
+  transform: translateY(100%);
+  filter: blur(4px);
+  animation: digit-pop var(--dur-base) var(--ease-out) forwards;
+}
+@keyframes digit-pop {
+  to {
+    transform: translateY(0);
+    filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .digit-pop .tick {
+    overflow: visible;
+  }
+  .digit-pop .tick > span,
+  .digit-pop.armed .tick > span {
+    animation: none;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ---------- Error shake: one trip, then rest on the message ---------- */
+.shake {
+  animation: field-shake var(--dur-fast) var(--ease-out);
+}
+@keyframes field-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-1px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shake {
+    animation: none;
+  }
+}
+
+/* ---------- Keyboard hint ---------- */
+.kbd-hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  border: 1px solid var(--color-border);
+  padding: 0 var(--space-1);
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* ---------- Touch targets: 44px on coarse pointers ---------- */
+@media (pointer: coarse) {
+  .chip {
+    min-height: 44px;
+  }
+  .copybtn {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /* ---------- Detail page ---------- */
@@ -587,7 +823,7 @@ html.js [data-reveal].is-visible {
   color: var(--color-text-tertiary);
 }
 .fact__v {
-  font-weight: 600;
+  font-weight: 500;
 }
 .fact__v.mono {
   font-family: var(--font-mono);

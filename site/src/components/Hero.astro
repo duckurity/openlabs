@@ -43,10 +43,24 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   .hero {
+    position: relative;
     padding-top: clamp(3rem, 8vw, 6rem);
     padding-bottom: var(--space-12);
   }
+  /* Single sanctioned atmosphere: ember ground-tone rising from the base. */
+  .hero::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 26%;
+    background: var(--gradient-ember-soft);
+    pointer-events: none;
+  }
   .hero__grid {
+    position: relative;
+    z-index: 1;
     display: grid;
     gap: var(--space-10);
   }
@@ -63,7 +77,6 @@ const base = import.meta.env.BASE_URL;
     align-content: start;
   }
   .hero__copy .display {
-    font-size: clamp(2.6rem, 6vw, 4.25rem);
     max-width: 14ch;
   }
   .hero__cta {
@@ -91,7 +104,6 @@ const base = import.meta.env.BASE_URL;
   .hero__live {
     width: 7px;
     height: 7px;
-    border-radius: 50%;
     background: var(--color-accent);
   }
   .hero__side {

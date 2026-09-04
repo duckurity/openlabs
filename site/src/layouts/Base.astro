@@ -1,6 +1,7 @@
 ---
 import '@fontsource-variable/funnel-display';
 import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import '../styles/motion.css';
@@ -27,8 +28,8 @@ const favicon = `${base}favicon.svg`;
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={favicon} />
-    <meta name="theme-color" content="#F4F2F1" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1C1916" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F2F2F0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1E1E1E" media="(prefers-color-scheme: dark)" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -53,6 +54,7 @@ const favicon = `${base}favicon.svg`;
       <slot />
     </main>
     <SiteFooter />
+    <div class="toasts" data-toasts aria-live="polite" aria-atomic="false"></div>
     <script src="../scripts/site.ts"></script>
   </body>
 </html>

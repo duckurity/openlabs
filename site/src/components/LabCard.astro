@@ -17,7 +17,7 @@ const delay = Math.min(index, 6) * 45;
 ---
 
 <a
-  class="card card--link"
+  class="card card--link notch"
   href={href}
   data-lab-card
   data-reveal
@@ -28,19 +28,11 @@ const delay = Math.min(index, 6) * 45;
   data-tagline={tagline.toLowerCase()}
 >
   <div class="card__top">
-    <span class="eyebrow">{trackLabel}</span>
-    <span class="mono card__port">:{port}</span>
+    <span class="readout">{trackLabel}</span>
+    <span class="readout">:{port}</span>
   </div>
   <h3 class="card__title">{title}</h3>
   <p class="card__tag">{tagline}</p>
   <DifficultyMeter level={difficulty} id={`${title}-${difficulty}`} />
   <span class="card__go">Open the brief <span class="go-arrow" aria-hidden="true">→</span></span>
 </a>
-
-<style>
-  .card__port {
-    font-size: var(--text-mono);
-    color: var(--color-text-tertiary);
-    font-variant-numeric: tabular-nums;
-  }
-</style>

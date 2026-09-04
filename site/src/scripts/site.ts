@@ -17,8 +17,12 @@ function currentTheme(): ThemeMode {
 
 function applyTheme(mode: ThemeMode): void {
   const root = document.documentElement;
+  // Flip lands instantly: hold transitions for one frame across the swap.
+  root.classList.add('theming-flip');
   if (mode === 'system') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', mode);
+  void root.offsetHeight;
+  requestAnimationFrame(() => root.classList.remove('theming-flip'));
   document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
     const label = mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark';
     btn.setAttribute('data-mode', mode === 'system' ? systemGuess() : mode);
@@ -91,6 +95,7 @@ function initFilters(): void {
   const clear = document.querySelector<HTMLButtonElement>('[data-lab-clear]');
   let track = 'all';
   let difficulty = 'all';
+  let lastPop = 0;
 
   function matches(card: HTMLElement): boolean {
     const okTrack = track === 'all' || card.dataset.track === track;
@@ -102,18 +107,57 @@ function initFilters(): void {
     return okTrack && okDiff && okQuery;
   }
 
-  function render(): void {
+  // Digits resolve one by one, never as a block. Skipped for rapid
+  // repeats, reduced motion, and screen-reader chatter (aria-live stays).
+  function paintCount(visible: number, total: number): void {
+    if (!count) return;
+    const text = `${visible} of ${total} ${total === 1 ? 'lab' : 'labs'}`;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const now = Date.now();
+    if (reduced || now - lastPop <= 150 || count.dataset.full === text) {
+      count.textContent = text;
+      count.dataset.full = text;
+      return;
+    }
+    lastPop = now;
+    count.dataset.full = text;
+    count.textContent = '';
+    count.classList.add('digit-pop');
+    const head = String(visible);
+    head.split('').forEach((digit, i) => {
+      const tick = document.createElement('span');
+      tick.className = 'tick';
+      const inner = document.createElement('span');
+      inner.textContent = digit;
+      inner.style.animationDelay = `${i * 50}ms`;
+      tick.append(inner);
+      count.append(tick);
+    });
+    count.append(document.createTextNode(text.slice(head.length)));
+    count.classList.remove('armed');
+    void count.offsetWidth;
+    count.classList.add('armed');
+  }
+
+  function render(source: 'chips' | 'search' | 'clear' | 'jump' | 'init'): void {
     let visible = 0;
     cards.forEach((card) => {
       const show = matches(card);
       card.hidden = !show;
       if (show) visible += 1;
     });
+    const wasEmpty = empty ? !empty.hidden : false;
     if (empty) empty.hidden = visible !== 0;
-    if (count) {
-      const total = cards.length;
-      count.textContent = `${visible} of ${total} ${total === 1 ? 'lab' : 'labs'}`;
+    // One shake when a pressed filter empties the grid. Never while typing.
+    if (empty && !empty.hidden && !wasEmpty && (source === 'chips' || source === 'jump')) {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) {
+        empty.classList.remove('shake');
+        void empty.offsetWidth;
+        empty.classList.add('shake');
+      }
     }
+    paintCount(visible, cards.length);
   }
 
   document.querySelectorAll<HTMLButtonElement>('[data-filter-track]').forEach((btn) => {
@@ -122,7 +166,7 @@ function initFilters(): void {
       document
         .querySelectorAll<HTMLButtonElement>('[data-filter-track]')
         .forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      render();
+      render('chips');
     });
   });
   document.querySelectorAll<HTMLButtonElement>('[data-filter-difficulty]').forEach((btn) => {
@@ -131,10 +175,10 @@ function initFilters(): void {
       document
         .querySelectorAll<HTMLButtonElement>('[data-filter-difficulty]')
         .forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      render();
+      render('chips');
     });
   });
-  search?.addEventListener('input', render);
+  search?.addEventListener('input', () => render('search'));
   clear?.addEventListener('click', () => {
     track = 'all';
     difficulty = 'all';
@@ -145,7 +189,7 @@ function initFilters(): void {
     document
       .querySelectorAll<HTMLButtonElement>('[data-filter-difficulty]')
       .forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.filterDifficulty ?? 'all') === 'all')));
-    render();
+    render('clear');
     search?.focus();
   });
 
@@ -157,12 +201,105 @@ function initFilters(): void {
       document
         .querySelectorAll<HTMLButtonElement>('[data-filter-track]')
         .forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.filterTrack ?? 'all') === id)));
-      render();
-      document.querySelector('#labs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      render('jump');
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document
+        .querySelector('#labs')
+        ?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     });
   });
 
-  render();
+  render('init');
+
+  initChipRoving();
+  initSearchKeys(search);
+}
+
+// Roving tabindex across a chip group. Arrows move focus, Home/End jump.
+// Selection stays on Space/Enter so exploring never filters by accident.
+function initChipRoving(): void {
+  ['[data-filter-track]', '[data-filter-difficulty]'].forEach((selector) => {
+    const group = Array.from(
+      document.querySelectorAll<HTMLButtonElement>(selector)
+    );
+    if (group.length === 0) return;
+    function order(focused: HTMLButtonElement): void {
+      group.forEach((btn) => btn.setAttribute('tabindex', btn === focused ? '0' : '-1'));
+    }
+    const start = group.find((btn) => btn.getAttribute('aria-pressed') === 'true') ?? group[0];
+    if (start) order(start);
+    group.forEach((btn, i) => {
+      btn.addEventListener('focus', () => order(btn));
+      btn.addEventListener('keydown', (event) => {
+        if (!(event instanceof KeyboardEvent)) return;
+        let next: number | null = null;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (i + 1) % group.length;
+        else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (i - 1 + group.length) % group.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = group.length - 1;
+        if (next === null) return;
+        const target = group[next];
+        if (target) {
+          event.preventDefault();
+          target.focus();
+        }
+      });
+    });
+  });
+}
+
+// `/` focuses search from anywhere except a field. Escape backs out.
+function initSearchKeys(search: HTMLInputElement | null | undefined): void {
+  document.addEventListener('keydown', (event) => {
+    if (!(event instanceof KeyboardEvent)) return;
+    const target = event.target as HTMLElement | null;
+    const inField =
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement ||
+      (target !== null && target.isContentEditable);
+    if (event.key === '/' && !inField && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      if (search) {
+        event.preventDefault();
+        search.focus();
+      }
+    } else if (event.key === 'Escape' && search && target === search) {
+      search.blur();
+    }
+  });
+}
+
+// Toast stack: confirmation lands, then politely withdraws. One stack,
+// three deep max. Dwell pauses while the reader holds it.
+function toast(message: string): void {
+  const stack = document.querySelector<HTMLElement>('[data-toasts]');
+  if (!stack) return;
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.setAttribute('role', 'status');
+  const mark = document.createElement('span');
+  mark.className = 'toast__mark';
+  mark.setAttribute('aria-hidden', 'true');
+  el.append(mark, document.createTextNode(message));
+  stack.append(el);
+  while (stack.children.length > 3) stack.firstElementChild?.remove();
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => el.setAttribute('data-open', ''))
+  );
+  let timer = 0;
+  const dismiss = () => {
+    el.setAttribute('data-closing', '');
+    window.setTimeout(() => el.remove(), 240);
+  };
+  const dwell = () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(dismiss, 4000);
+  };
+  el.addEventListener('mouseenter', () => window.clearTimeout(timer));
+  el.addEventListener('mouseleave', dwell);
+  el.addEventListener('focusin', () => window.clearTimeout(timer));
+  el.addEventListener('focusout', dwell);
+  dwell();
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -203,15 +340,8 @@ function initCopy(): void {
       const ok = await copyText(text.trim());
       if (!ok) return;
       btn.setAttribute('data-copied', 'true');
-      const label = btn.querySelector('[data-copy-label]');
-      const prev = label?.textContent ?? btn.textContent ?? '';
-      if (label) label.textContent = 'Copied';
-      else btn.textContent = 'Copied';
-      window.setTimeout(() => {
-        btn.setAttribute('data-copied', 'false');
-        if (label) label.textContent = prev;
-        else btn.textContent = prev;
-      }, 1400);
+      toast('Copied.');
+      window.setTimeout(() => btn.setAttribute('data-copied', 'false'), 1400);
     });
   });
 }
@@ -233,46 +363,48 @@ function initListen(): void {
     const cur = root.querySelector<HTMLElement>('[data-listen-cur]');
     const dur = root.querySelector<HTMLElement>('[data-listen-dur]');
     if (!audio || !play) return;
+    const player: HTMLAudioElement = audio;
+    const playButton: HTMLButtonElement = play;
 
     function paint(): void {
-      const pct = audio.duration > 0 ? (audio.currentTime / audio.duration) * 100 : 0;
+      const pct = player.duration > 0 ? (player.currentTime / player.duration) * 100 : 0;
       if (fill) fill.style.width = `${pct}%`;
-      if (cur) cur.textContent = formatTime(audio.currentTime);
-      if (dur) dur.textContent = formatTime(audio.duration);
+      if (cur) cur.textContent = formatTime(player.currentTime);
+      if (dur) dur.textContent = formatTime(player.duration);
       track?.setAttribute('aria-valuenow', String(Math.round(pct)));
     }
     function setPlaying(on: boolean): void {
       root.classList.toggle('is-playing', on);
-      play.setAttribute('aria-pressed', String(on));
-      play.setAttribute('aria-label', on ? 'Pause the welcome' : 'Play the welcome');
+      playButton.setAttribute('aria-pressed', String(on));
+      playButton.setAttribute('aria-label', on ? 'Pause the welcome' : 'Play the welcome');
     }
 
-    play.addEventListener('click', () => {
-      if (audio.paused) void audio.play().catch(() => undefined);
-      else audio.pause();
+    playButton.addEventListener('click', () => {
+      if (player.paused) void player.play().catch(() => undefined);
+      else player.pause();
     });
-    audio.addEventListener('play', () => setPlaying(true));
-    audio.addEventListener('pause', () => setPlaying(false));
-    audio.addEventListener('loadedmetadata', paint);
-    audio.addEventListener('timeupdate', paint);
-    audio.addEventListener('ended', () => {
+    player.addEventListener('play', () => setPlaying(true));
+    player.addEventListener('pause', () => setPlaying(false));
+    player.addEventListener('loadedmetadata', paint);
+    player.addEventListener('timeupdate', paint);
+    player.addEventListener('ended', () => {
       paint();
       setPlaying(false);
     });
     track?.addEventListener('click', (event) => {
       const rect = track.getBoundingClientRect();
       const ratio = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1);
-      if (audio.duration > 0) audio.currentTime = ratio * audio.duration;
+      if (player.duration > 0) player.currentTime = ratio * player.duration;
       paint();
     });
     track?.addEventListener('keydown', (event) => {
       if (!(event instanceof KeyboardEvent)) return;
-      const step = (audio.duration || 0) / 20;
+      const step = (player.duration || 0) / 20;
       if (event.key === 'ArrowRight') {
-        audio.currentTime = Math.min(audio.currentTime + step, audio.duration || 0);
+        player.currentTime = Math.min(player.currentTime + step, player.duration || 0);
         event.preventDefault();
       } else if (event.key === 'ArrowLeft') {
-        audio.currentTime = Math.max(audio.currentTime - step, 0);
+        player.currentTime = Math.max(player.currentTime - step, 0);
         event.preventDefault();
       }
       paint();
@@ -284,8 +416,9 @@ function initListen(): void {
 function initHeader(): void {
   const header = document.querySelector<HTMLElement>('[data-site-header]');
   if (!header) return;
+  const bar: HTMLElement = header;
   function onScroll(): void {
-    header.toggleAttribute('data-scrolled', window.scrollY > 8);
+    bar.toggleAttribute('data-scrolled', window.scrollY > 8);
   }
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });

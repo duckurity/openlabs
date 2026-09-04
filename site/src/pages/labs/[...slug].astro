@@ -38,7 +38,7 @@ const isCommand = (s: string) => /^[a-z0-9_.\-/:]+(\s+[^\s].*)?$/i.test(s) && !s
       <h1 class="display" data-reveal style="--reveal-delay: 60ms">{data.title}</h1>
       <p class="lede" data-reveal style="--reveal-delay: 120ms">{data.tagline}</p>
       <div data-reveal style="--reveal-delay: 180ms; max-width: 22rem;">
-        <DifficultyMeter level={data.difficulty} id={entry.slug} />
+        <DifficultyMeter level={data.difficulty} id={entry.slug} static />
       </div>
       <p class="detail-promise" data-reveal style="--reveal-delay: 220ms">{DIFFICULTY_META[data.difficulty]}</p>
     </header>
@@ -85,8 +85,8 @@ const isCommand = (s: string) => /^[a-z0-9_.\-/:]+(\s+[^\s].*)?$/i.test(s) && !s
         <section aria-labelledby="path-h" data-reveal>
           <h2 id="path-h">Solve path</h2>
           <ol class="steps" role="list">
-            {data.steps.map((step, i) => (
-              <li class="step" style={`--reveal-delay: ${Math.min(i, 4) * 60}ms`}>
+            {data.steps.map((step) => (
+              <li class="step">
                 <span class="step__num" aria-hidden="true"></span>
                 <div class="step__body">
                   <p>{step.text}</p>
@@ -114,14 +114,14 @@ const isCommand = (s: string) => /^[a-z0-9_.\-/:]+(\s+[^\s].*)?$/i.test(s) && !s
           <span class="fact__k">Flag format</span>
           <span class="fact__v mono">{data.flag.format}</span>
         </div>
-        <div class="fact" data-reveal style="--reveal-delay: 240ms">
+        <div class="fact" data-reveal style="--reveal-delay: 200ms">
           <span class="fact__k">Checker</span>
           <span class="fact__v mono">{checker}</span>
           <button class="copybtn copybtn--inline" type="button" data-copy={checker} aria-label="Copy checker command">
             <span data-copy-label>Copy</span>
           </button>
         </div>
-        <a class="btn btn--primary" href={`${base}/#play`} data-reveal style="--reveal-delay: 300ms">
+        <a class="btn btn--primary" href={`${base}/#play`} data-reveal style="--reveal-delay: 240ms">
           Read the quick start <span class="btn__arrow" aria-hidden="true">→</span>
         </a>
       </aside>
@@ -141,11 +141,19 @@ const isCommand = (s: string) => /^[a-z0-9_.\-/:]+(\s+[^\s].*)?$/i.test(s) && !s
   }
   .crumbs a {
     color: var(--color-text-secondary);
-    transition: color var(--dur-fast) var(--ease-out);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    padding-block-end: 1px;
+    transition: background-size var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
   }
   .crumbs a:hover { color: var(--color-text); }
+  @media (hover: hover) and (pointer: fine) {
+    .crumbs a:hover { background-size: 100% 1px; }
+  }
   .detail-head .display {
-    font-size: clamp(2.4rem, 5.5vw, 3.75rem);
     max-width: 16ch;
   }
   .detail-promise {

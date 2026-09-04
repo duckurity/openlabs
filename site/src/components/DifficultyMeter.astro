@@ -1,8 +1,9 @@
 ---
 // DifficultyMeter — the signature openlabs interaction.
-// Four equal segments. The active one is permanently Ember. On hover, the
-// segments before it "charge" left-to-right into Ember with a staggered
-// sweep, then settle back. Ember appears exactly once at rest — on brand.
+// Four equal segments. Inside a link, the active one is Ember and the
+// segments before it charge left-to-right on hover with a staggered sweep.
+// The static variant (detail headers, facts) uses neutral ink and no sweep:
+// Ember never marks a surface nobody can click.
 //
 // Pure CSS; each pre-active segment carries an inline --charge index so the
 // stagger is deterministic and interruptible via transition, not keyframes.
@@ -10,8 +11,9 @@
 interface Props {
   level: 'easy' | 'medium' | 'hard' | 'insane';
   id?: string;
+  static?: boolean;
 }
-const { level, id } = Astro.props;
+const { level, id, static: isStatic = false } = Astro.props;
 const order = ['easy', 'medium', 'hard', 'insane'];
 const activeIndex = order.indexOf(level);
 const labels = ['EASY', 'MEDIUM', 'HARD', 'INSANE'];
@@ -23,7 +25,7 @@ const segState = labels.map((_, i) =>
 const delays = labels.map((_, i) => (i < activeIndex ? 40 * (i + 1) : 0));
 ---
 
-<div class="meter" data-meter>
+<div class={isStatic ? 'meter meter--static' : 'meter'} data-meter>
   <div class="meter__segments" role="presentation">
     {labels.map((label, i) => (
       <span
@@ -66,13 +68,15 @@ const delays = labels.map((_, i) => (i < activeIndex ? 40 * (i + 1) : 0));
     transform-origin: left center;
     transform: scaleX(0);
     opacity: 0;
-    transition: transform 0s var(--ease-out) var(--charge-delay), opacity 0s var(--charge-delay);
+    transition: transform var(--dur-fast) var(--ease-out) var(--charge-delay),
+      opacity var(--dur-fast) var(--ease-out) var(--charge-delay);
   }
 
   .meter:hover .meter__seg[data-seg='pre']::after {
     transform: scaleX(1);
     opacity: 1;
-    transition: transform 180ms var(--ease-out) var(--charge-delay), opacity 80ms var(--charge-delay);
+    transition: transform var(--dur-fast) var(--ease-out) var(--charge-delay),
+      opacity var(--dur-fast) var(--ease-out) var(--charge-delay);
   }
 
   .meter__labels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
@@ -86,6 +90,11 @@ const delays = labels.map((_, i) => (i < activeIndex ? 40 * (i + 1) : 0));
     transition: color var(--dur-fast) var(--ease-out);
   }
   .meter__lbl[data-lbl='active'] { color: var(--color-accent-text); font-weight: 700; }
+
+  /* Static variant: neutral ink, no sweep. For headers and facts. */
+  .meter--static .meter__seg[data-seg='active'] { background: var(--color-border-strong); }
+  .meter--static .meter__seg[data-seg='pre']::after { display: none; }
+  .meter--static .meter__lbl[data-lbl='active'] { color: var(--color-text); }
 
   /* Reduced motion: no sweep; just show the permanent active segment. */
   @media (prefers-reduced-motion: reduce) {

@@ -13,7 +13,7 @@ const links = [
 <footer class="site-footer">
   <div class="site-footer__inner">
     <div class="site-footer__brand">
-      <Brand size={24} />
+      <Brand size={24} mono />
       <span>openlabs · a <a href="https://github.com/Duckurity">duckurity</a> project</span>
     </div>
 
@@ -50,7 +50,17 @@ const links = [
     font-size: var(--text-sm);
     color: var(--color-text-secondary);
   }
-  .site-footer__brand a { text-decoration: underline; text-decoration-color: var(--color-border); text-underline-offset: 3px; }
+  .site-footer__brand a {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    padding-block-end: 1px;
+    transition: background-size var(--dur-fast) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .site-footer__brand a:hover { background-size: 100% 1px; }
+  }
   .site-footer__nav ul {
     display: flex;
     flex-wrap: wrap;
@@ -61,9 +71,18 @@ const links = [
   .site-footer__link {
     font-size: var(--text-sm);
     color: var(--color-text-secondary);
-    transition: color var(--dur-fast) var(--ease-out);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    padding-block-end: 2px;
+    transition: background-size var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
   }
   .site-footer__link:hover { color: var(--color-text); }
+  @media (hover: hover) and (pointer: fine) {
+    .site-footer__link:hover { background-size: 100% 1px; }
+  }
   .site-footer__legal {
     font-size: var(--text-xs);
     color: var(--color-text-tertiary);
