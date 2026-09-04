@@ -1,0 +1,29 @@
+# openlabs
+
+> openlabs is an open source library of Docker-based security labs. Each lab is one vulnerable service, one brief, and one flag.
+
+Read a page in full at its URL. Open a brief, run the service, find the flag. Verify with `python3 scripts/check.py labs/<track>/<lab>` from the repo root. Each lab documents one host port and runs offline after images are pulled. Flags look like `duck{...}`; this file carries no flags.
+
+## Labs
+
+- [Labs](https://openlabs.duckurity.com/labs): Every lab is one vulnerable service, one brief, one flag.
+- [Duck cross](https://openlabs.duckurity.com/labs/duck-cross): A reports portal with a missing object-level authorization check.
+
+## Guides
+
+- [Open source security labs](https://openlabs.duckurity.com): Run a real service. Find the flag. Verify the solve.
+- [How to play](https://openlabs.duckurity.com/play): Clone, run, solve. Verify each flag from the repo root.
+- [Tracks](https://openlabs.duckurity.com/tracks): Five lab families. Start with web.
+- [Techniques](https://openlabs.duckurity.com/technique): Vulnerability classes, defined once and exercised across labs.
+- [Broken object-level authorization (IDOR)](https://openlabs.duckurity.com/technique/idor): The server checks who you are but not whether the object is yours. Change the identifier, read someone else's 
+
+## Rules
+
+- [Contribute](https://openlabs.duckurity.com/contribute): Author a lab. One lab per pull request.
+- [FAQ](https://openlabs.duckurity.com/faq): Accounts, source reading, offline runs. Short answers.
+- [Rules](https://openlabs.duckurity.com/rules): Run offline. Keep one port. Guard the flags.
+
+## Optional
+
+- [Repository](https://github.com/Duckurity/openlabs): source, labs, and issue forms.
+- [Sitemap](https://openlabs.duckurity.com/sitemap.xml): every page for discovery.

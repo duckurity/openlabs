@@ -13,6 +13,7 @@ export type LabPage = InferPageType<typeof source>
    cross into client components, so grids receive this shape. */
 export type LabCardData = {
   url: string
+  slug: string
   title: string
   description?: string
   track?: Track
@@ -23,6 +24,7 @@ export type LabCardData = {
 export function toLabCardData(page: LabPage): LabCardData {
   return {
     url: page.url,
+    slug: page.slugs[page.slugs.length - 1],
     title: page.data.title,
     description: page.data.description,
     track: page.data.track,

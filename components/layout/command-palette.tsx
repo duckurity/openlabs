@@ -93,10 +93,10 @@ export function CommandPalette({ items }: { items: SearchItem[] }) {
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.97, y: -4, filter: 'blur(4px)' }}
             transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
-            className="notch bg-background border-border relative mx-4 flex w-full max-w-xl flex-col border"
+            className="bg-background border-border relative mx-4 flex w-full max-w-xl flex-col border"
           >
       <div className="relative">
-          <div className="bg-muted flex h-14 w-full items-center gap-3 px-4">
+          <div className="field bg-muted flex h-14 w-full items-center gap-3 px-4">
             <SearchIcon className="text-muted-foreground size-4 shrink-0" />
             <input
               ref={inputRef}
@@ -104,7 +104,7 @@ export function CommandPalette({ items }: { items: SearchItem[] }) {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search labs"
               aria-label="Search labs"
-              className="focus-ring text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide"
+              className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide"
             />
             <Kbd className="h-[2em] px-2">Esc</Kbd>
           </div>

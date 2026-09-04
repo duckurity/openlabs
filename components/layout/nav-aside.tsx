@@ -17,9 +17,13 @@ export const NavAside = () => {
       <Link
         href="/"
         aria-label="openlabs home"
-        className="focus-ring text-foreground hover:text-primary flex size-aside-width items-center justify-center transition-colors outline-none"
+        className="focus-ring group relative flex size-aside-width items-center justify-center bg-primary text-(--neutral-950) transition-transform duration-[var(--duration-instant)] ease-[var(--ease-out)] outline-none active:scale-[0.96]"
       >
-        <Logo className="size-12" />
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-3 top-1.5 h-px bg-(--neutral-950)/25 opacity-0 transition-opacity duration-[var(--duration-fast)] ease-[var(--ease-out)] group-hover:opacity-100"
+        />
+        <Logo className="size-12" mark="var(--neutral-0)" />
       </Link>
       {sitemap.map((item) => {
         const isActive = pathname.startsWith(item.href)

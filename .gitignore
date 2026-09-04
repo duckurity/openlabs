@@ -15,3 +15,5 @@ content/labs/*.mdx
 !content/labs/index.mdx
 # Contentbit link index regenerates via `pnpm run content:links`.
 .contentbit/
+# GitHub API cache for the lab sync. Regenerates automatically.
+.cache/

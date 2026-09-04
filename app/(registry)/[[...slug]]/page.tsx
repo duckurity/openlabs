@@ -6,6 +6,14 @@ import { join } from 'node:path'
 
 import { source, getLabs, getRelatedLabs, isLabPage, toLabCardData } from '@/lib/source'
 import { APP_BASE_URL } from '@/lib/constants'
+import {
+  breadcrumbJsonLd,
+  faqJsonLd,
+  faqPairs,
+  guideJsonLd,
+  labJsonLd,
+  labsIndexJsonLd,
+} from '@/lib/schema'
 import { getMDXComponents } from '@/mdx-components'
 import { TOC } from '@/components/layout/toc'
 import { TOCProvider, TOCScrollArea } from '@/components/toc'
@@ -42,40 +50,6 @@ function checkerFor(track?: string, slug?: string): string | null {
   return `python3 scripts/check.py labs/${track}/${slug}`
 }
 
-function jsonLd(
-  page: { url: string; data: { title: string; description?: string } },
-  opts: { isLab: boolean; isLabsIndex: boolean; labs: { url: string; title: string }[] }
-): Record<string, unknown> | null {
-  const url = `${APP_BASE_URL}${page.url}`
-  if (opts.isLab) {
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'LearningResource',
-      name: page.data.title,
-      description: page.data.description,
-      url,
-      teaches: page.data.description,
-      isAccessibleForFree: true,
-    }
-  }
-  if (opts.isLabsIndex) {
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      name: page.data.title,
-      description: page.data.description,
-      url,
-      itemListElement: opts.labs.map((lab, i) => ({
-        '@type': 'ListItem',
-        position: i + 1,
-        name: lab.title,
-        url: `${APP_BASE_URL}${lab.url}`,
-      })),
-    }
-  }
-  return null
-}
-
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params
   const page = source.getPage(params.slug)
@@ -91,28 +65,87 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   const raw = await page.data.getText('raw').catch(() => page.data.description ?? page.data.title)
   const related = isLab ? getRelatedLabs(page, 3) : []
+  const labs = getLabs().map((lab) => ({ url: lab.url, title: lab.data.title }))
 
   const track = page.data.track as string | undefined
   const difficulty = page.data.difficulty as string | undefined
   const port = page.data.port as string | undefined
   const slug = page.slugs[page.slugs.length - 1]
   const checker = isLab ? checkerFor(track, slug) : null
-  const structured = jsonLd(page, {
-    isLab,
-    isLabsIndex,
-    labs: getLabs().map((lab) => ({ url: lab.url, title: lab.data.title })),
-  })
   const verified = (page.data.verified as boolean | undefined) ?? false
+  const score = page.data.score as number | undefined
+  const scoreGrade = page.data.score_grade as string | undefined
+  const scoreTone =
+    score === undefined
+      ? ''
+      : score >= 80
+        ? 'text-(--status-success-strong)'
+        : score >= 70
+          ? 'text-(--status-warning-strong)'
+          : 'text-(--status-error-strong)'
   const creator = {
     name: page.data.author_name as string | undefined,
     url: page.data.author_url as string | undefined,
     avatar: page.data.author_avatar as string | undefined,
     date: page.data.author_date as string | undefined,
+    verifierName: page.data.verifier_name as string | undefined,
+    verifierUrl: page.data.verifier_url as string | undefined,
+    verifierAvatar: page.data.verifier_avatar as string | undefined,
   }
   const sheetPath =
     isLab && track && existsSync(join(process.cwd(), 'labs', track, slug, `${slug}.pdf`))
       ? `labs/${track}/${slug}/${slug}.pdf`
       : null
+  const keywords = page.data.keywords as
+    | { primary?: string; secondary?: string[] }
+    | undefined
+  const image = (page.data.ogImage as string | undefined) ?? '/opengraph-image.png'
+  const lastModified =
+    page.data.lastModified instanceof Date
+      ? page.data.lastModified.toISOString()
+      : (page.data.lastModified as string | undefined)
+  const structured: Record<string, unknown>[] = [
+    ...(breadcrumbJsonLd(page.slugs) ? [breadcrumbJsonLd(page.slugs) as Record<string, unknown>] : []),
+    ...(isLab
+      ? [
+          labJsonLd({
+            url: page.url,
+            title: page.data.title,
+            description: page.data.description,
+            image,
+            dateModified: lastModified,
+            keywords,
+            section: track,
+            authorName: creator.name,
+            authorUrl: creator.url,
+            datePublished: creator.date,
+            difficulty: difficulty,
+            intent: page.data.intent as string | undefined,
+          }),
+        ]
+      : isLabsIndex
+        ? [
+            labsIndexJsonLd(page.url, page.data.title, page.data.description, labs),
+          ]
+        : [
+            guideJsonLd({
+              url: page.url,
+              title: page.data.title,
+              description: page.data.description,
+              image,
+              dateModified: lastModified,
+              keywords,
+              section: page.data.type as string | undefined,
+              technical:
+                page.slugs[0] === 'play' || page.slugs[0] === 'technique',
+            }),
+          ]),
+    ...(page.slugs.length === 1 && page.slugs[0] === 'faq'
+      ? [faqJsonLd(page.url, faqPairs(raw))].filter(
+          (block): block is Record<string, unknown> => block !== null
+        )
+      : []),
+  ]
 
   return (
     <TOCProvider toc={toc}>
@@ -160,7 +193,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         )}
 
         {isLab && (
-          <dl className="border-border mt-6 grid grid-cols-2 gap-px border bg-transparent font-mono text-sm sm:grid-cols-4">
+          <dl className="border-border mt-6 grid grid-cols-2 gap-px border bg-transparent font-mono text-sm sm:grid-cols-5">
             {track && (
               <div className="bg-card px-3 py-2">
                 <dt className="readout">
@@ -192,6 +225,16 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 </dt>
                 <dd className="truncate" title={checker}>
                   check.py
+                </dd>
+              </div>
+            )}
+            {score !== undefined && (
+              <div className="bg-card px-3 py-2">
+                <dt className="readout">
+                  Score
+                </dt>
+                <dd className={`tnum ${scoreTone}`}>
+                  {score}{scoreGrade ? ` ${scoreGrade}` : ''}
                 </dd>
               </div>
             )}
@@ -247,12 +290,13 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             </LabGrid>
           </div>
         )}
-        {structured && (
+        {structured.map((block, i) => (
           <script
+            key={i}
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(block) }}
           />
-        )}
+        ))}
       </article>
 
       {hasToc && (
@@ -264,6 +308,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 url={creator.url}
                 avatar={creator.avatar}
                 date={creator.date}
+                verifierName={creator.verifierName}
+                verifierUrl={creator.verifierUrl}
+                verifierAvatar={creator.verifierAvatar}
               />
             ) : undefined
           }
@@ -284,9 +331,21 @@ export async function generateMetadata(
   const page = source.getPage(params.slug)
   if (!page) notFound()
 
+  const image = (page.data.ogImage as string | undefined) ?? '/opengraph-image.png'
+  const keywords = [
+    ...((page.data.keywords as { primary?: string; secondary?: string[] } | undefined)?.primary
+      ? [(page.data.keywords as { primary?: string }).primary as string]
+      : []),
+    ...((page.data.keywords as { secondary?: string[] } | undefined)?.secondary ?? []),
+  ]
+  const authorName = page.data.author_name as string | undefined
+  const authorUrl = page.data.author_url as string | undefined
+
   return {
     title: page.data.title,
     description: page.data.description,
+    keywords: keywords.length > 0 ? keywords : undefined,
+    authors: authorName ? [{ name: authorName, url: authorUrl }] : undefined,
     alternates: {
       canonical: page.url,
     },
@@ -295,10 +354,24 @@ export async function generateMetadata(
       description: page.data.description,
       url: page.url,
       type: 'article',
+      locale: 'en_US',
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: page.data.title,
+        },
+      ],
+      publishedTime: (page.data.author_date as string | undefined) ?? page.data.lastModified?.toString(),
+      modifiedTime: page.data.lastModified?.toString(),
+      authors: authorName ? [authorName] : undefined,
     },
     twitter: {
+      card: 'summary_large_image',
       title: page.data.title,
       description: page.data.description,
+      images: [image],
     },
   }
 }

@@ -56,6 +56,7 @@ export function LabCards({ labs }: { labs: LabCardData[] }) {
         <LabCard
           key={lab.url}
           href={lab.url}
+          slug={lab.slug}
           title={lab.title}
           description={lab.description}
           track={lab.track}

@@ -25,13 +25,14 @@ verifies a player's flag against the stored SHA-256 hash.
 | `BRAND.md` | color, type, badge, and pipeline reference |
 | `scripts/sync_wiki.py` | asset version bumps and wiki repo sync, zero dependencies |
 | `scripts/sync_site_content.py` | generates `content/labs/` from `labs/` at build time; zero dependencies |
+| `scripts/score_lab.py` | scores each lab 0-100 (structure, secrets, Dockerfile, compose, docs); blocks CI below 70 |
 | `.github/assets/fonts/` | vendored Funnel Display cuts, SIL OFL 1.1 |
 | `wiki/` | GitHub wiki source: player, authoring, and review guides |
 | `app/`, `components/`, `content/`, `lib/`, `hooks/` | Next.js library site at the repo root, deployed to GitHub Pages |
 | `content/labs/` | generated from `labs/` by `prebuild`/`predev`; gitignored, never edited by hand |
 | `app/styles/theming.css` | design tokens: palette, type, radius; edit here, never hardcode values in components |
 | `.github/workflows/site.yml` | syncs content, builds the site, and deploys to Pages on `main` |
-| `.github/workflows/labs.yml` | CI, runs the validator on labs and scripts changes |
+| `.github/workflows/labs.yml` | CI: validator, security scans + score gate (min 70), content contracts |
 | `.github/workflows/brand.yml` | regenerates badges, bumps asset versions, syncs the wiki |
 
 ## Voice rules for any text you write
@@ -66,6 +67,7 @@ python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo
 bash scripts/test_brand.sh               # integration-test the brand pipeline
 python3 scripts/sync_site_content.py      # regenerate content/labs/ manually
 python3 scripts/sync_site_content.py --check  # verify generated output matches
+python3 scripts/score_lab.py --min 70     # score every lab, fail below 70
 pnpm run build                            # build the library site
 pnpm run dev                              # serve the site locally
 ```

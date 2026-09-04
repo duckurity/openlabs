@@ -152,7 +152,6 @@
   /* ---------- Frame grammar measures ---------- */
   --line-width-hairline: 1px;
   --line-width-emphasis: 2px;
-  --frame-notch-step: 6px;
   --frame-bracket-length: 12px;
   --frame-bracket-offset: 4px;
   --frame-hatch-period: 8px;

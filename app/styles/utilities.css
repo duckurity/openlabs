@@ -55,18 +55,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Frame grammar: notch = primary surface (one per region). */
-.notch {
-  clip-path: polygon(
-    0 calc(var(--frame-notch-step) * 2),
-    var(--frame-notch-step) calc(var(--frame-notch-step) * 2),
-    var(--frame-notch-step) var(--frame-notch-step),
-    calc(var(--frame-notch-step) * 2) var(--frame-notch-step),
-    calc(var(--frame-notch-step) * 2) 0,
-    100% 0, 100% 100%, 0 100%
-  );
-}
-
 /* Frame grammar: hatch = void (never animated, never on interactive). */
 .hatch {
   background-image: repeating-linear-gradient(
@@ -84,6 +72,29 @@
   font-size: 0.75rem;
   letter-spacing: 0.05em;
   color: var(--text-muted);
+}
+
+/* Search field. Focus lives on the row, not the input: the row warms
+   and a 2px Ember underline fades in. The input itself stays quiet. */
+.field {
+  position: relative;
+}
+.field > input {
+  outline: none;
+}
+.field::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--action-default);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.field:focus-within::after {
+  opacity: 1;
 }
 
 /* Mount entrance. One-shot resolve for conditionally rendered
@@ -108,6 +119,21 @@
 /* Anchored headings clear floating chrome. */
 [id] {
   scroll-margin-top: 1rem;
+}
+
+/* Vaul sheets. Overlay fades; top-anchored drawers resolve with the
+   drawer curve and exit the way they entered. */
+[data-vaul-overlay] {
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+[data-vaul-overlay][data-state='closed'] {
+  opacity: 0;
+}
+[data-vaul-drawer] {
+  transition: transform var(--duration-slow) var(--ease-drawer);
+}
+[data-vaul-drawer][data-state='closed'] {
+  transform: translateY(-100%);
 }
 
 /* Theme flip: disable transitions so light/dark never smears. */

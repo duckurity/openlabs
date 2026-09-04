@@ -31,7 +31,7 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
   const [searching, setSearching] = React.useState(false)
   const { query, setQuery, results, hasResults, isEmpty } =
     useLocalSearch(searchItems)
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, theme, setTheme } = useTheme()
 
   React.useEffect(() => {
     setOpen(false)
@@ -113,7 +113,7 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
             aria-label="Search labs"
             className="bg-background fixed inset-x-0 top-14 z-(--z-mobile-nav) flex flex-col outline-none md:hidden"
           >
-            <div className="bg-muted flex h-14 items-center gap-3 px-4">
+            <div className="field bg-muted flex h-14 items-center gap-3 px-4">
               <SearchIcon className="text-muted-foreground size-4" />
               <input
                 autoFocus
@@ -121,7 +121,7 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search labs"
-                className="focus-ring h-full flex-1 bg-transparent font-mono text-sm tracking-wide"
+                className="h-full flex-1 bg-transparent font-mono text-sm tracking-wide"
               />
             </div>
             <div className="max-h-[60vh] overflow-y-auto">
@@ -202,14 +202,19 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
               <span className="flex-1" />
               {themes.map((t) => {
                 const Icon = t.icon
+                const selected = (resolvedTheme ?? theme) === t.name
                 return (
                   <button
                     key={t.name}
                     type="button"
-                    onClick={() => setTheme(t.name)}
+                    onClick={() => {
+                      setTheme(t.name)
+                      setOpen(false)
+                    }}
+                    aria-pressed={selected}
                     className={cn(
                       'focus-ring text-muted-foreground hover:text-foreground flex size-10 items-center justify-center border transition-[color,background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-out)] active:scale-[0.96]',
-                      theme === t.name
+                      selected
                         ? 'border-primary text-foreground'
                         : 'border-transparent hover:border-foreground/40'
                     )}

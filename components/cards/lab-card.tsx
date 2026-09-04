@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Badge } from '../ui/badge'
+import { ChallengeShape } from '../lab/challenge-shape'
 
 type LabCardProps = {
   href: string
+  slug: string
   title: string
   description?: string
   track?: string
@@ -20,6 +22,7 @@ const difficultyLabel: Record<string, string> = {
 
 export function LabCard({
   href,
+  slug,
   title,
   description,
   track,
@@ -31,6 +34,9 @@ export function LabCard({
       href={href}
       className="focus-ring group relative flex flex-col gap-1 overflow-hidden transition-[color,background-color,border-color,transform] duration-[var(--duration-fast)] ease-[var(--ease-out)] active:scale-[0.98] active:duration-[var(--duration-instant)] has-touch-screen:active:scale-[0.99]"
     >
+      <div className="bg-card relative h-24 overflow-hidden">
+        <ChallengeShape slug={slug} className="absolute inset-0 h-full w-full" />
+      </div>
       <div className="bg-card flex items-center justify-between px-4 py-3">
         <Badge>
           {track ?? 'lab'}

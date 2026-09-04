@@ -26,6 +26,7 @@ jobs:
   validate:
     name: Validate labs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -41,9 +42,46 @@ jobs:
           docker compose version
           python3 scripts/validate.py --compose
 
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Real leaked secrets are never intended. Generic SAST is
+      # intentionally absent: labs are vulnerable by design and no
+      # rule set can tell intent from accident. score_lab.py covers
+      # the calibrated checks instead.
+      - name: Scan for leaked secrets
+        uses: gitleaks/gitleaks-action@v2
+
+      - name: Score every lab (blocking)
+        run: python3 scripts/score_lab.py --min 70
+
+      - name: Scan filesystem for known vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: labs/
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          cache: "true"
+
   content:
     name: Content contracts
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 

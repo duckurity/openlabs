@@ -1,0 +1,208 @@
+# openlabs
+
+> openlabs is an open source library of Docker-based security labs. Each lab is one vulnerable service, one brief, and one flag.
+
+## Open source security labs
+
+Source: https://openlabs.duckurity.com
+
+Openlabs ships self-contained security labs. Each lab runs in Docker. Each lab hides one flag.
+<div className="not-prose my-0 flex flex-wrap gap-x-2 gap-y-1">
+</div>
+## Start here
+Clone the repo:
+```bash
+git clone https://github.com/Duckurity/openlabs
+```
+Start the first lab:
+```bash
+cd openlabs/labs/web/duck-cross
+docker compose up -d
+```
+Open `http://localhost:8377` in your browser. Read the brief. Find the flag.
+Return to the repo root to verify the solve:
+```bash
+cd openlabs
+python3 scripts/check.py labs/web/duck-cross
+```
+Browse the [labs](/labs) to pick a target. Read [how to play](/play) for the full loop. Read the [rules](/rules) before you publish a writeup. Skim the [FAQ](/faq) when something puzzles you.
+
+## Contribute
+
+Source: https://openlabs.duckurity.com/contribute
+
+## Ways to contribute
+Author a lab. Fix an existing lab. Improve the docs. Report a broken lab through the issue forms.
+## Author a lab
+Copy `labs/_template/` into `labs/<track>/<lab-name>/`. Fill in the metadata. Write the brief. Build the service. Run the validator:
+```bash
+python3 scripts/validate.py
+```
+Open a pull request. Keep one lab per pull request.
+## Lab metadata
+`lab.yml` holds flat YAML, one `key: value` per line:
+| Key | Rules |
+|---|---|
+| `name` | matches the directory name, lowercase, hyphens |
+| `track` | one of `web`, `binary`, `crypto`, `network`, `osint` |
+| `difficulty` | one of `easy`, `medium`, `hard`, `insane` |
+| `description` | one line, shown in the lab index |
+| `flag_hash` | SHA-256 of the full flag string, `64` lowercase hex |
+Compute the hash from the exact flag string, braces included:
+```bash
+printf '%s' 'duck{your_flag_here}' | sha256sum
+```
+## Rules for labs
+Keep the service self-contained. Run offline once images are pulled. Place no runtime calls to external services.
+Pin base images to a full version tag. Use `python:3.12-alpine`. Never use `python:latest`.
+Generate each flag body randomly. Ship one flag per lab. Never reuse a flag. Keep plaintext flags inside lab internals. Store the hash in `lab.yml`.
+Expose one documented host port per lab. State the port in the brief and in `docker-compose.yml`.
+Write the brief in the repo voice. Use short declarative sentences. Use sentence case for headings.
+## Difficulty rubric
+Grade against what a player does. Ignore how long it takes:
+| Level | Expectation |
+|---|---|
+| `easy` | one clear vector, minimal recon, the brief points at the surface |
+| `medium` | chained steps, some enumeration, the vector needs a decision |
+| `hard` | multiple systems or stages, custom tooling, dead ends that punish assumptions |
+| `insane` | research-level, an original technique, no public reference walkthrough |
+Pick one tier. Grade down when a lab sits between two. Let the solve rate correct it later.
+## Review
+Review covers structure, difficulty accuracy, voice, and clean-clone runs. CI runs the same validator. Keep every check green before review.
+Opening a pull request licenses code under Apache-2.0 and written content under CC-BY-4.0.
+
+## FAQ
+
+Source: https://openlabs.duckurity.com/faq
+
+## Do labs need an account?
+No. No accounts exist. No scoring server exists. Verify each solve locally.
+## Can I read the source to find the flag?
+Yes. Reading the lab source counts as a solve. Open labs work that way.
+## What do I need to run a lab?
+Install Docker with Compose v2. Install `python3` for the flag checker. Clone the repo. Enter a lab. Run `docker compose up -d`. Open the host port.
+## Do labs run offline?
+Yes. Pull the images first. Labs run offline after the pull. Nothing leaves your machine.
+## Where do I start?
+Start with an `easy` lab. Read [how to play](/play) for the loop. Browse the [labs](/labs) to pick a target.
+## A lab looks broken. What now?
+Report it through the issue forms. Name the lab, the track, and the step that fails. Never report the lab vulnerabilities. They form the product.
+
+## How to play
+
+Source: https://openlabs.duckurity.com/play
+
+## 1. Clone
+```bash
+git clone https://github.com/Duckurity/openlabs
+```
+## 2. Run
+```bash
+cd openlabs/labs/web/duck-cross
+docker compose up -d
+```
+Open `http://localhost:8377` in your browser. Read the brief on the lab page.
+## 3. Solve
+Hunt the flag through the running service. Flags look like `duck{...}`. Reading lab source counts as a solve.
+## 4. Verify
+Run the checker from the repo root:
+```bash
+cd openlabs
+python3 scripts/check.py labs/web/duck-cross
+```
+The checker hashes your input with SHA-256. It compares the hash against `flag_hash` in `lab.yml`. It prints `solved` or `not solved`.
+## Notes
+Pull the images before you disconnect. Labs run offline after the pull. Nothing leaves your machine.
+Stop a lab when you finish:
+```bash
+docker compose down
+```
+Edit the host side of the mapping when the host port is taken. Keep the container port fixed.
+Read the service source when a lab stalls. The flag lives inside the lab.
+
+## Rules
+
+Source: https://openlabs.duckurity.com/rules
+
+Run each lab offline. Pull the images first. Nothing leaves your machine.
+Ship one documented host port per lab. Keep the container port fixed.
+Keep plaintext flags inside lab internals. The repo stores the SHA-256 hash in `lab.yml`. Flags follow `duck{...}`. Use lowercase letters, digits, and underscores between the braces. Keep the length between `16` and `40` characters. Match `^duck\{[a-z0-9_]{16,40}\}$`.
+Publish writeups on your own site. Link the lab. Written content stays under CC-BY-4.0. Code stays under Apache-2.0.
+The lab vulnerabilities need no report. They form the product. Report lab infrastructure issues through GitHub Private Vulnerability Reporting.
+
+## Tracks
+
+Source: https://openlabs.duckurity.com/tracks
+
+Start with an `easy` lab. Pick the track that matches your curiosity.
+| Track | Focus |
+| --- | --- |
+| `web` | injection, broken access control, auth bypass, SSRF |
+| `binary` | memory corruption, exploitation, reverse engineering |
+| `crypto` | weak primitives, protocol misuse, implementation faults |
+| `network` | protocol abuse, traffic analysis, pivoting |
+| `osint` | recon, source analysis, signature tracing |
+Read the track and difficulty on each lab page. Browse the [labs](/labs) to begin.
+## Difficulty rubric
+Grade against what a player does. Ignore how long it takes:
+| Level | Expectation |
+|---|---|
+| `easy` | one clear vector, minimal recon, the brief points at the surface |
+| `medium` | chained steps, some enumeration, the vector needs a decision |
+| `hard` | multiple systems or stages, custom tooling, dead ends that punish assumptions |
+| `insane` | research-level, an original technique, no public reference walkthrough |
+Start with an `easy` lab. Read [how to play](/play) when you need the loop.
+
+## Labs
+
+Source: https://openlabs.duckurity.com/labs
+
+Open a brief. Run the service. Find the flag.
+Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
+
+## Duck cross
+
+Source: https://openlabs.duckurity.com/labs/duck-cross
+
+`easy` · `web`
+## Brief
+The duck cross portal collects crossing reports from wardens. Five reports are public. One report stays restricted. Read it.
+## Setup
+Run these from the lab directory:
+```bash
+docker compose up -d
+```
+Open `http://localhost:8377`.
+## Goal
+Find the restricted report. Extract its flag. Verify the solve from the lab directory:
+```bash
+python3 ../../../scripts/check.py .
+```
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
+
+## Techniques
+
+Source: https://openlabs.duckurity.com/technique
+
+Vulnerability classes, defined once. Each technique links every lab that exercises it.
+Start with [broken object-level authorization](/technique/idor). Browse all [labs](/labs) when it is solved.
+
+## Broken object-level authorization (IDOR)
+
+Source: https://openlabs.duckurity.com/technique/idor
+
+## Overview
+Broken object-level authorization means the server verifies your session but never checks that the requested object belongs to you. Swap one identifier for another and the server hands over someone else's data with a `200 OK`.
+## Examples
+Watch for identifiers in URLs, request bodies, and API paths: `/api/reports/1`, `?user_id=42`, `{"document_id": 7}`. Change the value. Compare the response. A different user's object in the response confirms the flaw.
+## Related labs
+Practise on a live target:
+- [Duck cross](/labs/duck-cross) — five public reports, one restricted report, one missing check.
+Browse all [labs](/labs) when it is solved.
+## FAQ
+**Is IDOR the same as broken access control?**
+IDOR is one shape of it. The family covers missing function-level checks too. This page covers the object-level shape only.
+**Do I need special tooling?**
+No. A browser and a willingness to edit one number suffice. Read [how to play](/play) for the loop.

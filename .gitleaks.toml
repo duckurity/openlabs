@@ -1,0 +1,15 @@
+# Gitleaks config. Lab flags live inside service code by design and the
+# flag format matches generic secret shapes, so scope those findings to
+# lab internals only. Leaks anywhere else still fail the build.
+# Flag hygiene outside app/ is enforced separately by scripts/validate.py.
+
+title = "openlabs gitleaks config"
+
+[allowlist]
+description = "Challenge flags inside lab service code are the product, not a leak."
+paths = [
+  '''labs/[^/]+/[^/]+/app/''',
+]
+regexes = [
+  '''duck\{[a-z0-9_]{16,40}\}''',
+]

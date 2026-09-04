@@ -32,18 +32,35 @@ export const metadata: Metadata = {
   },
   description:
     'Open source security labs. Break a real service. Find the flag.',
+  authors: [{ name: 'openlabs', url: APP_BASE_URL }],
+  creator: 'openlabs',
+  publisher: 'openlabs',
   openGraph: {
     siteName: 'openlabs',
     type: 'website',
+    locale: 'en_US',
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'openlabs',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
+    images: ['/opengraph-image.png'],
   },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F4F2F1' },
+    { media: '(prefers-color-scheme: dark)', color: '#1E1E1E' },
+  ],
 }
 
 export default function Layout({ children }: LayoutProps<'/'>) {

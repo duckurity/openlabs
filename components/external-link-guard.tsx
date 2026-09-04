@@ -109,7 +109,7 @@ export function ExternalLinkGuard() {
         aria-hidden="true"
         className="cctv-backdrop absolute inset-0 cursor-pointer"
       />
-      <div className="mount-enter notch bg-background border-border relative mx-4 flex w-full max-w-md flex-col gap-4 border p-6">
+      <div className="mount-enter bg-background border-border relative mx-4 flex w-full max-w-md flex-col gap-4 border p-6">
         <h2
           id="leave-site-title"
           className="font-display text-xl leading-tight font-semibold"
