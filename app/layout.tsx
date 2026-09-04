@@ -4,6 +4,7 @@ import { Funnel_Display, Geist, Geist_Mono } from 'next/font/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import { MotionConfig } from 'motion/react'
 import { Toaster } from 'sonner'
+import { ExternalLinkGuard } from '@/components/external-link-guard'
 import { cn } from '@/lib/utils'
 import { APP_BASE_URL } from '@/lib/constants'
 
@@ -41,7 +42,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  maximumScale: 1,
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function Layout({ children }: LayoutProps<'/'>) {
@@ -62,7 +64,16 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           }}
         >
         <MotionConfig reducedMotion="user">
+          <meta
+            name="referrer"
+            content="strict-origin-when-cross-origin"
+          />
+          <meta
+            httpEquiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://avatars.githubusercontent.com https://github.com; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'; worker-src 'none'; upgrade-insecure-requests"
+          />
           {children}
+          <ExternalLinkGuard />
           <Toaster
             position="top-right"
             toastOptions={{
