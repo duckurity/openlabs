@@ -1,0 +1,194 @@
+/* ============================================================
+   openlabs — design tokens
+   Brand palette, type scale, spacing, motion. One source of truth.
+   Theme is light-first; dark is a sibling set, not an inversion.
+   Tokens are semantic roles, never appearance names.
+   ============================================================ */
+
+:root {
+  /* ---------- Brand palette (primitives) ---------- */
+  --palette-ink: #1e1e1e;
+  --palette-soft: #57524e;
+  --palette-dim: #8a857f;
+  --palette-hair: #e0dbd6;
+  --palette-warm: #f4f2f1;
+  --palette-paper: #ffffff;
+  --palette-canvas: #1c1916;
+  --palette-ember: #ff3616;
+  --palette-ember-soft: #fff0ec;
+
+  /* ---------- Semantic roles ---------- */
+  --color-page: var(--palette-paper);
+  --color-surface: var(--palette-warm);
+  --color-surface-raised: var(--palette-paper);
+  --color-surface-hover: color-mix(in srgb, var(--palette-ink) 4%, var(--palette-paper));
+
+  --color-text: var(--palette-ink);
+  --color-text-secondary: var(--palette-soft);
+  --color-text-tertiary: var(--palette-dim);
+  --color-text-invert: var(--palette-warm);
+
+  --color-border: var(--palette-hair);
+  --color-border-strong: var(--palette-ink);
+
+  --color-accent: var(--palette-ember);
+  --color-accent-soft: var(--palette-ember-soft);
+  --color-accent-text: var(--palette-ember);
+  --color-accent-contrast: var(--palette-paper);
+
+  --color-focus: var(--palette-ember);
+
+  /* Overlay material — frosted chrome for the header */
+  --color-overlay: color-mix(in srgb, var(--palette-paper) 76%, transparent);
+  --blur-overlay: 14px;
+
+  /* ---------- Type families ---------- */
+  --font-display: 'Funnel Display Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+
+  /* ---------- Type scale (size / line-height / tracking) ----------
+     Tracking is size-specific, per Apple's Details of UI Typography. */
+  --text-display: 3.25rem;
+  --text-display-leading: 1.02;
+  --text-display-tracking: -0.025em;
+
+  --text-h1: 2.25rem;
+  --text-h1-leading: 1.08;
+  --text-h1-tracking: -0.02em;
+
+  --text-h2: 1.75rem;
+  --text-h2-leading: 1.15;
+  --text-h2-tracking: -0.015em;
+
+  --text-h3: 1.25rem;
+  --text-h3-leading: 1.3;
+  --text-h3-tracking: -0.01em;
+
+  --text-lg: 1.125rem;
+  --text-lg-leading: 1.55;
+
+  --text-base: 1rem;
+  --text-base-leading: 1.65;
+
+  --text-sm: 0.875rem;
+  --text-sm-leading: 1.5;
+
+  --text-xs: 0.75rem;
+  --text-xs-leading: 1.4;
+
+  --text-mono: 0.8125rem;
+  --text-mono-leading: 1.5;
+
+  /* Eyebrow / overline */
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow-tracking: 0.16em;
+
+  /* ---------- Spacing scale (4px base) ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Range that a leader/metrical value can breathe */
+  --space-section: clamp(4rem, 10vw, 9rem);
+
+  /* ---------- Layout ---------- */
+  --layout-max: 72rem;
+  --layout-gutter: clamp(1.25rem, 4vw, 2.25rem);
+  --layout-narrow: 44rem;
+
+  /* ---------- Radii — sharp, on brand ---------- */
+  --radius: 0px;
+  --radius-pill: 999px;
+
+  /* ---------- Motion ----------
+     Custom easings, per the animations.dev / transitions.dev craft. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-strong: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-linear: linear;
+
+  --dur-press: 120ms;
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-med: 300ms;
+  --dur-slow: 450ms;
+  --dur-reveal: 500ms;
+
+  /* Motion toggles */
+  --reduce-motion: 0;
+
+  /* ---------- Focus ---------- */
+  --focus-ring: 0 0 0 2px var(--color-page), 0 0 0 4px var(--color-focus);
+}
+
+/* ---------- Dark theme: a sibling palette, not an inversion ---------- */
+[data-theme='dark'],
+:root[data-theme='dark'] {
+  --color-page: var(--palette-canvas);
+  --color-surface: #211d19;
+  --color-surface-raised: #262220;
+  --color-surface-hover: color-mix(in srgb, var(--palette-warm) 8%, #211d19);
+
+  --color-text: var(--palette-warm);
+  --color-text-secondary: #b7b1aa;
+  --color-text-tertiary: var(--palette-dim);
+  --color-text-invert: var(--palette-canvas);
+
+  --color-border: #3a3631;
+  --color-border-strong: var(--palette-warm);
+
+  --color-accent: var(--palette-ember);
+  --color-accent-soft: color-mix(in srgb, var(--palette-ember) 14%, var(--palette-canvas));
+  --color-accent-text: #ff6a4d;
+  --color-accent-contrast: var(--palette-paper);
+
+  --color-focus: #ff6a4d;
+
+  --color-overlay: color-mix(in srgb, #211d19 78%, transparent);
+}
+
+/* ---------- System theme (no toggle pressed) ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-page: var(--palette-canvas);
+    --color-surface: #211d19;
+    --color-surface-raised: #262220;
+    --color-surface-hover: color-mix(in srgb, var(--palette-warm) 8%, #211d19);
+
+    --color-text: var(--palette-warm);
+    --color-text-secondary: #b7b1aa;
+    --color-text-tertiary: var(--palette-dim);
+    --color-text-invert: var(--palette-canvas);
+
+    --color-border: #3a3631;
+    --color-border-strong: var(--palette-warm);
+
+    --color-accent: var(--palette-ember);
+    --color-accent-soft: color-mix(in srgb, var(--palette-ember) 14%, var(--palette-canvas));
+    --color-accent-text: #ff6a4d;
+    --color-accent-contrast: var(--palette-paper);
+
+    --color-focus: #ff6a4d;
+
+    --color-overlay: color-mix(in srgb, #211d19 78%, transparent);
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --reduce-motion: 1;
+    --dur-reveal: 0s;
+  }
+}

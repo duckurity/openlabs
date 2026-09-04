@@ -1,0 +1,19 @@
+{
+  "name": "openlabs-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Openlabs library site. A lab library, not a platform.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "^5.0.0",
+    "@fontsource-variable/funnel-display": "^5.0.0",
+    "astro": "^5.0.0"
+  }
+}

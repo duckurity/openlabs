@@ -1,0 +1,94 @@
+---
+// DifficultyMeter — the signature openlabs interaction.
+// Four equal segments. The active one is permanently Ember. On hover, the
+// segments before it "charge" left-to-right into Ember with a staggered
+// sweep, then settle back. Ember appears exactly once at rest — on brand.
+//
+// Pure CSS; each pre-active segment carries an inline --charge index so the
+// stagger is deterministic and interruptible via transition, not keyframes.
+
+interface Props {
+  level: 'easy' | 'medium' | 'hard' | 'insane';
+  id?: string;
+}
+const { level, id } = Astro.props;
+const order = ['easy', 'medium', 'hard', 'insane'];
+const activeIndex = order.indexOf(level);
+const labels = ['EASY', 'MEDIUM', 'HARD', 'INSANE'];
+const hiddenId = id ? `${id}-meter` : 'meter';
+const segState = labels.map((_, i) =>
+  i === activeIndex ? 'active' : i < activeIndex ? 'pre' : 'post'
+);
+// Per-segment stagger delay for the charge sweep (ms), growing toward active.
+const delays = labels.map((_, i) => (i < activeIndex ? 40 * (i + 1) : 0));
+---
+
+<div class="meter" data-meter>
+  <div class="meter__segments" role="presentation">
+    {labels.map((label, i) => (
+      <span
+        class="meter__seg"
+        data-seg={segState[i]}
+        style={`--charge-delay: ${delays[i]}ms`}
+      ></span>
+    ))}
+  </div>
+  <div class="meter__labels" aria-hidden="true">
+    {labels.map((label, i) => (
+      <span class="meter__lbl" data-lbl={i === activeIndex ? 'active' : undefined}>{label}</span>
+    ))}
+  </div>
+  <span class="sr-visible" id={hiddenId}>{level} difficulty</span>
+</div>
+
+<style>
+  .sr-visible {
+    position: absolute;
+    width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .meter { display: grid; gap: 5px; }
+  .meter__segments { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; height: 6px; }
+  .meter__seg {
+    background: var(--color-border);
+    transition: background-color var(--dur-fast) var(--ease-out);
+    position: relative;
+    overflow: hidden;
+  }
+  /* Active segment: permanent Ember. */
+  .meter__seg[data-seg='active'] { background: var(--color-accent); }
+
+  /* Charge overlay for pre-active segments. Starts hidden. */
+  .meter__seg[data-seg='pre']::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--color-accent);
+    transform-origin: left center;
+    transform: scaleX(0);
+    opacity: 0;
+    transition: transform 0s var(--ease-out) var(--charge-delay), opacity 0s var(--charge-delay);
+  }
+
+  .meter:hover .meter__seg[data-seg='pre']::after {
+    transform: scaleX(1);
+    opacity: 1;
+    transition: transform 180ms var(--ease-out) var(--charge-delay), opacity 80ms var(--charge-delay);
+  }
+
+  .meter__labels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+  .meter__lbl {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .meter__lbl[data-lbl='active'] { color: var(--color-accent-text); font-weight: 700; }
+
+  /* Reduced motion: no sweep; just show the permanent active segment. */
+  @media (prefers-reduced-motion: reduce) {
+    .meter__seg[data-seg='pre']::after { display: none; }
+  }
+</style>

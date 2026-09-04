@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import LabsSection from '../components/LabsSection.astro';
+import TracksSection from '../components/TracksSection.astro';
+import PlaySection from '../components/PlaySection.astro';
+import RulesSection from '../components/RulesSection.astro';
+import { TRACKS } from '../data/site';
+
+const entries = await getCollection('labs');
+const labs = entries
+  .map((entry) => ({
+    slug: entry.slug,
+    title: entry.data.title,
+    tagline: entry.data.tagline,
+    track: entry.data.track,
+    difficulty: entry.data.difficulty,
+    port: entry.data.port,
+  }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+
+const counts: Record<string, number> = {};
+for (const t of TRACKS) counts[t.id] = labs.filter((l) => l.track === t.id).length;
+
+const base = import.meta.env.BASE_URL;
+const first = labs[0];
+---
+
+<Base
+  title="openlabs — break a real service. Find the flag."
+  description="Open source security labs that run in Docker. Pick a lab. Read the brief. Solve on your own machine."
+  path="/"
+>
+  <Hero labCount={labs.length} />
+
+  <LabsSection labs={labs} />
+
+  <TracksSection counts={counts} />
+
+  <PlaySection />
+
+  <RulesSection />
+
+  {first && (
+    <section class="section wrap" aria-labelledby="start-title">
+      <div class="start" data-reveal>
+        <div>
+          <p class="eyebrow">Start here</p>
+          <h2 id="start-title">Start with {first.title}.</h2>
+          <p class="lede">{first.tagline}</p>
+        </div>
+        <a class="btn btn--primary" href={`${base}/labs/${first.slug}/`}>
+          Open the brief <span class="btn__arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .start {
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--space-10) var(--space-6);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .start {
+      grid-template-columns: 1fr auto;
+      padding: var(--space-12) var(--space-10);
+    }
+  }
+  .start > div {
+    display: grid;
+    gap: var(--space-3);
+  }
+</style>

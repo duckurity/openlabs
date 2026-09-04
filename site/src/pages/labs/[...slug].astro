@@ -1,0 +1,186 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DifficultyMeter from '../../components/DifficultyMeter.astro';
+import { TRACKS, DIFFICULTY_META } from '../../data/site';
+
+export async function getStaticPaths() {
+  const labs = await getCollection('labs');
+  return labs.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const data = entry.data;
+const base = import.meta.env.BASE_URL;
+const trackLabel = TRACKS.find((t) => t.id === data.track)?.label ?? data.track;
+const checker = `python3 scripts/check.py labs/${data.track}/${entry.slug}`;
+const isCommand = (s: string) => /^[a-z0-9_.\-/:]+(\s+[^\s].*)?$/i.test(s) && !s.includes('http');
+---
+
+<Base
+  title={`${data.title} — openlabs`}
+  description={data.tagline}
+  path={`/labs/${entry.slug}/`}
+>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb" data-reveal>
+      <a href={`${base}/#labs`}>Labs</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{data.title}</span>
+    </nav>
+
+    <header class="detail-head">
+      <p class="eyebrow" data-reveal>{trackLabel} · {data.difficulty}</p>
+      <h1 class="display" data-reveal style="--reveal-delay: 60ms">{data.title}</h1>
+      <p class="lede" data-reveal style="--reveal-delay: 120ms">{data.tagline}</p>
+      <div data-reveal style="--reveal-delay: 180ms; max-width: 22rem;">
+        <DifficultyMeter level={data.difficulty} id={entry.slug} />
+      </div>
+      <p class="detail-promise" data-reveal style="--reveal-delay: 220ms">{DIFFICULTY_META[data.difficulty]}</p>
+    </header>
+
+    <div class="detail-grid">
+      <div class="detail-main">
+        <section aria-labelledby="brief-h" data-reveal>
+          <h2 id="brief-h">Brief</h2>
+          <div class="prose">
+            <p>{data.brief}</p>
+          </div>
+          <div class="prose notes">
+            <Content />
+          </div>
+        </section>
+
+        <section aria-labelledby="setup-h" data-reveal>
+          <h2 id="setup-h">Setup</h2>
+          <div class="setup-list">
+            {data.setup.map((item) => {
+              const text = typeof item === 'string' ? item : item.text;
+              const command = typeof item === 'string' && isCommand(text);
+              return command ? (
+                <div class="codeblock">
+                  <pre><code>{text}</code></pre>
+                  <button class="copybtn" type="button" data-copy={text} aria-label="Copy command">
+                    <span data-copy-label>Copy</span>
+                  </button>
+                </div>
+              ) : (
+                <p class="setup-text">{text}</p>
+              );
+            })}
+          </div>
+        </section>
+
+        <section aria-labelledby="goal-h" data-reveal>
+          <h2 id="goal-h">Goal</h2>
+          <div class="prose">
+            <p>{data.goal}</p>
+          </div>
+        </section>
+
+        <section aria-labelledby="path-h" data-reveal>
+          <h2 id="path-h">Solve path</h2>
+          <ol class="steps" role="list">
+            {data.steps.map((step, i) => (
+              <li class="step" style={`--reveal-delay: ${Math.min(i, 4) * 60}ms`}>
+                <span class="step__num" aria-hidden="true"></span>
+                <div class="step__body">
+                  <p>{step.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <aside class="detail-side" aria-label="Lab facts">
+        <div class="fact" data-reveal>
+          <span class="fact__k">Track</span>
+          <span class="fact__v">{trackLabel}</span>
+        </div>
+        <div class="fact" data-reveal style="--reveal-delay: 60ms">
+          <span class="fact__k">Difficulty</span>
+          <span class="fact__v">{data.difficulty}</span>
+        </div>
+        <div class="fact" data-reveal style="--reveal-delay: 120ms">
+          <span class="fact__k">Host port</span>
+          <span class="fact__v mono">{data.port}</span>
+        </div>
+        <div class="fact" data-reveal style="--reveal-delay: 180ms">
+          <span class="fact__k">Flag format</span>
+          <span class="fact__v mono">{data.flag.format}</span>
+        </div>
+        <div class="fact" data-reveal style="--reveal-delay: 240ms">
+          <span class="fact__k">Checker</span>
+          <span class="fact__v mono">{checker}</span>
+          <button class="copybtn copybtn--inline" type="button" data-copy={checker} aria-label="Copy checker command">
+            <span data-copy-label>Copy</span>
+          </button>
+        </div>
+        <a class="btn btn--primary" href={`${base}/#play`} data-reveal style="--reveal-delay: 300ms">
+          Read the quick start <span class="btn__arrow" aria-hidden="true">→</span>
+        </a>
+      </aside>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .crumbs {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding-top: var(--space-8);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    color: var(--color-text-tertiary);
+  }
+  .crumbs a {
+    color: var(--color-text-secondary);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .crumbs a:hover { color: var(--color-text); }
+  .detail-head .display {
+    font-size: clamp(2.4rem, 5.5vw, 3.75rem);
+    max-width: 16ch;
+  }
+  .detail-promise {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    max-width: 52ch;
+  }
+  .detail-main {
+    display: grid;
+    gap: var(--space-section);
+    padding-bottom: var(--space-8);
+    min-width: 0;
+  }
+  .detail-main section {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .detail-main h2 {
+    padding-top: var(--space-2);
+  }
+  .notes {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .setup-list {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .setup-text {
+    color: var(--color-text-secondary);
+    max-width: 62ch;
+  }
+  .copybtn--inline {
+    position: static;
+    margin-top: var(--space-2);
+    justify-self: start;
+  }
+</style>

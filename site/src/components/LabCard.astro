@@ -1,0 +1,46 @@
+---
+import DifficultyMeter from './DifficultyMeter.astro';
+import { TRACKS } from '../data/site';
+
+interface Props {
+  href: string;
+  title: string;
+  tagline: string;
+  track: 'web' | 'binary' | 'crypto' | 'network' | 'osint';
+  difficulty: 'easy' | 'medium' | 'hard' | 'insane';
+  port: string;
+  index?: number;
+}
+const { href, title, tagline, track, difficulty, port, index = 0 } = Astro.props;
+const trackLabel = TRACKS.find((t) => t.id === track)?.label ?? track;
+const delay = Math.min(index, 6) * 45;
+---
+
+<a
+  class="card card--link"
+  href={href}
+  data-lab-card
+  data-reveal
+  style={`--reveal-delay: ${delay}ms`}
+  data-track={track}
+  data-difficulty={difficulty}
+  data-title={title.toLowerCase()}
+  data-tagline={tagline.toLowerCase()}
+>
+  <div class="card__top">
+    <span class="eyebrow">{trackLabel}</span>
+    <span class="mono card__port">:{port}</span>
+  </div>
+  <h3 class="card__title">{title}</h3>
+  <p class="card__tag">{tagline}</p>
+  <DifficultyMeter level={difficulty} id={`${title}-${difficulty}`} />
+  <span class="card__go">Open the brief <span class="go-arrow" aria-hidden="true">→</span></span>
+</a>
+
+<style>
+  .card__port {
+    font-size: var(--text-mono);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

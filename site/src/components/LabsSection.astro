@@ -1,0 +1,98 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import LabCard from './LabCard.astro';
+import { TRACKS, DIFFICULTY_ORDER } from '../data/site';
+
+interface Lab {
+  slug: string;
+  title: string;
+  tagline: string;
+  track: 'web' | 'binary' | 'crypto' | 'network' | 'osint';
+  difficulty: 'easy' | 'medium' | 'hard' | 'insane';
+  port: string;
+}
+interface Props {
+  labs: Lab[];
+}
+const { labs } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const trackCounts = new Map(TRACKS.map((t) => [t.id, labs.filter((l) => l.track === t.id).length]));
+---
+
+<section class="section wrap" id="labs" aria-labelledby="labs-title">
+  <div id="labs-title"><SectionHeading eyebrow="Library" title="Labs" lede="Filter by track and difficulty. Open a lab for the brief, the setup, and the goal." /></div>
+
+  <div class="filterbar" data-reveal role="search" aria-label="Filter labs">
+    <div class="filterbar__row" role="group" aria-label="Track">
+      <span class="filterbar__label" id="filter-track-label">Track</span>
+      <button class="chip" type="button" data-filter-track="all" aria-pressed="true" aria-labelledby="filter-track-label">All</button>
+      {TRACKS.map((t) => (
+        <button class="chip" type="button" data-filter-track={t.id} aria-pressed="false">
+          {t.label} <span class="chip__count">{trackCounts.get(t.id) ?? 0}</span>
+        </button>
+      ))}
+    </div>
+    <div class="filterbar__row" role="group" aria-label="Difficulty">
+      <span class="filterbar__label" id="filter-diff-label">Difficulty</span>
+      <button class="chip chip--accent" type="button" data-filter-difficulty="all" aria-pressed="true" aria-labelledby="filter-diff-label">All</button>
+      {DIFFICULTY_ORDER.map((d) => (
+        <button class="chip chip--accent" type="button" data-filter-difficulty={d} aria-pressed="false">{d}</button>
+      ))}
+    </div>
+    <div class="filterbar__row">
+      <label class="searchbox">
+        <span class="sr-only">Search labs</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+          <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <input type="search" placeholder="Search labs" data-lab-search autocomplete="off" />
+      </label>
+      <span class="mono filterbar__count" data-lab-count aria-live="polite"></span>
+    </div>
+  </div>
+
+  <div class="labgrid" data-lab-grid>
+    {labs.map((lab, i) => (
+      <LabCard
+        href={`${base}/labs/${lab.slug}/`}
+        title={lab.title}
+        tagline={lab.tagline}
+        track={lab.track}
+        difficulty={lab.difficulty}
+        port={lab.port}
+        index={i}
+      />
+    ))}
+  </div>
+
+  <div class="empty" data-lab-empty hidden>
+    <p class="eyebrow">No match</p>
+    <p>No labs match these filters. Clear them to see the full library.</p>
+    <button class="btn btn--ghost" type="button" data-lab-clear>Clear filters</button>
+  </div>
+</section>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .labgrid {
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 760px) {
+    .labgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1120px) {
+    .labgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  .filterbar__count {
+    font-size: var(--text-mono);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+  .empty { margin-top: var(--space-6); }
+</style>

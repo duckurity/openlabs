@@ -1,0 +1,58 @@
+---
+import '@fontsource-variable/funnel-display';
+import '@fontsource-variable/geist';
+import '../styles/tokens.css';
+import '../styles/global.css';
+import '../styles/motion.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+}
+const { title, description, path = '/' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const canonical = new URL(`${base}${path.replace(/^\//, '')}`, Astro.site ?? 'https://Duckurity.github.io').toString();
+const favicon = `${base}favicon.svg`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={favicon} />
+    <meta name="theme-color" content="#F4F2F1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1C1916" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        var saved = window.localStorage.getItem('openlabs-theme');
+        if (saved === 'light' || saved === 'dark') {
+          document.documentElement.setAttribute('data-theme', saved);
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+      } catch (e) {
+        /* storage unavailable */
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+    <script src="../scripts/site.ts"></script>
+  </body>
+</html>

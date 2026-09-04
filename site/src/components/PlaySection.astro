@@ -1,0 +1,51 @@
+---
+import SectionHeading from './SectionHeading.astro';
+
+interface Step {
+  text: string;
+  code: string;
+  copy: string;
+}
+const steps: Step[] = [
+  {
+    text: 'Clone the repository. Enter the lab folder.',
+    code: 'git clone https://github.com/Duckurity/openlabs',
+    copy: 'git clone https://github.com/Duckurity/openlabs',
+  },
+  {
+    text: 'Start the service. Run it from inside the lab folder.',
+    code: 'docker compose up -d',
+    copy: 'docker compose up -d',
+  },
+  {
+    text: 'Open the service. Work the brief in your browser.',
+    code: 'http://localhost:8080',
+    copy: 'http://localhost:8080',
+  },
+  {
+    text: 'Verify the solve. The checker prints solved or not solved.',
+    code: 'python3 scripts/check.py labs/web/duck-cross',
+    copy: 'python3 scripts/check.py labs/web/duck-cross',
+  },
+];
+---
+
+<section class="section wrap" id="play" aria-labelledby="play-title">
+  <div id="play-title"><SectionHeading eyebrow="Quick start" title="How to play" lede="Four steps stand between you and your first flag. Read the lab source. It counts as a solve." /></div>
+  <ol class="steps" role="list">
+    {steps.map((step, i) => (
+      <li class="step" data-reveal style={`--reveal-delay: ${Math.min(i, 4) * 60}ms`}>
+        <span class="step__num" aria-hidden="true"></span>
+        <div class="step__body">
+          <p>{step.text}</p>
+          <div class="codeblock">
+            <pre><code data-copy-text>{step.code}</code></pre>
+            <button class="copybtn" type="button" data-copy={step.copy} aria-label="Copy command">
+              <span data-copy-label>Copy</span>
+            </button>
+          </div>
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>

@@ -4,3 +4,6 @@ __pycache__/
 .DS_Store
 .github/assets/badges/MANIFEST.json
 labs/**/*.pdf
+site/node_modules/
+site/dist/
+site/.astro/

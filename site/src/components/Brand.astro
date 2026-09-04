@@ -1,0 +1,18 @@
+---
+// The ainmth cross-quadrant mark. One Ember quadrant is the live node;
+// everything else follows the current text colour. Renders sharp-cornered.
+interface Props {
+  class?: string;
+  size?: number;
+}
+const { class: className = '', size = 34 } = Astro.props;
+const s = { width: size, height: size };
+---
+
+<svg class={className} viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...s}>
+  <path d="M83.33 166.67V250H166.67V166.67Z" fill="currentColor" />
+  <path d="M83.33 0V83.33H166.67V0H83.33Z" fill="currentColor" />
+  <path d="M166.67 166.67H250V83.33H166.67V166.67Z" fill="currentColor" />
+  <path d="M83.33 83.33H0V166.67H83.33V83.33Z" fill="currentColor" />
+  <path d="M83.33 0H0V83.33H83.33V0Z" fill="var(--color-accent)" />
+</svg>
