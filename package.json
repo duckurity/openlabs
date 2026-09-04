@@ -52,6 +52,6 @@
     "contentbit": "^0.7.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.16",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }
