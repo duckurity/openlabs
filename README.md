@@ -24,7 +24,7 @@
 
 Press play to hear the welcome.
 
-<audio controls src=".github/assets/audio/welcome.mp3">
+<audio controls src=".github/assets/audio/welcome.mp3?v=aa066c70">
   Your browser does not support the audio element.
 </audio>
 
