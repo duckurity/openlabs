@@ -73,7 +73,7 @@ repository stores only the SHA-256 hash of each flag, never the plaintext.
 
 <div align="center">
 
-| Track | Focus |
+| Track | Examples |
 |:---:|:---|
 | `web` | injection, broken access control, auth bypass, SSRF |
 | `binary` | memory corruption, exploitation, reverse engineering |
