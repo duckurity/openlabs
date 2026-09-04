@@ -19,6 +19,8 @@ verifies a player's flag against the stored SHA-256 hash.
 | `scripts/validate.py` | CI validator, zero dependencies |
 | `scripts/check.py` | player flag checker, zero dependencies |
 | `scripts/make_badges.py` | badge and chip generator, needs `fonttools` and vendored fonts |
+| `scripts/make_lab_pdf.py` | branded challenge-sheet PDF, template-driven, needs `xelatex` + `rsvg-convert` |
+| `templates/labsheet.cls` | layout and type system the PDF fills; never edited by hand past the generator |
 | `scripts/test_brand.sh` | integration-test the brand pipeline in a temp clone |
 | `BRAND.md` | color, type, badge, and pipeline reference |
 | `scripts/sync_wiki.py` | asset version bumps and wiki repo sync, zero dependencies |
@@ -53,15 +55,19 @@ python3 scripts/validate.py              # structure + metadata
 python3 scripts/validate.py --compose    # + docker compose config
 python3 scripts/check.py labs/web/duck-cross
 python3 scripts/make_badges.py           # regenerate badges and chips
+python3 scripts/make_lab_pdf.py --all --strict   # rebuild every lab sheet pdf
 python3 scripts/sync_wiki.py bump        # hash-stamp asset refs (?v=)
 python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo
 bash scripts/test_brand.sh               # integration-test the brand pipeline
 ```
 
 CI runs the badge regeneration, version bumps, and wiki sync on every push
-to `main` that touches labs, wiki, README, scripts, or assets. Never edit
-generated badges by hand; edit `scripts/make_badges.py` and regenerate.
-Never hand-edit `?v=` values; run `sync_wiki.py bump`.
+to `main` that touches labs, wiki, README, scripts, or assets. The labs
+workflow also rebuilds each lab sheet with `make_lab_pdf.py --all --strict`,
+so a layout whose boxes overflow its measure fails CI. Never edit generated
+badges by hand; edit `scripts/make_badges.py` and regenerate. Never hand-edit
+`?v=` values; run `sync_wiki.py bump`. Never hand-edit the sheet's layout;
+edit `scripts/make_lab_pdf.py` or `templates/labsheet.cls`.
 
 The `Sync wiki` step reads the `WIKI_PUSH_TOKEN` repository secret. A
 fine-grained PAT with `Contents: Read and write` on

@@ -20,6 +20,27 @@
   <a href="#get-solving">Quick start</a> · <a href="#labs-1-live">Labs</a> · <a href="https://github.com/Duckurity/openlabs/wiki">Wiki</a> · <a href="#contribute">Contribute</a>
 </p>
 
+## Listen
+
+Press play to hear the welcome.
+
+<details>
+  <summary style="list-style:none;cursor:pointer">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/audio/player-dark.svg">
+      <img src=".github/assets/audio/player-light.svg" alt="welcome to openlabs" width="100%" style="max-width:720px;display:block;margin:auto">
+    </picture>
+  </summary>
+  <div align="center" style="padding:12px 0">
+    <audio controls preload="none" style="width:72%;max-width:560px;border-radius:0;outline:none" src=".github/assets/audio/welcome.mp3">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+</details>
+
+The artwork is a cover; the transport sits beneath it. Click the cover to
+open the player.
+
 ## Get solving
 
 Three things stand between you and your first flag.

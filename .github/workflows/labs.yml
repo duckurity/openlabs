@@ -30,3 +30,28 @@ jobs:
         run: |
           docker compose version
           python3 scripts/validate.py --compose
+
+  pdf:
+    name: Build lab sheets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PDF toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-xetex \
+            texlive-fonts-recommended \
+            texlive-latex-extra \
+            librsvg2-bin
+          xelatex --version >/dev/null
+          rsvg-convert --version >/dev/null
+
+      - name: Build every lab sheet with strict layout checks
+        run: python3 scripts/make_lab_pdf.py --all --strict

@@ -3,3 +3,4 @@ __pycache__/
 .env
 .DS_Store
 .github/assets/badges/MANIFEST.json
+labs/**/*.pdf

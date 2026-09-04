@@ -58,12 +58,42 @@ and it normalizes the live-lab count in the README heading. The command is
 idempotent. A second run with nothing to change prints
 `asset versions up to date`.
 
+## Challenge sheet
+
+Every lab ships a print challenge sheet, generated from `lab.yml` and the
+lab `README.md` by `scripts/make_lab_pdf.py` and styled by
+`templates/labsheet.cls`. It is a template engine, not a prose writer: the
+class owns the layout, the generator fills fixed slots, and all wording and
+structure come from the lab author.
+
+The sheet is a print translation of the same brand. Funnel Display carries
+the display hierarchy, Geist the body, Geist Mono the labels and code. One
+warm-neutral ramp runs from Ink down through Soft and Dim to a hairline rule
+colour; Ember appears exactly twice, once on the difficulty value and once
+on the active meter segment.
+
+Typography is set by size plus explicit leading and size-specific tracking
+(`fontsize{}{}` + `LetterSpace`), never a blunt scale factor. Vertical
+spacing is pitched on a shared 3mm beat so every gap is proportional.
+
+Two invariants the pipeline enforces:
+
+- The sheet is generated, never hand-edited. Change `templates/labsheet.cls`
+  or the generator and re-run `make_lab_pdf.py`.
+- Labels that overflow their measure fail CI. The labs workflow rebuilds
+  every sheet with `--all --strict`, which exits nonzero on any
+  overfull/underfull box.
+
+Requires `xelatex` and `rsvg-convert`. The rendered sheet sits next to its
+lab as `labs/<track>/<lab>/<name>.pdf`.
+
 ## Pipeline
 
-Two scripts automate the brand:
+Scripts automate the brand:
 
 ```bash
 python3 scripts/make_badges.py           # regenerate badges and chips
+python3 scripts/make_lab_pdf.py --all --strict   # rebuild every lab sheet
 python3 scripts/sync_wiki.py bump        # hash-stamp asset refs (?v=)
 python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo
 ```
