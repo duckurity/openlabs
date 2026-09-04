@@ -15,6 +15,6 @@
     "@fontsource-variable/funnel-display": "^5.0.0",
     "@fontsource-variable/geist": "^5.0.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
-    "astro": "^5.0.0"
+    "astro": "^7.1.1"
   }
 }
