@@ -82,7 +82,7 @@ else modeLabel = currentMode === 'light' ? 'Light' : 'Dark';
     position: absolute;
     width: 10px;
     height: 10px;
-    transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), filter var(--dur-fast) var(--ease-out);
+    transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
   }
   .tt-sun { opacity: 1; transform: scale(1); filter: blur(0); }
   .tt-moon { opacity: 0; transform: scale(0.25); filter: blur(4px); }
@@ -99,15 +99,14 @@ else modeLabel = currentMode === 'light' ? 'Light' : 'Dark';
   @media (prefers-reduced-motion: reduce) {
     .theme-toggle,
     .theme-toggle__track,
-    .theme-toggle__glider,
     .tt-sun,
     .tt-moon {
       transition: opacity var(--dur-fast) var(--ease-out);
       transform: none;
       filter: none;
     }
-    .theme-toggle[data-mode='dark'] .theme-toggle__glider {
-      transform: none;
+    .theme-toggle__glider {
+      transition: none;
     }
   }
 </style>

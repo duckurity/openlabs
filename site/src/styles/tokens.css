@@ -69,6 +69,9 @@
   --text-base: 1rem;
   --text-base-leading: 1.6;
 
+  --text-lg: 1.125rem;
+  --text-lg-leading: 1.55;
+
   --text-sm: 0.875rem;
   --text-sm-leading: 1.5;
 
@@ -121,7 +124,6 @@
   --dur-press: 100ms;
   --dur-fast: 150ms;
   --dur-base: 200ms;
-  --dur-med: 300ms;
   --dur-slow: 300ms;
   --dur-reveal: 300ms;
   --dur-ambient: 800ms;

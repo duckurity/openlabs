@@ -1,8 +1,8 @@
 /* ============================================================
    openlabs — shared motion and component primitives
    Buttons, chips, cards, code, filters, scroll reveals.
-   Every transition names exact properties and stays under 300ms
-   for UI. Marketing reveals may run to 500ms.
+   Every transition names exact properties. UI stays at or under
+   300ms, no exceptions on this site.
    ============================================================ */
 
 /* ---------- Skip link ---------- */
@@ -17,7 +17,6 @@
   font-size: var(--text-sm);
   font-weight: 600;
   transform: translateY(-300%);
-  transition: transform var(--dur-fast) var(--ease-out);
 }
 .skip-link:focus-visible {
   transform: none;
@@ -154,12 +153,6 @@ button.chip:active {
 a.card:hover,
 .card--link:hover {
   border-color: var(--color-border-strong);
-}
-@media (hover: hover) and (pointer: fine) {
-  a.card:hover,
-  .card--link:hover {
-    transform: translateY(-2px);
-  }
 }
 a.card:active,
 .card--link:active {
@@ -316,7 +309,7 @@ html.js [data-reveal].is-visible {
   background: var(--color-surface);
   padding: var(--space-2) var(--space-3);
   min-width: min(22rem, 100%);
-  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  transition: border-color var(--dur-fast) var(--ease-out);
 }
 .searchbox:focus-within {
   border-color: var(--color-accent);
@@ -353,6 +346,11 @@ html.js [data-reveal].is-visible {
 }
 .empty[hidden] {
   display: none;
+}
+.empty__body {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
 }
 
 /* ---------- Listen strip (custom audio UI) ---------- */
@@ -549,7 +547,7 @@ html.js [data-reveal].is-visible {
   gap: var(--space-4);
   padding: var(--space-5) 0;
   border-bottom: 1px solid var(--color-border);
-  transition: background-color var(--dur-fast) var(--ease-out),
+  transition: background-color var(--dur-base) var(--ease-out),
     border-color var(--dur-base) var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -582,7 +580,8 @@ html.js [data-reveal].is-visible {
   border-bottom: 1px solid var(--color-border);
   text-align: left;
   width: 100%;
-  transition: background-color var(--dur-fast) var(--ease-out),
+  transition: transform var(--dur-press) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out),
     border-color var(--dur-base) var(--ease-out);
 }
 @media (min-width: 640px) {
@@ -597,6 +596,9 @@ html.js [data-reveal].is-visible {
     background: var(--color-surface);
     border-bottom-color: transparent;
   }
+}
+button.track:active {
+  transform: scale(var(--motion-press-scale));
 }
 .track__name {
   font-family: var(--font-display);
@@ -781,6 +783,22 @@ html.js [data-reveal].is-visible {
     min-height: 44px;
     min-width: 44px;
   }
+  .btn,
+  button.track,
+  .site-header__link,
+  .searchbox input {
+    min-height: 44px;
+  }
+}
+/* Expanded invisible hit area for the thin audio slider. */
+.listen__track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: max(44px, 100%);
 }
 
 /* ---------- Detail page ---------- */
@@ -829,6 +847,43 @@ html.js [data-reveal].is-visible {
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: var(--text-mono);
+}
+
+/* ---------- Reduced motion: no trips, information stays ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active,
+  button.chip:active,
+  a.card:active,
+  .card--link:active,
+  .copybtn:active,
+  button.track:active,
+  .listen__play:active,
+  .theme-toggle:active,
+  .site-header__cta:active {
+    transform: none;
+  }
+  .btn .btn__arrow,
+  .card__go .go-arrow {
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  a.card:hover .go-arrow,
+  .card--link:hover .go-arrow {
+    transform: none;
+  }
+  .site-header__link::after,
+  .link-sweep,
+  .site-footer__link,
+  .site-footer__brand a,
+  .crumbs a {
+    transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+  }
+  .site-header__link:hover::after,
+  .link-sweep:hover,
+  .site-footer__link:hover,
+  .site-footer__brand a:hover,
+  .crumbs a:hover {
+    background-size: 0% 1px;
+  }
 }
 
 /* ---------- Reduced transparency ---------- */

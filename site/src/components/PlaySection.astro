@@ -34,7 +34,7 @@ const steps: Step[] = [
   <div id="play-title"><SectionHeading eyebrow="Quick start" title="How to play" lede="Four steps stand between you and your first flag. Read the lab source. It counts as a solve." /></div>
   <ol class="steps" role="list">
     {steps.map((step, i) => (
-      <li class="step" data-reveal style={`--reveal-delay: ${Math.min(i, 4) * 60}ms`}>
+      <li class="step" data-reveal style={`--reveal-delay: ${Math.min(i, 4) * 50}ms`}>
         <span class="step__num" aria-hidden="true"></span>
         <div class="step__body">
           <p>{step.text}</p>

@@ -22,7 +22,7 @@ const segState = labels.map((_, i) =>
   i === activeIndex ? 'active' : i < activeIndex ? 'pre' : 'post'
 );
 // Per-segment stagger delay for the charge sweep (ms), growing toward active.
-const delays = labels.map((_, i) => (i < activeIndex ? 40 * (i + 1) : 0));
+const delays = labels.map((_, i) => (i < activeIndex ? 50 * (i + 1) : 0));
 ---
 
 <div class={isStatic ? 'meter meter--static' : 'meter'} data-meter>
@@ -72,11 +72,13 @@ const delays = labels.map((_, i) => (i < activeIndex ? 40 * (i + 1) : 0));
       opacity var(--dur-fast) var(--ease-out) var(--charge-delay);
   }
 
-  .meter:hover .meter__seg[data-seg='pre']::after {
-    transform: scaleX(1);
-    opacity: 1;
-    transition: transform var(--dur-fast) var(--ease-out) var(--charge-delay),
-      opacity var(--dur-fast) var(--ease-out) var(--charge-delay);
+  @media (hover: hover) and (pointer: fine) {
+    .meter:hover .meter__seg[data-seg='pre']::after {
+      transform: scaleX(1);
+      opacity: 1;
+      transition: transform var(--dur-fast) var(--ease-out) var(--charge-delay),
+        opacity var(--dur-fast) var(--ease-out) var(--charge-delay);
+    }
   }
 
   .meter__labels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }

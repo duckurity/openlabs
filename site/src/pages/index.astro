@@ -49,6 +49,7 @@ const first = labs[0];
           <p class="eyebrow">Start here</p>
           <h2 id="start-title">Start with {first.title}.</h2>
           <p class="lede">{first.tagline}</p>
+          <p class="readout" aria-hidden="true">{labs.length} {labs.length === 1 ? 'lab' : 'labs'} live · {TRACKS.length} tracks</p>
         </div>
         <a class="btn btn--primary" href={`${base}/labs/${first.slug}/`}>
           Open the brief <span class="btn__arrow" aria-hidden="true">→</span>

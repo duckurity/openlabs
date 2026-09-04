@@ -12,27 +12,27 @@ const base = import.meta.env.BASE_URL;
   <div class="hero__grid">
     <div class="hero__copy">
       <p class="eyebrow" data-reveal>Open source security labs</p>
-      <h1 class="display" id="hero-title" data-reveal style="--reveal-delay: 60ms">
+      <h1 class="display" id="hero-title" data-reveal style="--reveal-delay: 50ms">
         Break a real service. Find the flag.
       </h1>
-      <p class="lede" data-reveal style="--reveal-delay: 120ms">
+      <p class="lede" data-reveal style="--reveal-delay: 100ms">
         Openlabs ships small labs that run in Docker. Pick a lab. Read the
         brief. Solve on your own machine.
       </p>
-      <div class="hero__cta" data-reveal style="--reveal-delay: 180ms">
+      <div class="hero__cta" data-reveal style="--reveal-delay: 150ms">
         <a class="btn btn--primary" href={`${base}/#labs`}>
           Browse labs <span class="btn__arrow" aria-hidden="true">→</span>
         </a>
         <a class="btn btn--ghost" href={`${base}/#play`}>Read the quick start</a>
       </div>
-      <ul class="hero__meta" role="list" data-reveal style="--reveal-delay: 240ms">
+      <ul class="hero__meta" role="list" data-reveal style="--reveal-delay: 150ms">
         <li><span class="hero__live" aria-hidden="true"></span>{labCount} {labCount === 1 ? 'lab' : 'labs'} live</li>
         <li>Docker only</li>
         <li>No accounts</li>
       </ul>
     </div>
     <div class="hero__side">
-      <p class="eyebrow" data-reveal style="--reveal-delay: 140ms">Listen</p>
+      <p class="eyebrow" data-reveal style="--reveal-delay: 100ms">Listen</p>
       <ListenStrip />
       <p class="hero__hint" data-reveal style="--reveal-delay: 200ms">
         Press play to hear the welcome.
@@ -104,7 +104,7 @@ const base = import.meta.env.BASE_URL;
   .hero__live {
     width: 7px;
     height: 7px;
-    background: var(--color-accent);
+    background: var(--color-text-tertiary);
   }
   .hero__side {
     display: grid;

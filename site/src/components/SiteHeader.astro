@@ -1,5 +1,4 @@
 ---
-import Brand from './Brand.astro';
 import ThemeToggle from './ThemeToggle.astro';
 
 const nav = [
@@ -14,7 +13,6 @@ const nav = [
 <header class="site-header" data-site-header>
   <div class="site-header__inner">
     <a class="site-header__brand" href="/openlabs/" aria-label="Openlabs home">
-      <Brand size={26} />
       <span class="site-header__word">openlabs</span>
     </a>
 
@@ -115,8 +113,10 @@ const nav = [
     transition: transform var(--dur-base) var(--ease-in-out);
   }
   .site-header__link:hover { color: var(--color-text); }
-  .site-header__link:hover::after,
   .site-header__link[aria-current='page']::after { transform: scaleX(1); }
+  @media (hover: hover) and (pointer: fine) {
+    .site-header__link:hover::after { transform: scaleX(1); }
+  }
   .site-header__link[aria-current='page'] { color: var(--color-text); }
 
   .site-header__actions {

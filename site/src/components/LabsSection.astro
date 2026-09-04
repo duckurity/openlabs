@@ -25,7 +25,7 @@ const trackCounts = new Map(TRACKS.map((t) => [t.id, labs.filter((l) => l.track 
   <div class="filterbar" data-reveal role="search" aria-label="Filter labs">
     <div class="filterbar__row" role="group" aria-label="Track">
       <span class="filterbar__label" id="filter-track-label">Track</span>
-      <button class="chip" type="button" data-filter-track="all" aria-pressed="true" aria-labelledby="filter-track-label">All</button>
+      <button class="chip" type="button" data-filter-track="all" aria-pressed="true">All</button>
       {TRACKS.map((t) => (
         <button class="chip" type="button" data-filter-track={t.id} aria-pressed="false">
           {t.label} <span class="chip__count">{trackCounts.get(t.id) ?? 0}</span>
@@ -34,7 +34,7 @@ const trackCounts = new Map(TRACKS.map((t) => [t.id, labs.filter((l) => l.track 
     </div>
     <div class="filterbar__row" role="group" aria-label="Difficulty">
       <span class="filterbar__label" id="filter-diff-label">Difficulty</span>
-      <button class="chip" type="button" data-filter-difficulty="all" aria-pressed="true" aria-labelledby="filter-diff-label">All</button>
+      <button class="chip" type="button" data-filter-difficulty="all" aria-pressed="true">All</button>
       {DIFFICULTY_ORDER.map((d) => (
         <button class="chip" type="button" data-filter-difficulty={d} aria-pressed="false">{d}</button>
       ))}
@@ -69,9 +69,11 @@ const trackCounts = new Map(TRACKS.map((t) => [t.id, labs.filter((l) => l.track 
 
   <div class="empty" data-lab-empty hidden>
     <div class="empty__void hatch" aria-hidden="true"></div>
-    <p class="eyebrow">No match</p>
-    <p>No labs match these filters. Clear them to see the full library.</p>
-    <button class="btn btn--ghost" type="button" data-lab-clear>Clear filters</button>
+    <div class="empty__body" data-lab-empty-body>
+      <p class="eyebrow">No match</p>
+      <p>No labs match these filters. Clear them to see the full library.</p>
+      <button class="btn btn--ghost" type="button" data-lab-clear>Clear filters</button>
+    </div>
   </div>
 </section>
 

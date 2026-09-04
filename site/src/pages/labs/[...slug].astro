@@ -35,12 +35,12 @@ const isCommand = (s: string) => /^[a-z0-9_.\-/:]+(\s+[^\s].*)?$/i.test(s) && !s
 
     <header class="detail-head">
       <p class="eyebrow" data-reveal>{trackLabel} · {data.difficulty}</p>
-      <h1 class="display" data-reveal style="--reveal-delay: 60ms">{data.title}</h1>
-      <p class="lede" data-reveal style="--reveal-delay: 120ms">{data.tagline}</p>
-      <div data-reveal style="--reveal-delay: 180ms; max-width: 22rem;">
+      <h1 class="display" data-reveal style="--reveal-delay: 50ms">{data.title}</h1>
+      <p class="lede" data-reveal style="--reveal-delay: 100ms">{data.tagline}</p>
+      <div data-reveal style="--reveal-delay: 150ms; max-width: 22rem;">
         <DifficultyMeter level={data.difficulty} id={entry.slug} static />
       </div>
-      <p class="detail-promise" data-reveal style="--reveal-delay: 220ms">{DIFFICULTY_META[data.difficulty]}</p>
+      <p class="detail-promise" data-reveal style="--reveal-delay: 200ms">{DIFFICULTY_META[data.difficulty]}</p>
     </header>
 
     <div class="detail-grid">
@@ -102,15 +102,15 @@ const isCommand = (s: string) => /^[a-z0-9_.\-/:]+(\s+[^\s].*)?$/i.test(s) && !s
           <span class="fact__k">Track</span>
           <span class="fact__v">{trackLabel}</span>
         </div>
-        <div class="fact" data-reveal style="--reveal-delay: 60ms">
+        <div class="fact" data-reveal style="--reveal-delay: 50ms">
           <span class="fact__k">Difficulty</span>
           <span class="fact__v">{data.difficulty}</span>
         </div>
-        <div class="fact" data-reveal style="--reveal-delay: 120ms">
+        <div class="fact" data-reveal style="--reveal-delay: 100ms">
           <span class="fact__k">Host port</span>
           <span class="fact__v mono">{data.port}</span>
         </div>
-        <div class="fact" data-reveal style="--reveal-delay: 180ms">
+        <div class="fact" data-reveal style="--reveal-delay: 150ms">
           <span class="fact__k">Flag format</span>
           <span class="fact__v mono">{data.flag.format}</span>
         </div>
@@ -121,7 +121,7 @@ const isCommand = (s: string) => /^[a-z0-9_.\-/:]+(\s+[^\s].*)?$/i.test(s) && !s
             <span data-copy-label>Copy</span>
           </button>
         </div>
-        <a class="btn btn--primary" href={`${base}/#play`} data-reveal style="--reveal-delay: 240ms">
+        <a class="btn btn--primary" href={`${base}/#play`} data-reveal style="--reveal-delay: 200ms">
           Read the quick start <span class="btn__arrow" aria-hidden="true">→</span>
         </a>
       </aside>

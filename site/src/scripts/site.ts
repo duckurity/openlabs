@@ -151,10 +151,11 @@ function initFilters(): void {
     // One shake when a pressed filter empties the grid. Never while typing.
     if (empty && !empty.hidden && !wasEmpty && (source === 'chips' || source === 'jump')) {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!reduced) {
-        empty.classList.remove('shake');
-        void empty.offsetWidth;
-        empty.classList.add('shake');
+      const body = empty.querySelector<HTMLElement>('[data-lab-empty-body]');
+      if (!reduced && body) {
+        body.classList.remove('shake');
+        void body.offsetWidth;
+        body.classList.add('shake');
       }
     }
     paintCount(visible, cards.length);
@@ -288,8 +289,28 @@ function toast(message: string): void {
   );
   let timer = 0;
   const dismiss = () => {
+    // FLIP: neighbors slide into the freed space instead of jumping.
+    const siblings = Array.from(stack.children) as HTMLElement[];
+    const firsts = new Map<HTMLElement, number>();
+    siblings.forEach((sib) => firsts.set(sib, sib.getBoundingClientRect().top));
     el.setAttribute('data-closing', '');
-    window.setTimeout(() => el.remove(), 240);
+    window.setTimeout(() => {
+      el.remove();
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) {
+        siblings.forEach((sib) => {
+          if (sib === el || !sib.isConnected) return;
+          const last = sib.getBoundingClientRect().top;
+          const delta = (firsts.get(sib) ?? last) - last;
+          if (delta !== 0) {
+            sib.animate(
+              [{ transform: `translateY(${delta}px)` }, { transform: 'translateY(0)' }],
+              { duration: 150, easing: 'cubic-bezier(0.77, 0, 0.175, 1)' }
+            );
+          }
+        });
+      }
+    }, 200);
   };
   const dwell = () => {
     window.clearTimeout(timer);
@@ -412,21 +433,8 @@ function initListen(): void {
     paint();
   });
 }
-
-function initHeader(): void {
-  const header = document.querySelector<HTMLElement>('[data-site-header]');
-  if (!header) return;
-  const bar: HTMLElement = header;
-  function onScroll(): void {
-    bar.toggleAttribute('data-scrolled', window.scrollY > 8);
-  }
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
-}
-
 initTheme();
 initReveal();
 initFilters();
 initCopy();
 initListen();
-initHeader();
