@@ -252,6 +252,9 @@ def cmd_wiki(no_push: bool) -> int:
             return 0
         if token:
             push_with_token(wiki_repo, clone_url, token, "HEAD:master")
+        elif os.environ.get("CI"):
+            print("note: no WIKI_PUSH_TOKEN set in CI; skipping wiki push")
+            return 0
         else:
             print("note: no WIKI_PUSH_TOKEN set; pushing with local "
                   "git credentials")

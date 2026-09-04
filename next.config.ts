@@ -5,7 +5,6 @@ const withMDX = createMDX()
 
 const nextConfig: NextConfig = {
   output: 'export',
-  basePath: '/openlabs',
   images: {
     unoptimized: true,
   },

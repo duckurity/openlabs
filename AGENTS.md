@@ -81,7 +81,9 @@ edit `scripts/make_lab_pdf.py` or `templates/labsheet.cls`.
 The `Sync wiki` step reads the `WIKI_PUSH_TOKEN` repository secret. A
 fine-grained PAT with `Contents: Read and write` on
 `Duckurity/openlabs.wiki` works; `GITHUB_TOKEN` is scoped to the main
-repo and cannot reach the wiki.
+repo and cannot reach the wiki. Without the secret, CI skips the push
+and exits clean; run `sync_wiki.py wiki` from a workstation to push
+with local git credentials.
 
 <!-- contentbit:start -->
 
