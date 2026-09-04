@@ -11,6 +11,8 @@ import { Kbd } from '@/components/ui/kbd'
 
 const suggestedSearches = ['web', 'easy', 'docker', 'flag', 'duck-cross']
 
+export { suggestedSearches }
+
 export function CommandPalette({ items }: { items: SearchItem[] }) {
   const router = useRouter()
   const inputRef = React.useRef<HTMLInputElement>(null)

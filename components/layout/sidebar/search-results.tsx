@@ -60,7 +60,7 @@ export function SearchResults({
               className={cn(
                 'focus-ring flex cursor-pointer flex-col gap-0.5 py-1.5 pr-4 pl-4 text-left transition-[color,background-color] duration-[var(--duration-normal)] ease-[var(--ease-out)]',
                 'text-muted-foreground',
-                'hover:text-foreground hover:bg-accent focus-visible:text-foreground focus-visible:bg-accent'
+                'hover:text-foreground hover:bg-accent focus-visible:text-foreground focus-visible:bg-accent active:text-foreground active:bg-accent'
               )}
             >
               <span className="font-mono text-sm tracking-wide">

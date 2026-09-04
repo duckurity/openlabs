@@ -9,9 +9,12 @@ const REPO = 'https://github.com/Duckurity/openlabs/blob/main'
 export function PageGithubLinkButton({
   path,
   className,
+  label = 'Open in GitHub',
 }: {
+  /** Repo-relative path, e.g. content/labs/duck-cross.mdx */
   path: string
   className?: string
+  label?: string
 }) {
   return (
     <Button
@@ -20,9 +23,9 @@ export function PageGithubLinkButton({
       size="sm"
       className={cn('font-mono tracking-wide', className)}
     >
-      <Link href={`${REPO}/content/${path}`} target="_blank" rel="noopener noreferrer">
+      <Link href={`${REPO}/${path}`} target="_blank" rel="noopener noreferrer">
         <GithubIcon className="size-4" />
-        Open in GitHub
+        {label}
         <ArrowUpRightIcon className="size-3" />
       </Link>
     </Button>

@@ -1,8 +1,11 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createRelativeLink } from 'fumadocs-ui/mdx'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 
 import { source, getLabs, getRelatedLabs, isLabPage, toLabCardData } from '@/lib/source'
+import { APP_BASE_URL } from '@/lib/constants'
 import { getMDXComponents } from '@/mdx-components'
 import { TOC } from '@/components/layout/toc'
 import { TOCProvider, TOCScrollArea } from '@/components/toc'
@@ -18,6 +21,8 @@ import { PageGithubLinkButton } from '@/components/page-github-link-button'
 import { PageActions } from '@/components/layout/page-actions'
 import { LabList } from '@/components/lab/lab-list'
 import { LabGrid, LabCards } from '@/components/lab/lab-grid'
+import { LabCreator } from '@/components/lab/lab-creator'
+import { StatusIndicator } from '@/components/status-indicator'
 import { CopyButton } from '@/components/copy-button'
 
 export const dynamic = 'force-static'
@@ -35,6 +40,40 @@ function categoryLabel(slugs: string[]): string {
 function checkerFor(track?: string, slug?: string): string | null {
   if (!track || !slug) return null
   return `python3 scripts/check.py labs/${track}/${slug}`
+}
+
+function jsonLd(
+  page: { url: string; data: { title: string; description?: string } },
+  opts: { isLab: boolean; isLabsIndex: boolean; labs: { url: string; title: string }[] }
+): Record<string, unknown> | null {
+  const url = `${APP_BASE_URL}${page.url}`
+  if (opts.isLab) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'LearningResource',
+      name: page.data.title,
+      description: page.data.description,
+      url,
+      teaches: page.data.description,
+      isAccessibleForFree: true,
+    }
+  }
+  if (opts.isLabsIndex) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: page.data.title,
+      description: page.data.description,
+      url,
+      itemListElement: opts.labs.map((lab, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: lab.title,
+        url: `${APP_BASE_URL}${lab.url}`,
+      })),
+    }
+  }
+  return null
 }
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
@@ -58,6 +97,22 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const port = page.data.port as string | undefined
   const slug = page.slugs[page.slugs.length - 1]
   const checker = isLab ? checkerFor(track, slug) : null
+  const structured = jsonLd(page, {
+    isLab,
+    isLabsIndex,
+    labs: getLabs().map((lab) => ({ url: lab.url, title: lab.data.title })),
+  })
+  const verified = (page.data.verified as boolean | undefined) ?? false
+  const creator = {
+    name: page.data.author_name as string | undefined,
+    url: page.data.author_url as string | undefined,
+    avatar: page.data.author_avatar as string | undefined,
+    date: page.data.author_date as string | undefined,
+  }
+  const sheetPath =
+    isLab && track && existsSync(join(process.cwd(), 'labs', track, slug, `${slug}.pdf`))
+      ? `labs/${track}/${slug}/${slug}.pdf`
+      : null
 
   return (
     <TOCProvider toc={toc}>
@@ -80,9 +135,16 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         )}
       >
         <div className="mb-6 flex items-start justify-between gap-4">
-          <Badge>{categoryLabel(page.slugs)}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge>{categoryLabel(page.slugs)}</Badge>
+            {isLab && (
+              <StatusIndicator
+                status={verified ? 'verified' : 'needs-fix'}
+              />
+            )}
+          </div>
           <div className="flex items-center gap-2 max-sm:hidden">
-            <PageGithubLinkButton className="max-lg:hidden" path={page.path} />
+            <PageGithubLinkButton className="max-lg:hidden" path={`content/${page.path}`} />
             <PageActions content={raw} />
           </div>
         </div>
@@ -146,8 +208,14 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           </div>
         )}
 
+        {sheetPath && (
+          <div className="not-prose mt-4">
+            <PageGithubLinkButton path={sheetPath} label="Challenge sheet (PDF)" />
+          </div>
+        )}
+
         <div className="not-prose my-0 flex flex-wrap gap-x-2 gap-y-1">
-          <PageGithubLinkButton className="lg:hidden" path={page.path} />
+          <PageGithubLinkButton className="lg:hidden" path={`content/${page.path}`} />
           <PageActions className="sm:hidden" content={raw} />
         </div>
 
@@ -179,9 +247,28 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             </LabGrid>
           </div>
         )}
+        {structured && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
+          />
+        )}
       </article>
 
-      {hasToc && <TOC />}
+      {hasToc && (
+        <TOC
+          footer={
+            isLab ? (
+              <LabCreator
+                name={creator.name}
+                url={creator.url}
+                avatar={creator.avatar}
+                date={creator.date}
+              />
+            ) : undefined
+          }
+        />
+      )}
     </TOCProvider>
   )
 }
@@ -200,5 +287,18 @@ export async function generateMetadata(
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: {
+      canonical: page.url,
+    },
+    openGraph: {
+      title: page.data.title,
+      description: page.data.description,
+      url: page.url,
+      type: 'article',
+    },
+    twitter: {
+      title: page.data.title,
+      description: page.data.description,
+    },
   }
 }

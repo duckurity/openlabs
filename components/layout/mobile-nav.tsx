@@ -17,6 +17,7 @@ import { useTheme } from 'next-themes'
 import { Drawer } from 'vaul'
 import { MenuIcon } from '../icons/menu'
 import { MobileNavSection } from './mobile-nav-section'
+import { suggestedSearches } from './command-palette'
 
 type MobileNavProps = {
   tree: PageTree.Root
@@ -41,6 +42,9 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
   const folders = tree.children.filter(
     (child): child is PageTree.Folder => child.type === 'folder'
   )
+  const rootPages = tree.children.filter(
+    (child): child is PageTree.Item => child.type === 'page'
+  )
 
   const currentLabel = React.useMemo(() => {
     for (const folder of folders) {
@@ -50,18 +54,21 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
         folder.$id?.split(':')[1]?.toLowerCase() ?? name.toLowerCase()
       if (pathname.startsWith(`/${id}`)) return name
     }
-    return 'openlabs'
-  }, [folders, pathname])
+    for (const page of rootPages) {
+      if (pathname === page.url) {
+        return typeof page.name === 'string' ? page.name : String(page.name)
+      }
+    }
+    return null
+  }, [folders, rootPages, pathname])
 
   return (
     <>
       <header className="bg-background sticky top-0 z-(--z-header) flex h-14 items-center gap-2 border-b px-4 md:hidden">
         <Link href="/" className="flex items-center gap-2" aria-label="openlabs home">
-          <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center">
-            <Logo className="size-6" />
-          </span>
+          <Logo className="size-8" />
           <span className="font-mono text-sm tracking-wide">
-            openlabs:{currentLabel}
+            {currentLabel ?? 'openlabs'}
           </span>
         </Link>
         <span className="flex-1" />
@@ -95,8 +102,10 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
       <Drawer.Root
         direction="top"
         open={searching}
-        onOpenChange={setSearching}
-        modal={false}
+        onOpenChange={(next) => {
+          setSearching(next)
+          if (!next) setQuery('')
+        }}
       >
         <Drawer.Portal>
           <Drawer.Overlay className="cctv-backdrop fixed inset-0 top-14 z-(--z-mobile-nav)" />
@@ -107,6 +116,8 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
             <div className="bg-muted flex h-14 items-center gap-3 px-4">
               <SearchIcon className="text-muted-foreground size-4" />
               <input
+                autoFocus
+                enterKeyHint="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search labs"
@@ -122,6 +133,26 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
                 />
               )}
               {isEmpty && <NoResults query={query} />}
+              {!hasResults && !isEmpty && (
+                <div className="bg-accent/70 flex flex-col pt-2 pb-4">
+                  <span className="text-muted-foreground px-4 py-2 font-mono text-xs tracking-wide">
+                    Suggested searches
+                  </span>
+                  {suggestedSearches.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => setQuery(suggestion)}
+                      className="focus-ring text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:text-foreground focus-visible:bg-accent flex cursor-pointer items-center gap-2 py-3 pr-4 pl-4 text-left transition-[color,background-color] duration-[var(--duration-normal)] ease-[var(--ease-out)]"
+                    >
+                      <SearchIcon className="size-3.5 shrink-0 opacity-50" />
+                      <span className="font-mono text-sm tracking-wide">
+                        {suggestion}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </Drawer.Content>
         </Drawer.Portal>
@@ -131,7 +162,6 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
         direction="top"
         open={open}
         onOpenChange={setOpen}
-        modal={false}
       >
         <Drawer.Portal>
           <Drawer.Overlay className="cctv-backdrop fixed inset-0 top-14 z-(--z-mobile-nav)" />
@@ -140,6 +170,28 @@ export function MobileNav({ tree, searchItems }: MobileNavProps) {
             className="bg-background fixed inset-x-0 top-14 z-(--z-mobile-nav) max-h-[calc(100dvh-3.5rem)] overflow-y-auto outline-none md:hidden"
           >
             <nav className="relative flex flex-col gap-1 p-4">
+            {rootPages.map((page) => {
+              const active = pathname === page.url
+              const name =
+                typeof page.name === 'string' ? page.name : String(page.name)
+              return (
+                <Link
+                  key={page.url}
+                  href={page.url}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'focus-ring flex h-12 items-center gap-3 px-4 text-left transition-[color,background-color] duration-[var(--duration-fast)] ease-[var(--ease-out)] active:scale-[0.99]',
+                    active
+                      ? 'text-foreground bg-accent font-medium'
+                      : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                  )}
+                >
+                  <span className="font-mono text-xs font-medium tracking-wide">
+                    {name}
+                  </span>
+                </Link>
+              )
+            })}
             {folders.map((folder) => (
               <MobileNavSection key={folder.$id} folder={folder} />
             ))}

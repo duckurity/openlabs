@@ -10,9 +10,19 @@
     "build": "next build",
     "start": "next start",
     "postinstall": "fumadocs-mdx",
-    "check": "tsc --noEmit"
+    "sync:labs": "python3 scripts/sync_site_content.py",
+    "prebuild": "pnpm sync:labs && fumadocs-mdx",
+    "predev": "pnpm sync:labs && fumadocs-mdx",
+    "check": "tsc --noEmit",
+    "content:check": "contentbit validate",
+    "content:links": "contentbit links",
+    "content:doctor": "contentbit doctor",
+    "studio": "contentbit studio"
   },
   "dependencies": {
+    "@contentbit/blocks": "^0.7.2",
+    "@contentbit/core": "^0.7.2",
+    "@contentbit/react": "^0.7.2",
     "@phosphor-icons/react": "^2.1.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -29,13 +39,15 @@
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.4.0",
     "vaul": "^1.1.2",
-    "zod": "^4.1.13"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@contentbit/studio": "^0.7.2",
     "@tailwindcss/postcss": "^4.1.16",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "contentbit": "^0.7.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3"

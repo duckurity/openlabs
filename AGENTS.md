@@ -24,11 +24,11 @@ verifies a player's flag against the stored SHA-256 hash.
 | `scripts/test_brand.sh` | integration-test the brand pipeline in a temp clone |
 | `BRAND.md` | color, type, badge, and pipeline reference |
 | `scripts/sync_wiki.py` | asset version bumps and wiki repo sync, zero dependencies |
-| `scripts/sync_site_content.py` | generates `content/labs/` from `labs/`; zero dependencies |
+| `scripts/sync_site_content.py` | generates `content/labs/` from `labs/` at build time; zero dependencies |
 | `.github/assets/fonts/` | vendored Funnel Display cuts, SIL OFL 1.1 |
 | `wiki/` | GitHub wiki source: player, authoring, and review guides |
 | `app/`, `components/`, `content/`, `lib/`, `hooks/` | Next.js library site at the repo root, deployed to GitHub Pages |
-| `content/labs/` | generated from `labs/` by `scripts/sync_site_content.py`; never edited by hand |
+| `content/labs/` | generated from `labs/` by `prebuild`/`predev`; gitignored, never edited by hand |
 | `app/styles/theming.css` | design tokens: palette, type, radius; edit here, never hardcode values in components |
 | `.github/workflows/site.yml` | syncs content, builds the site, and deploys to Pages on `main` |
 | `.github/workflows/labs.yml` | CI, runs the validator on labs and scripts changes |
@@ -64,8 +64,8 @@ python3 scripts/make_lab_pdf.py --all --strict   # rebuild every lab sheet pdf
 python3 scripts/sync_wiki.py bump        # hash-stamp asset refs (?v=)
 python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo
 bash scripts/test_brand.sh               # integration-test the brand pipeline
-python3 scripts/sync_site_content.py      # regenerate content/labs/ from labs/
-python3 scripts/sync_site_content.py --check  # fail on drift, runs in CI
+python3 scripts/sync_site_content.py      # regenerate content/labs/ manually
+python3 scripts/sync_site_content.py --check  # verify generated output matches
 pnpm run build                            # build the library site
 pnpm run dev                              # serve the site locally
 ```
@@ -82,3 +82,55 @@ The `Sync wiki` step reads the `WIKI_PUSH_TOKEN` repository secret. A
 fine-grained PAT with `Contents: Read and write` on
 `Duckurity/openlabs.wiki` works; `GITHUB_TOKEN` is scoped to the main
 repo and cannot reach the wiki.
+
+<!-- contentbit:start -->
+
+## contentbit content (generated — edits inside this block are overwritten)
+
+This project validates Markdown content with contentbit. Documents are plain
+Markdown plus directive blocks (`:::name{props} ... :::`), each with a schema.
+Find the nearest `contentbit.config.*` or workspace package that declares
+contentbit (it may be nested in a monorepo), and run commands from that
+directory. The config holds the canonical content glob, registry, link fields,
+and SEO config, so commands normally need no repeated project flags.
+If the project has a `content:links` script, use it to build the internal-link
+index; otherwise run `contentbit links <content glob>`.
+If `contentbit.seo.config.ts` exists and the user is creating or revising a
+search-targeted page, run `contentbit brief <key-or-slug> [content glob]` first
+and treat the brief as the structure contract for the writer.
+
+When writing or editing content:
+
+1. Fetch the live authoring guide first — never guess block syntax:
+   `contentbit instructions --audience llm`
+2. For SEO-planned pages, fetch the page brief:
+   `contentbit brief <key-or-slug>`
+3. Write plain Markdown; use blocks where the guide's use-when guidance fits
+   and satisfy any brief acceptance checks.
+4. If sibling documents use `slug` / `linksTo`, read
+   `.contentbit/link-index.json` from `contentbit links <content glob>` and
+   author frontmatter links with existing slugs. When creating a linked page,
+   include `keywords.primary` and `keywords.secondary` with search-intent
+   phrases future agents can use to choose related pages.
+5. Validate until clean (exit 0): `contentbit validate <file>`.
+   Diagnostics print as `file:line:col severity CODE message` with fix hints.
+   For link frontmatter, validate the full content glob so cross-file checks run.
+
+When auditing content health:
+
+- `contentbit doctor` prints a ranked,
+  read-only repair plan: validation issues, link issues, thin sections,
+  block-less long documents, and missing image alt text.
+- `contentbit doctor --json` prints the
+  same findings as structured JSON for agents and CI.
+- `contentbit stats` prints raw JSON
+  stats: outline word counts, block usage, link domains, and validation
+  error/warning counts.
+- `contentbit links [--fix]` builds
+  `.contentbit/link-index.json`, reports dangling links/orphans, and rewrites
+  alias references in `linksTo` when `--fix` is used.
+
+If `contentbit` is unavailable, suggest `npx contentbit@latest init` instead
+of inventing block syntax.
+
+<!-- contentbit:end -->

@@ -3,3 +3,5 @@ track: web
 difficulty: easy
 description: One line shown in the lab index.
 flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+# techniques exercised, as a bracket list of content/technique slugs.
+# techniques: [idor]

@@ -71,7 +71,7 @@ export function CopyButton({
       className={cn(
         'size-7',
         'absolute top-[0.725rem] right-3 z-10',
-        'opacity-0 transition-opacity duration-[var(--duration-fast)] ease-[var(--ease-out)] group-hover/code:opacity-100 hover:opacity-100 focus-visible:opacity-100',
+        'opacity-0 transition-opacity duration-[var(--duration-fast)] ease-[var(--ease-out)] group-hover/code:opacity-100 hover:opacity-100 focus-visible:opacity-100 has-touch-screen:opacity-100',
         className
       )}
       onClick={handleCopy}

@@ -6,6 +6,8 @@ type MDXComponents = Record<string, React.ComponentType<any>>
 import { cn } from '@/lib/utils'
 import { CopyButton } from '@/components/copy-button'
 import { codeClasses } from '@/lib/mdx'
+import { LicenseBadge } from '@/components/license-badge'
+import { GitHubStarsButton } from '@/components/github-stars-button'
 
 export function getMDXComponents(
   components?: MDXComponents
@@ -13,6 +15,8 @@ export function getMDXComponents(
   return {
     ...defaultMdxComponents,
     CodeTabs,
+    LicenseBadge,
+    GitHubStarsButton,
     code: ({
       className,
       ...props

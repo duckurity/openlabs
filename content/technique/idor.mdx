@@ -1,0 +1,43 @@
+---
+title: Broken object-level authorization (IDOR)
+description: The server checks who you are but not whether the object is yours. Change the identifier, read someone else's data.
+type: technique
+key: technique-idor
+slug: technique/idor
+intent: Learn what IDOR is and which labs exercise it.
+keywords:
+  primary: IDOR practice lab
+  secondary:
+    - broken object level authorization explained
+    - access control lab
+linksTo:
+  - labs/duck-cross
+  - labs
+  - play
+---
+
+## Overview
+
+Broken object-level authorization means the server verifies your session but never checks that the requested object belongs to you. Swap one identifier for another and the server hands over someone else's data with a `200 OK`.
+
+## Examples
+
+Watch for identifiers in URLs, request bodies, and API paths: `/api/reports/1`, `?user_id=42`, `{"document_id": 7}`. Change the value. Compare the response. A different user's object in the response confirms the flaw.
+
+## Related labs
+
+Practise on a live target:
+
+- [Duck cross](/labs/duck-cross) — five public reports, one restricted report, one missing check.
+
+Browse all [labs](/labs) when it is solved.
+
+## FAQ
+
+**Is IDOR the same as broken access control?**
+
+IDOR is one shape of it. The family covers missing function-level checks too. This page covers the object-level shape only.
+
+**Do I need special tooling?**
+
+No. A browser and a willingness to edit one number suffice. Read [how to play](/play) for the loop.

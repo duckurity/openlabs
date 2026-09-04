@@ -2,6 +2,8 @@ import FlaskIcon from '@/components/icons/flask'
 import CubeIcon from '@/components/icons/3d-cube'
 import FileIcon from '@/components/icons/file'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
+import PencilIcon from '@/components/icons/pencil'
+import QuestionIcon from '@/components/icons/question'
 import type { SVGProps } from 'react'
 
 type SitemapItem = {
@@ -30,5 +32,15 @@ export const sitemap: SitemapItem[] = [
     label: 'Rules',
     href: '/rules',
     icon: FileIcon,
+  },
+  {
+    label: 'Contribute',
+    href: '/contribute',
+    icon: PencilIcon,
+  },
+  {
+    label: 'FAQ',
+    href: '/faq',
+    icon: QuestionIcon,
   },
 ]

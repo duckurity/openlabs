@@ -45,9 +45,6 @@ jobs:
           node-version: "22"
           cache: pnpm
 
-      - name: Sync lab content
-        run: python3 scripts/sync_site_content.py --check
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

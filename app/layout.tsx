@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     'Open source security labs. Break a real service. Find the flag.',
   openGraph: {
     siteName: 'openlabs',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',

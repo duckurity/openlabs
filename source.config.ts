@@ -21,6 +21,22 @@ export const docs = defineDocs({
         .enum(['easy', 'medium', 'hard', 'insane'])
         .optional(),
       port: z.string().optional(),
+      verified: z.boolean().optional(),
+      author_name: z.string().optional(),
+      author_url: z.string().optional(),
+      author_avatar: z.string().optional(),
+      author_date: z.string().optional(),
+      type: z.string().optional(),
+      key: z.string().optional(),
+      slug: z.string().optional(),
+      intent: z.string().optional(),
+      keywords: z
+        .object({
+          primary: z.string().optional(),
+          secondary: z.array(z.string()).optional(),
+        })
+        .optional(),
+      linksTo: z.array(z.string()).optional(),
     }),
     postprocess: {
       includeProcessedMarkdown: true,

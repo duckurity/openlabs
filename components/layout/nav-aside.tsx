@@ -16,7 +16,8 @@ export const NavAside = () => {
     <div className="w-aside-width flex h-screen shrink-0 flex-col gap-1 self-start max-md:hidden">
       <Link
         href="/"
-        className="size-aside-width bg-primary text-primary-foreground group/logo flex items-center justify-center"
+        aria-label="openlabs home"
+        className="focus-ring text-foreground hover:text-primary flex size-aside-width items-center justify-center transition-colors outline-none"
       >
         <Logo className="size-12" />
       </Link>

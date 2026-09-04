@@ -7,6 +7,8 @@ export const dynamic = 'force-static'
 export default function sitemap(): MetadataRoute.Sitemap {
   return source.getPages().map((page) => ({
     url: `${APP_BASE_URL}${page.url}`,
+    lastModified: page.data.lastModified ?? undefined,
+    changeFrequency: page.slugs.length <= 1 ? 'weekly' : 'monthly',
     priority: page.slugs.length === 0 ? 1 : 0.7,
   }))
 }

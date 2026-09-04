@@ -3,3 +3,4 @@ track: web
 difficulty: easy
 description: A reports portal with a missing object-level authorization check.
 flag_hash: 1001444936d1ac7055a213bde05726f86f482f72555d2e6bb8dde40cbabbeb06
+techniques: [idor]

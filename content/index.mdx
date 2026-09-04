@@ -1,9 +1,27 @@
 ---
+key: home
+slug: /
 title: Open source security labs
 description: Run a real service. Find the flag. Verify the solve.
+type: guide
+intent: Find and solve self-hosted Docker security labs.
+keywords:
+  primary: open source security labs
+  secondary:
+    - docker security labs
+    - self-hosted ctf practice
+linksTo:
+  - labs
+  - play
 ---
 
 Openlabs ships self-contained security labs. Each lab runs in Docker. Each lab hides one flag.
+
+<div className="not-prose my-0 flex flex-wrap gap-x-2 gap-y-1">
+  <LicenseBadge license="Apache-2.0" showCategory />
+  <LicenseBadge license="CC-BY-4.0" />
+  <GitHubStarsButton owner="Duckurity" repo="openlabs" showRepo />
+</div>
 
 ## Start here
 
@@ -29,4 +47,5 @@ cd openlabs
 python3 scripts/check.py labs/web/duck-cross
 ```
 
-Browse the [labs](/labs) to pick a target. Read [how to play](/play) for the full loop. Read the [rules](/rules) before you publish a writeup.
+Browse the [labs](/labs) to pick a target. Read [how to play](/play) for the full loop. Read the [rules](/rules) before you publish a writeup. Skim the [FAQ](/faq) when something puzzles you.
+

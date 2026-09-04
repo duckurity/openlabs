@@ -10,3 +10,8 @@ out/
 .source/
 next-env.d.ts
 tsconfig.tsbuildinfo
+# Lab pages generate at build time from labs/. Never commit them.
+content/labs/*.mdx
+!content/labs/index.mdx
+# Contentbit link index regenerates via `pnpm run content:links`.
+.contentbit/

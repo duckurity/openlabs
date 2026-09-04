@@ -48,6 +48,14 @@ def parse_flat_yaml(text: str) -> dict[str, str]:
     return data
 
 
+def parse_bracket_list(text: str) -> list[str]:
+    """Parse `[a, b]` into `["a", "b"]`. Empty or malformed input yields []."""
+    text = text.strip()
+    if not (text.startswith("[") and text.endswith("]")):
+        return []
+    return [item.strip() for item in text[1:-1].split(",") if item.strip()]
+
+
 def check_lab(lab: Path) -> list[str]:
     errors: list[str] = []
 
@@ -89,6 +97,17 @@ def check_lab(lab: Path) -> list[str]:
 
     if not HASH_RE.match(meta["flag_hash"]):
         errors.append("lab.yml: `flag_hash` must be 64 lowercase hex characters")
+
+    techniques_raw = meta.get("techniques", "")
+    if techniques_raw:
+        techniques = parse_bracket_list(techniques_raw)
+        if not techniques:
+            errors.append("lab.yml: `techniques` must be a bracket list like `[idor, ssrf]`")
+        for slug in techniques:
+            if not NAME_RE.match(slug):
+                errors.append(f"lab.yml: technique {slug!r} must be lowercase and hyphenated")
+            elif not (REPO_ROOT / "content" / "technique" / f"{slug}.mdx").is_file():
+                errors.append(f"lab.yml: technique {slug!r} has no page at content/technique/{slug}.mdx")
 
     for file in (meta_path, brief):
         if file.is_file() and FLAG_PLAINTEXT_RE.search(file.read_text(encoding="utf-8")):

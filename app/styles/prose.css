@@ -2,6 +2,15 @@
   --tw-prose-body: color-mix(in oklab, var(--foreground) 70%, transparent);
 }
 
+/* Wide tables scroll horizontally instead of breaking layout. */
+.prose
+  :where(table):not(:where(.not-prose, .not-prose *)) {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 /* Type casting: display voice for headings, body voice for prose. */
 .prose
   :where(h1, h2):not(:where(.not-prose, .not-prose *)) {

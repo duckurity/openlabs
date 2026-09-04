@@ -5,12 +5,22 @@ on:
     paths:
       - "labs/**"
       - "scripts/**"
+      - "content/**"
+      - "contentbit.config.ts"
+      - "contentbit.seo.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
       - ".github/workflows/labs.yml"
   push:
     branches: [main]
     paths:
       - "labs/**"
       - "scripts/**"
+      - "content/**"
+      - "contentbit.config.ts"
+      - "contentbit.seo.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
 
 jobs:
   validate:
@@ -30,6 +40,34 @@ jobs:
         run: |
           docker compose version
           python3 scripts/validate.py --compose
+
+  content:
+    name: Content contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate lab pages
+        run: python3 scripts/sync_site_content.py
+
+      - name: Check strict SEO contracts
+        run: pnpm exec contentbit doctor --strict-seo
 
   pdf:
     name: Build lab sheets

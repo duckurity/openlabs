@@ -1,11 +1,18 @@
 'use client'
 
+import type * as React from 'react'
 import TextScanIcon from '@/components/icons/text-scan'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
 import { cn } from '@/lib/utils'
 
-export function TOC({ className }: { className?: string }) {
+export function TOC({
+  className,
+  footer,
+}: {
+  className?: string
+  footer?: React.ReactNode
+}) {
   return (
     <div
       id="nd-toc"
@@ -27,6 +34,7 @@ export function TOC({ className }: { className?: string }) {
             <TOCItems className="[&_a]:text-xs" />
           </TOCScrollArea>
         </div>
+        {footer}
         <div className="bg-muted flex-1" />
       </div>
     </div>
