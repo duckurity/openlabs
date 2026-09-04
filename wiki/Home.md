@@ -65,7 +65,7 @@ cd openlabs/labs/web/duck-cross
 docker compose up -d
 ```
 
-Open `http://localhost:8080`. Verify a solve with
+Open `http://localhost:8377`. Verify a solve with
 `python3 scripts/check.py labs/web/duck-cross`.
 
 [Explore the repository](https://github.com/Duckurity/openlabs) |

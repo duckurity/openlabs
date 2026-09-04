@@ -1,0 +1,48 @@
+---
+title: How to play
+description: Clone, run, solve. Verify each flag from the repo root.
+---
+
+## 1. Clone
+
+```bash
+git clone https://github.com/Duckurity/openlabs
+```
+
+## 2. Run
+
+```bash
+cd openlabs/labs/web/duck-cross
+docker compose up -d
+```
+
+Open `http://localhost:8377` in your browser. Read the brief on the lab page.
+
+## 3. Solve
+
+Hunt the flag through the running service. Flags look like `duck{...}`. Reading lab source counts as a solve.
+
+## 4. Verify
+
+Run the checker from the repo root:
+
+```bash
+cd openlabs
+python3 scripts/check.py labs/web/duck-cross
+```
+
+The checker hashes your input with SHA-256. It compares the hash against `flag_hash` in `lab.yml`. It prints `solved` or `not solved`.
+
+## Notes
+
+Pull the images before you disconnect. Labs run offline after the pull. Nothing leaves your machine.
+
+Stop a lab when you finish:
+
+```bash
+docker compose down
+```
+
+Edit the host side of the mapping when the host port is taken. Keep the container port fixed.
+
+Read the service source when a lab stalls. The flag lives inside the lab.

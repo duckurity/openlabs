@@ -1,0 +1,24 @@
+.prose {
+  --tw-prose-body: color-mix(in oklab, var(--foreground) 70%, transparent);
+}
+
+/* Type casting: display voice for headings, body voice for prose. */
+.prose
+  :where(h1, h2):not(:where(.not-prose, .not-prose *)) {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.prose
+  :where(h3, h4):not(:where(.not-prose, .not-prose *)) {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.prose
+  :where(figure[data-rehype-pretty-code-figure]):not(
+    :where(.not-prose, .not-prose *)
+  ) {
+  @apply my-6 first:mt-0 last:mb-0;
+}

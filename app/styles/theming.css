@@ -1,0 +1,258 @@
+/* ============================================================
+   openlabs — design tokens. This file is the only place raw color,
+   easing, duration, and frame values live. Components use semantic
+   names or Tailwind utilities mapped in globals.css. Never hardcode
+   values in components.
+
+   Palette: warm neutrals (hue 45) + Ember accent (hue 31.6) +
+   five status hues. All color in oklch. No shadows, no pills.
+   :root is the dark theme (canonical). `.light` overrides it.
+   ============================================================ */
+
+:root,
+.dark {
+  --radius: 0rem;
+
+  /* ---------- Neutral ramp (dark canonical, oklch L C 45) ---------- */
+  --neutral-0: oklch(0.18 0.004 45);
+  --neutral-50: oklch(0.205 0.004 45);
+  --neutral-100: oklch(0.25 0.004 45);
+  --neutral-200: oklch(0.3 0.004 45);
+  --neutral-300: oklch(0.36 0.004 45);
+  --neutral-400: oklch(0.45 0.004 45);
+  --neutral-500: oklch(0.55 0.004 45);
+  --neutral-600: oklch(0.64 0.004 45);
+  --neutral-700: oklch(0.76 0.004 45);
+  --neutral-800: oklch(0.85 0.002 45);
+  --neutral-900: oklch(0.93 0.002 45);
+  --neutral-950: oklch(0.965 0.002 45);
+
+  /* ---------- Ember accent ramp (identical both themes, hue 31.6) ---------- */
+  --action-0: oklch(0.97 0.006 31.6);
+  --action-50: oklch(0.94 0.02 31.6);
+  --action-100: oklch(0.9 0.05 31.6);
+  --action-200: oklch(0.835 0.09 31.6);
+  --action-300: oklch(0.77 0.138 31.6);
+  --action-400: oklch(0.71 0.186 31.6);
+  --action-500: oklch(0.649 0.2379 31.6);
+  --action-600: oklch(0.665 0.2 31.6);
+  --action-700: oklch(0.54 0.175 31.6);
+  --action-800: oklch(0.4 0.134 31.6);
+  --action-900: oklch(0.31 0.104 31.6);
+  --action-950: oklch(0.24 0.081 31.6);
+
+  /* ---------- Status hues: text-on-surface only, never fills ---------- */
+  --status-error: oklch(0.66 0.06 22);
+  --status-error-strong: oklch(0.52 0.07 22);
+  --status-error-tint: oklch(0.2 0.03 22);
+  --status-success: oklch(0.66 0.06 142);
+  --status-success-strong: oklch(0.52 0.07 142);
+  --status-success-tint: oklch(0.2 0.03 142);
+  --status-warning: oklch(0.66 0.054 78);
+  --status-warning-strong: oklch(0.52 0.06 78);
+  --status-warning-tint: oklch(0.22 0.03 78);
+  --status-info: oklch(0.66 0.054 235);
+  --status-info-strong: oklch(0.52 0.06 235);
+  --status-info-tint: oklch(0.2 0.03 235);
+  --status-tip: oklch(0.66 0.064 290);
+  --status-tip-strong: oklch(0.52 0.07 290);
+  --status-tip-tint: oklch(0.2 0.03 290);
+
+  /* ---------- Semantic roles: dark (canonical) ---------- */
+  --surface-canvas: var(--neutral-0);
+  --surface-default: var(--neutral-50);
+  --surface-raised: var(--neutral-100);
+  --surface-row-hover: var(--neutral-100);
+  --text-primary: var(--neutral-900);
+  --text-reading: var(--neutral-700);
+  --text-muted: var(--neutral-600);
+  --action-default: var(--action-500);
+  --action-hover: var(--action-400);
+  --action-active: var(--action-600);
+  --text-action: var(--action-400);
+  --text-on-action: var(--neutral-0);
+  --focus-ring: var(--action-300);
+  --surface-action-tint: var(--action-900);
+  --overlay: rgb(11 9 8 / 0.55);
+
+  /* Hairline: alpha wash from the text color, never solid gray. */
+  --line-default: color-mix(in oklch, var(--text-primary) 10%, transparent);
+  --line-strong: color-mix(in oklch, var(--text-primary) 18%, transparent);
+
+  /* ---------- Component token mappings: dark ---------- */
+  --background: var(--surface-canvas);
+  --foreground: var(--text-primary);
+  --card: var(--surface-default);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-default);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--action-default);
+  --primary-foreground: var(--text-on-action);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--surface-raised);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--status-error);
+  --border: var(--line-default);
+  --input: var(--line-default);
+  --ring: var(--focus-ring);
+  --code: var(--surface-default);
+  --code-foreground: var(--text-primary);
+  --preview: var(--surface-default);
+  --preview-foreground: var(--text-primary);
+  --code-highlight: var(--surface-raised);
+  --code-number: color-mix(in oklch, var(--text-muted) 70%, transparent);
+  --chart-1: var(--action-default);
+  --chart-2: var(--neutral-900);
+  --chart-3: var(--neutral-600);
+  --chart-4: var(--neutral-400);
+  --chart-5: var(--neutral-700);
+  --sidebar: var(--surface-default);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--text-primary);
+  --sidebar-primary-foreground: var(--surface-canvas);
+  --sidebar-accent: var(--surface-raised);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--line-default);
+  --sidebar-ring: var(--focus-ring);
+
+  /* ---------- Motion: easing voices ---------- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-instant: cubic-bezier(0, 0, 0, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-expo-in-out: cubic-bezier(0.87, 0, 0.13, 1);
+
+  /* ---------- Motion: duration clock (UI stays at slow or below) ---------- */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-ambient: 800ms;
+  --duration-spinner: 700ms;
+
+  /* ---------- Motion: physical primitives ---------- */
+  --motion-enter-scale: 0.95;
+  --motion-enter-y: 6px;
+  --motion-enter-blur: 4px;
+  --motion-press-scale: 0.96;
+  --motion-stagger: 50ms;
+  --motion-icon-in-scale: 0.25;
+  --motion-icon-in-blur: 4px;
+  --spring-default-response: 0.4s;
+  --spring-default-bounce: 0;
+  --spring-momentum-response: 0.4s;
+  --spring-momentum-bounce: 0.2;
+  --spring-sheet-response: 0.3s;
+  --spring-sheet-bounce: 0.15;
+
+  /* ---------- Frame grammar measures ---------- */
+  --line-width-hairline: 1px;
+  --line-width-emphasis: 2px;
+  --frame-notch-step: 6px;
+  --frame-bracket-length: 12px;
+  --frame-bracket-offset: 4px;
+  --frame-hatch-period: 8px;
+  --min-touch-target: 44px;
+
+  /* ---------- Layer order ---------- */
+  --z-nav: 30;
+  --z-dropdown: 40;
+  --z-overlay: 50;
+  --z-drawer: 60;
+  --z-modal: 70;
+  --z-toast: 80;
+
+  /* ---------- Type companions (families map in globals.css) ---------- */
+  --text-display-xl: clamp(1.75rem, 4vw, 2.25rem);
+  --text-display-lg: clamp(1.5rem, 3vw, 1.75rem);
+
+  color-scheme: dark;
+}
+
+.light {
+  /* ---------- Neutral ramp (light canonical) ---------- */
+  --neutral-0: oklch(0.17 0.004 45);
+  --neutral-50: oklch(0.27 0.004 45);
+  --neutral-100: oklch(0.38 0.004 45);
+  --neutral-200: oklch(0.45 0.004 45);
+  --neutral-300: oklch(0.5 0.004 45);
+  --neutral-400: oklch(0.72 0.004 45);
+  --neutral-500: oklch(0.84 0.002 45);
+  --neutral-600: oklch(0.905 0.002 45);
+  --neutral-700: oklch(0.94 0.002 45);
+  --neutral-800: oklch(0.962 0.002 45);
+  --neutral-900: oklch(0.98 0.002 45);
+  --neutral-950: oklch(0.99 0.002 45);
+
+  /* ---------- Semantic roles: light (elevation steps down) ---------- */
+  --surface-canvas: var(--neutral-800);
+  --surface-default: var(--neutral-700);
+  --surface-raised: var(--neutral-600);
+  --surface-row-hover: var(--neutral-600);
+  --text-primary: var(--neutral-0);
+  --text-reading: var(--neutral-100);
+  --text-muted: var(--neutral-300);
+  --text-action: var(--action-700);
+  --text-on-action: var(--neutral-0);
+  --focus-ring: var(--action-700);
+  --surface-action-tint: var(--action-50);
+  --line-default: color-mix(in oklch, var(--text-primary) 10%, transparent);
+  --line-strong: color-mix(in oklch, var(--text-primary) 18%, transparent);
+
+  /* ---------- Component token mappings: light ---------- */
+  --background: var(--surface-canvas);
+  --foreground: var(--text-primary);
+  --card: var(--surface-default);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-default);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--action-default);
+  --primary-foreground: var(--text-on-action);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--surface-raised);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--status-error-strong);
+  --border: var(--line-default);
+  --input: var(--line-default);
+  --ring: var(--focus-ring);
+  --code: var(--surface-default);
+  --code-foreground: var(--text-primary);
+  --preview: var(--surface-default);
+  --preview-foreground: var(--text-primary);
+  --code-highlight: var(--surface-raised);
+  --code-number: color-mix(in oklch, var(--text-muted) 70%, transparent);
+  --chart-1: var(--action-default);
+  --chart-2: var(--neutral-0);
+  --chart-3: var(--neutral-300);
+  --chart-4: var(--neutral-500);
+  --chart-5: var(--neutral-100);
+  --sidebar: var(--surface-default);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--text-primary);
+  --sidebar-primary-foreground: var(--surface-canvas);
+  --sidebar-accent: var(--surface-raised);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--line-default);
+  --sidebar-ring: var(--focus-ring);
+
+  /* Status text deepens for AA on paper; tints go pale. */
+  --status-error: var(--status-error-strong);
+  --status-success: var(--status-success-strong);
+  --status-warning: var(--status-warning-strong);
+  --status-info: var(--status-info-strong);
+  --status-tip: var(--status-tip-strong);
+  --status-error-tint: oklch(0.95 0.02 22);
+  --status-success-tint: oklch(0.95 0.02 142);
+  --status-warning-tint: oklch(0.95 0.02 78);
+  --status-info-tint: oklch(0.95 0.02 235);
+  --status-tip-tint: oklch(0.95 0.02 290);
+
+  color-scheme: light;
+}

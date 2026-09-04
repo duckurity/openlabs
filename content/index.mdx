@@ -1,0 +1,32 @@
+---
+title: Open source security labs
+description: Run a real service. Find the flag. Verify the solve.
+---
+
+Openlabs ships self-contained security labs. Each lab runs in Docker. Each lab hides one flag.
+
+## Start here
+
+Clone the repo:
+
+```bash
+git clone https://github.com/Duckurity/openlabs
+```
+
+Start the first lab:
+
+```bash
+cd openlabs/labs/web/duck-cross
+docker compose up -d
+```
+
+Open `http://localhost:8377` in your browser. Read the brief. Find the flag.
+
+Return to the repo root to verify the solve:
+
+```bash
+cd openlabs
+python3 scripts/check.py labs/web/duck-cross
+```
+
+Browse the [labs](/labs) to pick a target. Read [how to play](/play) for the full loop. Read the [rules](/rules) before you publish a writeup.

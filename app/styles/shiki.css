@@ -1,0 +1,124 @@
+/* Shiki code block styles */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+}
+
+.shiki,
+.shiki span {
+  background-color: transparent !important;
+}
+
+/* MDX-rendered code blocks (via rehype-pretty-code) */
+[data-rehype-pretty-code-figure] {
+  background-color: var(--color-code);
+  color: var(--color-code-foreground);
+  overflow: hidden;
+  font-size: var(--text-sm);
+  outline: none;
+  position: relative;
+}
+
+[data-rehype-pretty-code-figure] pre {
+  color: var(--color-code-foreground);
+}
+
+@media (pointer: coarse) {
+  [data-rehype-pretty-code-figure] pre {
+    overscroll-behavior-x: none;
+  }
+}
+
+[data-rehype-pretty-code-figure] [data-slot='copy-button'] {
+  @apply bg-accent/70;
+}
+
+[data-rehype-pretty-code-title] {
+  height: calc(var(--spacing) * 11);
+  padding-inline: calc(var(--spacing) * 3);
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: color-mix(in oklab, var(--color-code-foreground) 50%, transparent);
+  line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-bottom: theme('spacing.1') solid var(--color-background);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Internal line/syntax styles */
+[data-line-numbers] {
+  display: grid;
+  min-width: 100%;
+  white-space: pre;
+  background: transparent;
+  padding: 0;
+  counter-reset: line;
+  box-decoration-break: clone;
+}
+
+[data-line-numbers] [data-line]::before {
+  font-size: var(--text-sm);
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: calc(var(--spacing) * 16);
+  padding-right: calc(var(--spacing) * 6);
+  text-align: right;
+  color: var(--color-code-number);
+  background-color: var(--color-code);
+  position: sticky;
+  left: 0;
+}
+
+[data-line-numbers] [data-highlighted-line][data-line]::before {
+  background-color: var(--color-code-highlight);
+}
+
+[data-line] {
+  --line-height: 1.9;
+  --code-line-height: calc(1em * var(--line-height));
+
+  width: 100%;
+  display: inline-block;
+  line-height: var(--line-height);
+  padding-right: calc(var(--spacing) * 4);
+}
+
+[data-line] span {
+  color: var(--shiki-light);
+
+  @variant dark {
+    color: var(--shiki-dark);
+  }
+}
+
+[data-highlighted-line],
+[data-highlighted-chars] {
+  position: relative;
+  background-color: var(--color-code-highlight);
+}
+
+[data-highlighted-line]:after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  content: '';
+  background-color: color-mix(
+    in oklab,
+    var(--muted-foreground) 50%,
+    transparent
+  );
+}
+
+[data-highlighted-chars] {
+  padding-inline: 0.3rem;
+  padding-block: 0.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}

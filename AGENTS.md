@@ -24,11 +24,13 @@ verifies a player's flag against the stored SHA-256 hash.
 | `scripts/test_brand.sh` | integration-test the brand pipeline in a temp clone |
 | `BRAND.md` | color, type, badge, and pipeline reference |
 | `scripts/sync_wiki.py` | asset version bumps and wiki repo sync, zero dependencies |
+| `scripts/sync_site_content.py` | generates `content/labs/` from `labs/`; zero dependencies |
 | `.github/assets/fonts/` | vendored Funnel Display cuts, SIL OFL 1.1 |
 | `wiki/` | GitHub wiki source: player, authoring, and review guides |
-| `site/` | Astro library site, deployed to GitHub Pages; content in `src/content/labs/` mirrors `labs/` briefs |
-| `site/src/styles/tokens.css` | design tokens: palette, type, spacing, motion; edit here, never hardcode values in components |
-| `.github/workflows/site.yml` | builds `site/` and deploys to Pages on `main` |
+| `app/`, `components/`, `content/`, `lib/`, `hooks/` | Next.js library site at the repo root, deployed to GitHub Pages |
+| `content/labs/` | generated from `labs/` by `scripts/sync_site_content.py`; never edited by hand |
+| `app/styles/theming.css` | design tokens: palette, type, radius; edit here, never hardcode values in components |
+| `.github/workflows/site.yml` | syncs content, builds the site, and deploys to Pages on `main` |
 | `.github/workflows/labs.yml` | CI, runs the validator on labs and scripts changes |
 | `.github/workflows/brand.yml` | regenerates badges, bumps asset versions, syncs the wiki |
 
@@ -62,8 +64,10 @@ python3 scripts/make_lab_pdf.py --all --strict   # rebuild every lab sheet pdf
 python3 scripts/sync_wiki.py bump        # hash-stamp asset refs (?v=)
 python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo
 bash scripts/test_brand.sh               # integration-test the brand pipeline
-npm --prefix site run build             # build the library site
-npm --prefix site run dev               # serve the site locally
+python3 scripts/sync_site_content.py      # regenerate content/labs/ from labs/
+python3 scripts/sync_site_content.py --check  # fail on drift, runs in CI
+pnpm run build                            # build the library site
+pnpm run dev                              # serve the site locally
 ```
 
 CI runs the badge regeneration, version bumps, and wiki sync on every push

@@ -38,7 +38,7 @@ cd openlabs/labs/web/duck-cross
 docker compose up -d
 ```
 
-Open `http://localhost:8080`, work the brief until the flag turns up, then
+Open `http://localhost:8377`, work the brief until the flag turns up, then
 check the solve:
 
 ```bash
@@ -181,8 +181,8 @@ Details in [SECURITY.md](SECURITY.md).
   </a>
 </p>
 
-[^1]: If port `8080` is taken on your machine, edit the host side of the
-mapping in `docker-compose.yml`. The container port stays `8080`.
+[^1]: If port `8377` is taken on your machine, edit the host side of the
+mapping in `docker-compose.yml`. The container port stays `8377`.
 
 [^2]: `flag_hash` is the SHA-256 of the full flag string, braces included:
 `printf '%s' 'duck{...}' | sha256sum`. Plaintext flags live only inside lab

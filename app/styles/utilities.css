@@ -1,0 +1,134 @@
+@variant has-touch-screen {
+  @media (pointer: coarse) {
+    @slot;
+  }
+}
+
+/* ============================================================
+   Canonical interaction utilities (motion recipes).
+   Theme-invariant. Every recipe ships its reduced-motion guard.
+   ============================================================ */
+
+/* A2 — Focus. 2px accent outline + 2px offset, instant, never a glow. */
+.focus-ring:focus:not(:focus-visible) {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* A5 — Icon swap. Two stacked icons crossfade; the entering icon
+   pops from scale 0.25 with a 4px blur resolve. */
+.icon-swap {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+.icon-swap > * {
+  grid-area: 1 / 1;
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out),
+    filter var(--duration-normal) var(--ease-out);
+}
+.icon-swap [data-icon='on'] {
+  opacity: 0;
+  transform: scale(var(--motion-icon-in-scale));
+  filter: blur(var(--motion-icon-in-blur));
+}
+.icon-swap.is-on [data-icon='off'],
+.icon-swap[data-on] [data-icon='off'] {
+  opacity: 0;
+  transform: scale(var(--motion-icon-in-scale));
+  filter: blur(var(--motion-icon-in-blur));
+}
+.icon-swap.is-on [data-icon='on'],
+.icon-swap[data-on] [data-icon='on'] {
+  opacity: 1;
+  transform: scale(1);
+  filter: none;
+}
+
+/* Type companion: tabular numbers for ports, counts, timers. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Frame grammar: notch = primary surface (one per region). */
+.notch {
+  clip-path: polygon(
+    0 calc(var(--frame-notch-step) * 2),
+    var(--frame-notch-step) calc(var(--frame-notch-step) * 2),
+    var(--frame-notch-step) var(--frame-notch-step),
+    calc(var(--frame-notch-step) * 2) var(--frame-notch-step),
+    calc(var(--frame-notch-step) * 2) 0,
+    100% 0, 100% 100%, 0 100%
+  );
+}
+
+/* Frame grammar: hatch = void (never animated, never on interactive). */
+.hatch {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--line-default) 0,
+    var(--line-default) 1px,
+    transparent 1px,
+    transparent var(--frame-hatch-period)
+  );
+}
+
+/* Frame grammar: readout = facts in mono micro-labels. */
+.readout {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Mount entrance. One-shot resolve for conditionally rendered
+   surfaces (TOC popover, search swaps): fade + 4px rise + blur. */
+.mount-enter {
+  opacity: 1;
+  transform: translateY(0);
+  filter: none;
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out),
+    filter var(--duration-normal) var(--ease-out);
+}
+.mount-enter {
+  @starting-style {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(4px);
+  }
+}
+
+/* Anchored headings clear floating chrome. */
+[id] {
+  scroll-margin-top: 1rem;
+}
+
+/* Theme flip: disable transitions so light/dark never smears. */
+.theme-flip,
+.theme-flip *,
+.theme-flip *::before,
+.theme-flip *::after {
+  transition: none !important;
+}
+
+/* Reduced motion: less trip, same information. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-slot='button']:active {
+    transform: none;
+  }
+}

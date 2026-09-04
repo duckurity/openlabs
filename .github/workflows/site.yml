@@ -4,9 +4,19 @@ on:
   push:
     branches: [main]
     paths:
-      - "site/**"
+      - "app/**"
+      - "components/**"
+      - "content/**"
+      - "hooks/**"
+      - "lib/**"
+      - "public/**"
       - "labs/**/lab.yml"
       - "labs/**/README.md"
+      - "scripts/sync_site_content.py"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "next.config.ts"
+      - "source.config.ts"
       - ".github/workflows/site.yml"
   workflow_dispatch:
 
@@ -23,27 +33,30 @@ jobs:
   build:
     name: Build site
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: site
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
 
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: site/package-lock.json
+          cache: pnpm
+
+      - name: Sync lab content
+        run: python3 scripts/sync_site_content.py --check
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site/dist
+          path: out
 
   deploy:
     name: Deploy to Pages

@@ -4,7 +4,7 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-PORT = 8080
+PORT = 8377
 REPORTS = json.loads((Path(__file__).parent / "data" / "reports.json").read_text(encoding="utf-8"))
 
 PAGE = """<!doctype html>

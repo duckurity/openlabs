@@ -16,9 +16,10 @@
 2. Open the service in your browser and work the brief. The brief under the
    lab directory states the setup and the goal.
 
-3. Check the solve.
+3. Return to the repo root. Check the solve.
 
    ```bash
+   cd openlabs
    python3 scripts/check.py labs/web/duck-cross
    ```
 
@@ -43,8 +44,9 @@ learn the loop, then move up.
 
 ## Ports
 
-The default host port is `8080`. If it is taken, edit the host side of the
-mapping in `docker-compose.yml`. The container port stays `8080`.
+Each lab documents one host port in its brief. `duck-cross` serves
+`http://localhost:8377`. If a host port is taken, edit the host side of the
+mapping in `docker-compose.yml`. The container port stays fixed.
 
 ## Shift the difficulty
 
