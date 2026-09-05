@@ -1,32 +1,43 @@
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { LabGrid } from '@/components/lab/lab-grid'
+import sponsorData from '@/lib/sponsors.json'
 
 const SPONSORS_URL = 'https://github.com/sponsors/Duckurity'
 
-/* Sponsor wall. Four slots max. Duckurity ships first. Add a
-   row to join the wall. Empty slots stay dashed placeholders. */
-const SPONSORS = [
-  {
-    name: 'Duckurity',
-    caption: 'Sponsor',
-    url: 'https://github.com/Duckurity',
-    logo: 'https://github.com/duckurity.png?s=128',
-  },
-]
+type Sponsor = {
+  login: string
+  name: string
+  url: string
+  avatar: string
+}
+
+/* Sponsor wall. Four slots max. The maintainer tile ships first.
+   External sponsors append from the generated wall data, refreshed
+   weekly by the sponsors workflow. Placeholders fill the row. */
+const MAINTAINER: Sponsor = {
+  login: 'Duckurity',
+  name: 'Duckurity',
+  url: 'https://github.com/Duckurity',
+  avatar: 'https://github.com/duckurity.png?s=128',
+}
 const MAX_SPONSORS = 4
+
+const SPONSORS: Sponsor[] = [
+  MAINTAINER,
+  ...((sponsorData.manual ?? []) as Sponsor[]),
+  ...((sponsorData.sponsors ?? []) as Sponsor[]),
+]
 
 /* One sponsor logo tile. Logo left, mono name and caption right. */
 function SponsorTile({
   name,
-  caption,
   url,
-  logo,
+  avatar,
 }: {
   name: string
-  caption: string
   url: string
-  logo: string
+  avatar: string
 }) {
   return (
     <a
@@ -37,13 +48,13 @@ function SponsorTile({
       className="focus-ring group bg-card group-hover:bg-accent/50 flex h-full items-center gap-3 px-4 py-3 transition-[color,background-color,border-color] duration-[var(--duration-normal)] ease-[var(--ease-out)]"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={logo} alt="" loading="eager" className="size-10 shrink-0" />
+      <img src={avatar} alt="" loading="eager" className="size-10 shrink-0" />
       <span className="flex min-w-0 flex-col gap-1">
         <span className="text-card-foreground truncate font-mono text-sm font-medium tracking-wide">
           {name}
         </span>
         <span className="text-muted-foreground font-mono text-xs tracking-wide">
-          {caption}
+          Sponsor
         </span>
       </span>
     </a>
@@ -132,10 +143,15 @@ export function SponsorSection() {
       <p className="readout mb-2">Sponsors</p>
       <LabGrid className="grid-cols-2 sm:grid-cols-4">
         {SPONSORS.map((sponsor) => (
-          <SponsorTile key={sponsor.name} {...sponsor} />
+          <SponsorTile
+            key={sponsor.login}
+            name={sponsor.name}
+            url={sponsor.url}
+            avatar={sponsor.avatar}
+          />
         ))}
         {Array.from(
-          { length: MAX_SPONSORS - SPONSORS.length },
+          { length: Math.max(0, MAX_SPONSORS - SPONSORS.length) },
           (_, i) => i
         ).map((i) => (
           <SponsorPlaceholder key={`slot-${i}`} />

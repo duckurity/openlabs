@@ -87,6 +87,13 @@ repo and cannot reach the wiki. Without the secret, CI skips the push
 and exits clean; run `sync_wiki.py wiki` from a workstation to push
 with local git credentials.
 
+The sponsors workflow reads the `SPONSORS_TOKEN` repository secret. A
+classic PAT with `read:user` and `read:org`, owned by an organization
+owner, works; `GITHUB_TOKEN` cannot read sponsor data. Without the
+secret, the workflow exits clean and the checked-in wall stands.
+Never hand-edit `lib/sponsors.json`, except the `manual` key which
+holds curated brand-deal sponsors; run `sync_sponsors.py`.
+
 <!-- contentbit:start -->
 
 ## contentbit content (generated — edits inside this block are overwritten)
