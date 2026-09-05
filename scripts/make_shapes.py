@@ -3,9 +3,9 @@
 
 Each lab gets a unique Bayer-ordered gradient derived from sha256 of its
 flag_hash (a hash of a hash reveals nothing). Ink field resolving to
-Ember at the sweep peak, on transparent ground, built for the
-DitheredObject renderer, which extrudes alpha contours and applies
-its own dither at render time.
+Ember at the sweep peak, on transparent ground. The card banner renders
+the SVG full-bleed with object-cover over a brand wash, then overlays
+the live Ember wave canvas.
 
 Deterministic: same lab.yml produces same SVG bytes. No network.
 
@@ -96,11 +96,11 @@ def seed_for(flag_hash: str, name: str) -> int:
 
 
 def compose(seed: int) -> str:
-    """Seeded dither gradient on a 16px grid: Ink field resolving to
-    Ember at the sweep peak. Transparent ground for the 3D extruder.
+    """Seeded dither gradient on an 8px grid: Ink field resolving to
+    Ember at the sweep peak. Transparent ground over the brand wash.
     Sweep runs across the width. The card banner crops vertically,
     so a vertical sweep would hide the Ember peak."""
-    return dither_dots(seed, SIZE, SIZE, angles=(0, 180))
+    return dither_dots(seed, SIZE, SIZE, cell=8.0, angles=(0, 180))
 
 
 def render(name: str, flag_hash: str) -> bytes:
