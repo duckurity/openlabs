@@ -22,12 +22,29 @@ interface ChallengeShapeProps {
  * lazily on the client only. The static shape SVG always paints
  * underneath, so server render and no-JS clients still show art;
  * the live canvas overlays it on hydrate, or the mark on failure.
+ * Keep the base wash opaque. It carries Ember across the full banner
+ * where the dither field stays sparse. Keep color in the 3D pass.
+ * Grayscale would strip the Ember peak from the shape.
  */
 export function ChallengeShape({ slug, className }: ChallengeShapeProps) {
   const [failed, setFailed] = React.useState(false)
 
   return (
-    <span className={cn('relative block overflow-hidden', className)} aria-hidden="true">
+    <span
+      className={cn(
+        'relative block overflow-hidden bg-[var(--surface-raised)]',
+        className
+      )}
+      aria-hidden="true"
+    >
+      <span
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(90deg, var(--surface-raised) 0%, color-mix(in oklch, var(--action-500) 24%, var(--surface-raised)) 100%)',
+        }}
+      />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`/shapes/${slug}.svg`}
@@ -40,7 +57,9 @@ export function ChallengeShape({ slug, className }: ChallengeShapeProps) {
           src={`/shapes/${slug}.svg`}
           method="bayer"
           gridSize={4}
-          grayscale
+          grayscale={false}
+          // Ember mirrors var(--action-500). The 3D engine needs hex.
+          highlight="#FF3616"
           orbit={false}
           zoom={false}
           autoRotate

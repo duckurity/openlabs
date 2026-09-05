@@ -46,6 +46,7 @@ def dither_dots(
     stops: tuple[tuple[float, str, float], ...] = ((0.0, INK, 1.0), (0.82, EMBER, 1.0)),
     x0: float = 0.0,
     y0: float = 0.0,
+    angles: tuple[int, ...] = (0, 45, 90, 135, 180, 225, 270, 315),
 ) -> str:
     """Bayer-ordered gradient dots. Deterministic per seed.
 
@@ -53,8 +54,9 @@ def dither_dots(
     sweep value beats the Bayer threshold. Stops map sweep ranges to
     (fill, opacity); cells below the first stop stay empty.
     """
+
     rng = random.Random(seed)
-    angle = rng.choice([0, 45, 90, 135, 180, 225, 270, 315]) * math.pi / 180
+    angle = rng.choice(list(angles)) * math.pi / 180
     dx, dy = math.cos(angle), math.sin(angle)
     corners = [(x0, y0), (x0 + w, y0), (x0, y0 + h), (x0 + w, y0 + h)]
     projs = [x * dx + y * dy for x, y in corners]
@@ -95,8 +97,10 @@ def seed_for(flag_hash: str, name: str) -> int:
 
 def compose(seed: int) -> str:
     """Seeded dither gradient on a 16px grid: Ink field resolving to
-    Ember at the sweep peak. Transparent ground for the 3D extruder."""
-    return dither_dots(seed, SIZE, SIZE)
+    Ember at the sweep peak. Transparent ground for the 3D extruder.
+    Sweep runs across the width. The card banner crops vertically,
+    so a vertical sweep would hide the Ember peak."""
+    return dither_dots(seed, SIZE, SIZE, angles=(0, 180))
 
 
 def render(name: str, flag_hash: str) -> bytes:
