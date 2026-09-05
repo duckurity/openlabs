@@ -26,6 +26,9 @@ from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from make_shapes import dither_dots
+
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 OUT = ROOT / "public" / "og"
@@ -104,67 +107,19 @@ def fit_size(font: TTFont, cmap: dict, upem: float, text: str, start: float, lim
 
 MARK = [(0, 80, WARM), (160, 80, WARM), (80, 0, WARM), (80, 160, WARM), (0, 0, EMBER)]
 
-BAYER_4 = (
-    (0, 8, 2, 10),
-    (12, 4, 14, 6),
-    (3, 11, 1, 9),
-    (15, 7, 13, 5),
-)
-
-
-def dither_field(seed: int) -> str:
-    """Ordered-dither texture for the right third. Seeded per page,
-    Ember monochrome, faint enough to sit behind type."""
-    rng = random.Random(seed)
-    cx = rng.uniform(880.0, 1080.0)
-    cy = rng.uniform(150.0, 480.0)
-    max_r = rng.uniform(280.0, 420.0)
-    cell = 10.0
-    parts: list[str] = []
-    y = 0.0
-    row = 0
-    while y < H:
-        x = 760.0
-        col = 0
-        while x < W:
-            dx, dy = x + cell / 2 - cx, y + cell / 2 - cy
-            falloff = max(0.0, 1.0 - (dx * dx + dy * dy) ** 0.5 / max_r)
-            threshold = (BAYER_4[row % 4][col % 4] + 0.5) / 16.0
-            if falloff > threshold + 0.35:
-                parts.append(
-                    f'  <rect x="{x:g}" y="{y:g}" width="{cell:g}" '
-                    f'height="{cell:g}" fill="{EMBER}" opacity="0.10"/>'
-                )
-            x += cell
-            col += 1
-        y += cell
-        row += 1
-    return "\n".join(parts)
-
-
-def hash_shapes(seed: int) -> str:
-    """Two outlined rotated squares, seeded per page, hairline Warm."""
-    rng = random.Random(seed ^ 0x9E3779B9)
-    parts: list[str] = []
-    for _ in range(2):
-        size = rng.uniform(120.0, 220.0)
-        x = rng.uniform(820.0, 1120.0 - size)
-        y = rng.uniform(60.0, 570.0 - size)
-        angle = rng.uniform(0.0, 90.0)
-        cx, cy = x + size / 2, y + size / 2
-        parts.append(
-            f'  <rect x="{x:g}" y="{y:g}" width="{size:g}" height="{size:g}" '
-            f'fill="none" stroke="{WARM}" stroke-width="2" opacity="0.12" '
-            f'transform="rotate({angle:g} {cx:g} {cy:g})"/>'
-        )
-    return "\n".join(parts)
-
-
 def render(title: str, eyebrow: str, slug: str) -> bytes:
     display, dcmap, dupem = load(DISPLAY)
     mono, mcmap, mupem = load(MONO)
 
     seed = int.from_bytes(hashlib.sha256(slug.encode("utf-8")).digest()[:8], "big")
+    sweep = dither_dots(
+        seed,
+        W - 620.0,
+        float(H),
+        cell=12.0,
+        stops=((0.30, EMBER, 0.10),),
+        x0=620.0,
+    )
     max_w = W - 420.0
     title_size = fit_size(display, dcmap, dupem, title, 88.0, max_w)
     title_d, _ = text_path(display, dcmap, dupem, title_size, title, 340.0, 360.0)
@@ -178,8 +133,7 @@ def render(title: str, eyebrow: str, slug: str) -> bytes:
         f'<svg width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
         f'fill="none" xmlns="http://www.w3.org/2000/svg">\n'
         f'  <rect width="{W}" height="{H}" fill="{INK}"/>\n'
-        f"{dither_field(seed)}\n"
-        f"{hash_shapes(seed)}\n"
+        f"{sweep}\n"
         f"{mark}\n"
         f'  <path d="{eye_d}" fill="{EMBER}"/>\n'
         f'  <path d="{title_d}" fill="{WARM}"/>\n'

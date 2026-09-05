@@ -149,6 +149,24 @@ def login_from_email(email: str) -> str:
     return ""
 
 
+def github_user(login: str, cache: dict) -> dict[str, str]:
+    """Public profile fields for a login, cached. Empty when unresolvable."""
+    key = f"user:{login.lower()}"
+    entry = cache.get(key)
+    if entry and time.time() - entry.get("ts", 0) < GITHUB_TTL:
+        return entry
+    profile: dict[str, str] = {}
+    data = github_api(f"/users/{login}")
+    if isinstance(data, dict):
+        if isinstance(data.get("name"), str) and data["name"].strip():
+            profile["name"] = data["name"].strip()
+        if isinstance(data.get("avatar_url"), str):
+            profile["avatar"] = data["avatar_url"]
+    if profile:
+        cache[key] = {**profile, "ts": time.time()}
+    return profile
+
+
 def commit_login(owner_repo: str, sha: str, cache: dict) -> str:
     """GitHub login for a commit sha, cached. Empty when unresolvable."""
     key = f"commit:{sha}"
@@ -235,8 +253,10 @@ def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
         creator["author_date"] = date.strip()
     login = login_from_email(email.strip()) or commit_login(owner_repo, sha.strip(), cache)
     if login:
+        profile = github_user(login, cache)
+        creator["author_name"] = profile.get("name", login)
         creator["author_url"] = f"https://github.com/{login}"
-        creator["author_avatar"] = f"https://github.com/{login}.png"
+        creator["author_avatar"] = profile.get("avatar", f"https://github.com/{login}.png")
     else:
         creator["author_url"] = (
             f"https://github.com/{owner_repo}/commits/main/{lab_rel}"
@@ -246,10 +266,11 @@ def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     pr = introducing_pr(owner_repo, lab_rel, cache)
     merger = pr.get("merger", "")
     if merger and merger != login:
+        profile = github_user(merger, cache)
         verifier = {
-            "verifier_name": merger,
+            "verifier_name": profile.get("name", merger),
             "verifier_url": f"https://github.com/{merger}",
-            "verifier_avatar": f"https://github.com/{merger}.png",
+            "verifier_avatar": profile.get("avatar", f"https://github.com/{merger}.png"),
         }
 
     github_cache_save(cache)
