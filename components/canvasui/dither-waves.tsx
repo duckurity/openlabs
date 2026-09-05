@@ -248,7 +248,8 @@ export function DitherWaves({
 
       let loopOn = false;
       let signalled = false;
-      const clock = new THREE.Clock();
+      const timer = new THREE.Timer();
+      timer.connect(document);
 
       const renderAt = (time: number) => {
         uniforms.uTime.value = time;
@@ -262,9 +263,9 @@ export function DitherWaves({
         if (on === loopOn || disposed) return;
         loopOn = on;
         if (on) {
-          clock.start();
           renderer.setAnimationLoop(() => {
-            renderAt(clock.getElapsedTime());
+            timer.update();
+            renderAt(timer.getElapsed());
           });
         } else {
           renderer.setAnimationLoop(null);
@@ -281,6 +282,7 @@ export function DitherWaves({
         dispose: () => {
           setLoop(false);
           sizeObserver.disconnect();
+          timer.dispose();
           geometry.dispose();
           material.dispose();
           renderer.dispose();
