@@ -36,9 +36,10 @@ FONTS = ROOT / ".github" / "assets" / "fonts"
 
 W, H = 1200, 630
 INK = "#1E1E1E"
-WARM = "#F2F2F0"
-MUTED = "#A8A29E"
+WARM = "#F4F2F1"
 EMBER = "#FF3616"
+MARGIN = 96
+TEXT_X = 384
 
 DISPLAY = FONTS / "FunnelDisplay-Bold.otf"
 MONO = FONTS / "GeistMono-Regular.otf"
@@ -114,16 +115,15 @@ def render(title: str, eyebrow: str, slug: str) -> bytes:
     seed = int.from_bytes(hashlib.sha256(slug.encode("utf-8")).digest()[:8], "big")
     sweep = dither_dots(
         seed,
-        W - 620.0,
+        float(W),
         float(H),
         cell=12.0,
-        stops=((0.30, EMBER, 0.10),),
-        x0=620.0,
+        stops=((0.30, EMBER, 0.08), (0.70, EMBER, 0.22)),
     )
-    max_w = W - 420.0
+    max_w = W - TEXT_X - MARGIN
     title_size = fit_size(display, dcmap, dupem, title, 88.0, max_w)
-    title_d, _ = text_path(display, dcmap, dupem, title_size, title, 340.0, 360.0)
-    eye_d, _ = text_path(mono, mcmap, mupem, 28.0, eyebrow, 342.0, 270.0)
+    title_d, _ = text_path(display, dcmap, dupem, title_size, title, float(TEXT_X), 360.0)
+    eye_d, _ = text_path(mono, mcmap, mupem, 28.0, eyebrow, float(TEXT_X), 270.0)
 
     mark = "\n".join(
         f'  <rect x="{96 + x}" y="{235 + y}" width="80" height="80" fill="{fill}"/>'
