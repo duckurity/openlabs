@@ -127,11 +127,14 @@ export interface DitherWavesProps {
   className?: string;
   style?: React.CSSProperties;
   onError?: (error: unknown) => void;
+  /** Fires once after the first frame paints. Fade in on this. */
+  onReady?: () => void;
 }
 
 /**
  * Fullscreen Ember wave field with Bayer dither. Renders opaque and
- * fills its host. Freezes on reduced motion. Stops offscreen.
+ * fills its host. Initializes on first visibility. Freezes on
+ * reduced motion.
  */
 export function DitherWaves({
   waveColor = EMBER,
@@ -146,11 +149,15 @@ export function DitherWaves({
   className,
   style,
   onError,
+  onReady,
 }: DitherWavesProps) {
   const hostRef = React.useRef<HTMLDivElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const errorRef = React.useRef(onError);
   errorRef.current = onError;
+  const readyRef = React.useRef(onReady);
+  readyRef.current = onReady;
+  // Snapshot props on mount. Later updates are ignored; banner props never change.
   const [initial] = React.useState(() => ({
     waveColor,
     backgroundColor,
@@ -168,34 +175,43 @@ export function DitherWaves({
     const canvas = canvasRef.current;
     if (!host || !canvas) return;
 
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: false,
-        alpha: false,
-        powerPreference: 'low-power',
-      });
-    } catch (error) {
-      errorRef.current?.(error);
-      return;
-    }
-    renderer.setPixelRatio(1);
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let disposed = false;
+    let api: {
+      setLoop: (on: boolean) => void;
+      renderStatic: () => void;
+      dispose: () => void;
+    } | null = null;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(
-        new Float32Array([-1, -1, 0, 3, -1, 0, -1, 3, 0]),
-        3
-      )
-    );
-    const material = new THREE.ShaderMaterial({
-      vertexShader: VERT,
-      fragmentShader: FRAG,
-      uniforms: {
+    const frozen = () =>
+      initial.disableAnimation || motionQuery.matches;
+
+    const initGL = () => {
+      let renderer: THREE.WebGLRenderer;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: false,
+          alpha: false,
+          powerPreference: 'low-power',
+        });
+      } catch (error) {
+        errorRef.current?.(error);
+        return null;
+      }
+      renderer.setPixelRatio(1);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute(
+        'position',
+        new THREE.BufferAttribute(
+          new Float32Array([-1, -1, 0, 3, -1, 0, -1, 3, 0]),
+          3
+        )
+      );
+      const uniforms: Record<string, THREE.IUniform> = {
         uResolution: { value: new THREE.Vector2(1, 1) },
         uTime: { value: 0 },
         uSeed: { value: initial.seed },
@@ -208,89 +224,102 @@ export function DitherWaves({
         },
         uColorNum: { value: initial.colorNum },
         uPixelSize: { value: initial.pixelSize },
-      },
-      depthTest: false,
-      depthWrite: false,
-    });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.frustumCulled = false;
-    scene.add(mesh);
-
-    const resize = () => {
-      const width = Math.max(host.clientWidth, 1);
-      const height = Math.max(host.clientHeight, 1);
-      renderer.setSize(width, height, false);
-      const resolution = material.uniforms.uResolution
-        .value as THREE.Vector2;
-      resolution.set(width, height);
-    };
-    resize();
-
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let disposed = false;
-    let running = false;
-    const clock = new THREE.Clock();
-
-    const renderAt = (time: number) => {
-      (material.uniforms.uTime.value as number) = time;
-      renderer.render(scene, camera);
-    };
-
-    const start = () => {
-      if (running || disposed) return;
-      running = true;
-      clock.start();
-      renderer.setAnimationLoop(() => {
-        renderAt(clock.getElapsedTime());
+      };
+      const material = new THREE.ShaderMaterial({
+        vertexShader: VERT,
+        fragmentShader: FRAG,
+        uniforms,
+        depthTest: false,
+        depthWrite: false,
       });
-    };
-    const stop = () => {
-      if (!running) return;
-      running = false;
-      renderer.setAnimationLoop(null);
-    };
-    const renderStatic = () => {
-      stop();
-      if (!disposed) renderAt(0);
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.frustumCulled = false;
+      scene.add(mesh);
+
+      const resize = () => {
+        const width = Math.max(host.clientWidth, 1);
+        const height = Math.max(host.clientHeight, 1);
+        renderer.setSize(width, height, false);
+        uniforms.uResolution.value.set(width, height);
+      };
+      resize();
+      const sizeObserver = new ResizeObserver(resize);
+      sizeObserver.observe(host);
+
+      let loopOn = false;
+      let signalled = false;
+      const clock = new THREE.Clock();
+
+      const renderAt = (time: number) => {
+        uniforms.uTime.value = time;
+        renderer.render(scene, camera);
+        if (!signalled) {
+          signalled = true;
+          readyRef.current?.();
+        }
+      };
+      const setLoop = (on: boolean) => {
+        if (on === loopOn || disposed) return;
+        loopOn = on;
+        if (on) {
+          clock.start();
+          renderer.setAnimationLoop(() => {
+            renderAt(clock.getElapsedTime());
+          });
+        } else {
+          renderer.setAnimationLoop(null);
+        }
+      };
+      const renderStatic = () => {
+        setLoop(false);
+        if (!disposed) renderAt(0);
+      };
+
+      return {
+        setLoop,
+        renderStatic,
+        dispose: () => {
+          setLoop(false);
+          sizeObserver.disconnect();
+          geometry.dispose();
+          material.dispose();
+          renderer.dispose();
+        },
+      };
     };
 
-    const frozen = () =>
-      initial.disableAnimation || motionQuery.matches;
-    const onMotionChange = () => {
-      if (frozen()) renderStatic();
-      else if (inView) start();
+    const applyMotion = () => {
+      if (!api || disposed) return;
+      if (frozen()) api.renderStatic();
+      else api.setLoop(true);
     };
+    const onMotionChange = () => applyMotion();
     motionQuery.addEventListener('change', onMotionChange);
 
-    let inView = true;
-    const viewObserver =
-      typeof IntersectionObserver !== 'undefined'
-        ? new IntersectionObserver((entries) => {
-            inView = entries[entries.length - 1]?.isIntersecting ?? true;
-            if (!inView) {
-              stop();
-            } else if (!frozen()) {
-              start();
-            }
-          })
-        : null;
-    viewObserver?.observe(host);
+    const reveal = () => {
+      if (disposed) return;
+      if (!api) api = initGL();
+      applyMotion();
+    };
 
-    const sizeObserver = new ResizeObserver(resize);
-    sizeObserver.observe(host);
-
-    if (frozen()) renderStatic();
-    else start();
+    let viewObserver: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver === 'undefined') {
+      reveal();
+    } else {
+      viewObserver = new IntersectionObserver((entries) => {
+        if (entries[entries.length - 1]?.isIntersecting ?? true) {
+          viewObserver?.disconnect();
+          reveal();
+        }
+      });
+      viewObserver.observe(host);
+    }
 
     return () => {
-      disposed = true;
-      stop();
-      sizeObserver.disconnect();
       viewObserver?.disconnect();
       motionQuery.removeEventListener('change', onMotionChange);
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
+      api?.dispose();
+      disposed = true;
     };
   }, [initial]);
 

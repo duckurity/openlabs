@@ -30,13 +30,17 @@ function seedFromSlug(slug: string): number {
 /**
  * Full-bleed dither art, unique per challenge. Paint the seeded
  * shape SVG underneath, so server render and no-JS clients still
- * show art. Overlay the live Ember wave field on hydrate.
- * Keep the base wash opaque. It carries Ember across the full
- * measure where the dither field stays sparse.
+ * show art. Overlay the live Ember wave field on hydrate and
+ * fade it in on its first frame. Keep the base wash opaque. It
+ * carries Ember across the full measure where the dither field
+ * stays sparse. Float the mark over the field with luminosity
+ * blend, so the glyph borrows the wave hue and sits inside the
+ * art instead of stamping over it.
  */
 export function ChallengeShape({ slug, className }: ChallengeShapeProps) {
   const [imgFailed, setImgFailed] = React.useState(false)
   const [glFailed, setGlFailed] = React.useState(false)
+  const [ready, setReady] = React.useState(false)
 
   return (
     <span
@@ -59,7 +63,7 @@ export function ChallengeShape({ slug, className }: ChallengeShapeProps) {
         <img
           src={`/shapes/${slug}.svg`}
           alt=""
-          loading="lazy"
+          loading="eager"
           onError={() => setImgFailed(true)}
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -71,9 +75,18 @@ export function ChallengeShape({ slug, className }: ChallengeShapeProps) {
       {!glFailed && !imgFailed && (
         <DitherWaves
           seed={seedFromSlug(slug)}
-          className="absolute inset-0 h-full w-full"
+          className={cn(
+            'absolute inset-0 h-full w-full transition-opacity duration-[var(--duration-slow)] ease-[var(--ease-out)]',
+            ready ? 'opacity-100' : 'opacity-0'
+          )}
           onError={() => setGlFailed(true)}
+          onReady={() => setReady(true)}
         />
+      )}
+      {!imgFailed && (
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[var(--neutral-950)] mix-blend-luminosity">
+          <Logo className="size-8" />
+        </span>
       )}
     </span>
   )
