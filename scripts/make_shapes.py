@@ -103,6 +103,7 @@ def render(name: str, flag_hash: str) -> bytes:
     shapes = compose(seed_for(flag_hash, name))
     svg = (
         f'<svg width="{SIZE}" height="{SIZE}" viewBox="0 0 {SIZE} {SIZE}" '
+        f'preserveAspectRatio="xMidYMid slice" '
         f'fill="none" xmlns="http://www.w3.org/2000/svg">\n'
         f"{shapes}\n</svg>\n"
     )

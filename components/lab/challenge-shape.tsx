@@ -33,7 +33,7 @@ export function ChallengeShape({ slug, className }: ChallengeShapeProps) {
         src={`/shapes/${slug}.svg`}
         alt=""
         loading="lazy"
-        className="absolute inset-0 h-full w-full"
+        className="absolute inset-0 h-full w-full object-cover"
       />
       {!failed ? (
         <DitheredObject
