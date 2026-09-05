@@ -32,7 +32,7 @@ export function LabCard({
   return (
     <Link
       href={href}
-      className="focus-ring group relative flex flex-col gap-1 overflow-hidden transition-[color,background-color,border-color,transform] duration-[var(--duration-fast)] ease-[var(--ease-out)] active:scale-[0.98] active:duration-[var(--duration-instant)] has-touch-screen:active:scale-[0.99]"
+      className="focus-ring group relative flex h-full flex-col gap-1 overflow-hidden transition-[color,background-color,border-color,transform] duration-[var(--duration-fast)] ease-[var(--ease-out)] active:scale-[0.98] active:duration-[var(--duration-instant)] has-touch-screen:active:scale-[0.99]"
     >
       <div className="bg-card relative h-24 overflow-hidden">
         <ChallengeShape slug={slug} className="absolute inset-0 h-full w-full" />

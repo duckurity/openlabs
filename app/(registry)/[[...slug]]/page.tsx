@@ -29,6 +29,7 @@ import { PageGithubLinkButton } from '@/components/page-github-link-button'
 import { PageActions } from '@/components/layout/page-actions'
 import { LabList } from '@/components/lab/lab-list'
 import { LabGrid, LabCards } from '@/components/lab/lab-grid'
+import { SponsorSection } from '@/components/lab/sponsor-section'
 import { LabCreator } from '@/components/lab/lab-creator'
 import { StatusIndicator } from '@/components/status-indicator'
 import { CopyButton } from '@/components/copy-button'
@@ -296,6 +297,8 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             <LabCards labs={getLabs().map(toLabCardData)} />
           </LabGrid>
         )}
+
+        {isHome && <SponsorSection />}
 
         {related.length > 0 && (
           <div className="mt-16">
