@@ -2,14 +2,16 @@
  * Link button showing a GitHub repo's star count.
  *
  * Async server component. The count is fetched at build time, so it
- * refreshes on every deploy. Renders the link without a count when
+ * refreshes on every deploy. The client island revalidates live on
+ * mount and swaps on success. Renders the link without a count when
  * the API is unreachable.
  */
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 import GithubIcon from '@/components/icons/github'
-import { fetchGitHubRepo, formatCount } from '@/lib/github'
+import { fetchGitHubRepo } from '@/lib/github'
+import { LiveStarCount } from '@/components/github-stars-count'
 
 interface GitHubStarsButtonProps extends Omit<React.ComponentProps<'a'>, 'children'> {
   owner: string
@@ -50,14 +52,12 @@ async function GitHubStarsButton({
     >
       <GithubIcon className="shrink-0" />
       {showRepo && <span className="max-w-[12rem] truncate">{fullName}</span>}
-      {stars !== null && (
-        <>
-          {showRepo && (
-            <span className="h-3.5 w-px shrink-0 bg-border" aria-hidden="true" />
-          )}
-          <span className="tnum">{formatCount(stars)}</span>
-        </>
-      )}
+      <LiveStarCount
+        owner={owner}
+        repo={repo}
+        initial={stars}
+        showDivider={showRepo}
+      />
     </a>
   )
 }
