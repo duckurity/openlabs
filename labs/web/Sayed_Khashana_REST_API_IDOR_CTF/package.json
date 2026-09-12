@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "northstar-document-hub-ctf",
   "version": "1.0.0",
   "private": true,
@@ -9,8 +9,6 @@
     "audit": "node tests/integrity-audit.js"
   },
   "engines": {
-    "node": "22.x"
+    "node": ">=20"
   }
 }
-
-
