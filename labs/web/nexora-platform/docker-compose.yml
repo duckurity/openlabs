@@ -1,26 +1,31 @@
 services:
   web:
     build: ./web
+    restart: "no"
     ports: ["8080:8080"]
     depends_on: [dns, oast, internal, metadata]
     networks:
       ctfnet: {ipv4_address: 172.28.0.20}
   oast:
     build: ./oast
+    restart: "no"
     ports: ["8081:80"]
     networks:
       ctfnet: {ipv4_address: 172.28.0.11}
   dns:
     build: ./dns
+    restart: "no"
     depends_on: [oast]
     networks:
       ctfnet: {ipv4_address: 172.28.0.53}
   metadata:
     build: ./metadata
+    restart: "no"
     networks:
       ctfnet: {ipv4_address: 172.28.0.10}
   internal:
     build: ./internal
+    restart: "no"
     networks:
       ctfnet: {ipv4_address: 172.28.0.12}
 networks:

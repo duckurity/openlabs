@@ -1,7 +1,7 @@
-name: nexora_platform
+name: nexora-platform
 track: web
 difficulty: medium
 description: Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, OAST, internal reconnaissance, and DNS rebinding to bypass hostname validation and reach internal infrastructure.
 flag_hash: 99409cf1999e7720fdee46c9fe023cf27d16e3144f72be52baa056e3eafbd9d0
 # techniques exercised, as a bracket list of content/technique slugs.
-# techniques: [idor]
+techniques: [ssrf]
