@@ -3,3 +3,4 @@ track: web
 difficulty: hard
 description: A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.
 flag_hash: 232d38d5d8669c81d44b3e6e879b37ec7e19f6285682ce88783160437483c784
+techniques: [ssrf, auth-bypass]
