@@ -74,11 +74,11 @@ RUN chmod 0755 /usr/local/bin/entrypoint.sh \
 
 USER ctf:ctf
 
-EXPOSE 8000
+EXPOSE 1000
 
 # Independent of business logic so a broken challenge route still
 # reports lifecycle status accurately.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -fsS http://127.0.0.1:8000/api/v1/health || exit 1
+    CMD curl -fsS http://127.0.0.1:1000/api/v1/health || exit 1
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/entrypoint.sh"]

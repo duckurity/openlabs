@@ -1,52 +1,43 @@
-# ThreadLine — Broken Boundaries
 
-**Category:** Web / API Security
-**Difficulty:** Medium
+# ThreadLine — `MEDIUM` · `web`
 
----
+## Brief
 
-## Scenario
+ThreadLine sells clothing through a REST API. No frontend, no docs. You
+hold a normal customer account. A flag sits somewhere in the checkout
+flow.
 
-ThreadLine is an online clothing store rolling out a new REST API. During a
-private beta, a customer's account was quietly given a **loyalty retention
-offer** after they threatened to close their account. The offer was never
-meant to be public, and it was never meant to be discoverable by anyone but
-the customer themselves.
+A customer's account was quietly given a loyalty retention offer after
+they threatened to close their account. The offer was never meant to be
+public — get the Premium Leather Jacket for free, the way it was never
+supposed to happen.
 
-You've been dropped into the beta as a regular shopper with one goal:
-**get the Premium Leather Jacket for free**, the way it was never supposed to
-happen.
+## Setup
 
----
+The API listens on port **`1000`**. All endpoints are under
+`http://<target-host>:1000/api/v1`.
+docker compose up --build -d
+curl -s http://127.0.0.1:1000/api/v1/health
 
-## What you're given
+text
 
-A running instance of the ThreadLine API at:
-
-```
-http://<target-host>:8000/api/v1
-```
+Wait for `{"status":"ok"}` before sending further requests.
 
 There is no web frontend — this is an API-only challenge. Use `curl`,
-`httpie`, Postman, Burp Repeater, or a script; whatever you're comfortable
-driving raw HTTP requests with.
+`httpie`, Postman, Burp Repeater, or a script.
 
-## Getting started
+Register and log in:
+POST /api/v1/auth/register
+{ "username": "...", "email": "...", "password": "..." }
 
-1. Register your own account:
-   ```
-   POST /api/v1/auth/register
-   { "username": "...", "email": "...", "password": "..." }
-   ```
-2. Log in — the API uses a session cookie, not a bearer token:
-   ```
-   POST /api/v1/auth/login
-   { "email": "...", "password": "..." }
-   ```
-3. Explore from there. Every account starts with a small balance, but that's
-   not enough to buy anything on its own.
+POST /api/v1/auth/login
+{ "email": "...", "password": "..." }
 
-## Endpoints (non-exhaustive — some may not matter, some might matter a lot)
+text
+
+No API documentation is provided. Map the rest of the surface yourself.
+
+## Endpoints
 
 | Method | Path                          | Notes                         |
 |--------|-------------------------------|--------------------------------|
@@ -65,7 +56,14 @@ driving raw HTTP requests with.
 ## Goal
 
 Get a cart's `final_price` down to **0**, then check out. If you got there
-the *right* way, checkout will hand you a flag.
+the *right* way, checkout will hand you a flag. It matches `duck{...}`.
+
+## Reset
+docker compose restart
+
+text
+
+State resets to the seeded starting point on every restart.
 
 ## Rules
 
@@ -74,7 +72,6 @@ the *right* way, checkout will hand you a flag.
 - Don't brute-force passwords or run heavy fuzzing that could take the
   service down for other players — this is a logic challenge, not a
   denial-of-service exercise.
-- The flag format is `duck{...}`.
 
 ## Hints
 
