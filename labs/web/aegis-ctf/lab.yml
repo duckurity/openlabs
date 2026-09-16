@@ -2,4 +2,5 @@ name: aegis-ctf
 track: web
 difficulty: hard
 description: Chained API trust vulnerabilities across REST, GraphQL, and gRPC.
+techniques: [idor, mass-assignment, auth-bypass, api-version-enumeration]
 flag_hash: f016c2215d046bc87d8eb5fca904a8861fe3fe03f1dcf528b27528472b9778c1

@@ -1,12 +1,12 @@
 # Aegis CTF
 
-## Scenario
+## Brief
 
 AEGIS is an internal employee portal for a fictional company. From the outside, it looks like a simple web application with a login page, employee profiles, and self-service features.
 
 Behind the application, multiple backend services communicate with the same underlying data. Your goal is to investigate how these services interact and identify the trust weaknesses between them.
 
-## Objective
+## Goal
 
 Recover the full flag by progressing through the different API services exposed by the application.
 
@@ -25,7 +25,7 @@ Experience with Burp Suite and modifying HTTP requests is recommended.
 * Burp Suite or another HTTP intercepting proxy
 * Basic knowledge of REST APIs, GraphQL, and gRPC
 
-## Startup
+## Setup
 
 From the lab directory, run:
 
