@@ -1,0 +1,6 @@
+name: duckexchange
+track: web
+difficulty: medium
+description: A tenant document API with a gRPC transcoding authorization bypass.
+flag_hash: 5a830786e524c3c9f5a88b1308255dc6d376342e06ed0a40bfb82305ef273de5
+techniques: [sqli, api-version-enumeration]

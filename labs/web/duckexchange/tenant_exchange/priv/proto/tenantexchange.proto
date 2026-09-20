@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package tenantexchange;
+
+service Documents {
+  rpc GetDocument(GetDocumentRequest) returns (DocumentReply) {
+    option (google.api.http) = {
+      get: "/api/v1/tenants/{tenant_id}/documents/{doc_id}"
+    };
+  }
+}
+
+message GetDocumentRequest {
+  string tenant_id = 1;
+  string doc_id = 2;
+}
+
+message DocumentReply {
+  string tenant_id = 1;
+  string doc_id = 2;
+  string title = 3;
+  string body = 4;
+  string classification = 5;
+}
