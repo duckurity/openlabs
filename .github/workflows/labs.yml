@@ -21,6 +21,11 @@ on:
       - "contentbit.seo.config.ts"
       - "package.json"
       - "pnpm-lock.yaml"
+      - ".github/workflows/labs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
