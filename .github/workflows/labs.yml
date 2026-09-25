@@ -74,13 +74,16 @@ jobs:
       - name: Score every lab (blocking)
         run: python3 scripts/score_lab.py --min 70
 
+      # Lab services pin vulnerable dependencies on purpose. Report CVEs for
+      # visibility but do not fail the job; score_lab.py and gitleaks are the
+      # merge gates for repo policy.
       - name: Scan filesystem for known vulnerabilities
         uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
         with:
           scan-type: fs
           scan-ref: labs/
           severity: HIGH,CRITICAL
-          exit-code: "1"
+          exit-code: "0"
 
   content:
     name: Content contracts
