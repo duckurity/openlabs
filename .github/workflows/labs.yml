@@ -21,6 +21,10 @@ on:
       - "contentbit.seo.config.ts"
       - "package.json"
       - "pnpm-lock.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
@@ -50,8 +54,6 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
         with:
           fetch-depth: 0
 
