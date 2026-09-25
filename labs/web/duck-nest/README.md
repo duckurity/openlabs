@@ -25,3 +25,5 @@ Extract the flag from the restricted project. Verify the solve from the lab dire
 ```bash
 python3 ../../../scripts/check.py .
 ```
+
+See [how to play](/play) for the usual solve loop.
