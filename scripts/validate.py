@@ -137,7 +137,8 @@ def discover_labs() -> list[Path]:
             continue
         for lab in sorted(track.iterdir()):
             if lab.is_dir() and not lab.name.startswith((".", "_")):
-                labs.append(lab)
+                if (lab / "lab.yml").is_file():
+                    labs.append(lab)
     return labs
 
 

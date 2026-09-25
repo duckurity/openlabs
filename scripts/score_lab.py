@@ -70,7 +70,28 @@ def score_secrets(lab: Path) -> tuple[int, list[str]]:
 
 def read_dockerfile(lab: Path) -> str:
     dockerfile = lab / "Dockerfile"
-    return dockerfile.read_text(encoding="utf-8") if dockerfile.is_file() else ""
+    if dockerfile.is_file():
+        return dockerfile.read_text(encoding="utf-8")
+    compose = read_compose(lab)
+    if not compose:
+        return ""
+    match = re.search(
+        r"(?ms)^\s*build:\s*\n\s*context:\s*(\S+)\s*\n\s*dockerfile:\s*(\S+)",
+        compose,
+    )
+    if match:
+        context = lab / match.group(1).strip("\"'")
+        dockerfile_name = match.group(2).strip("\"'")
+        candidate = context / dockerfile_name
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8")
+    match = re.search(r"(?m)^\s*build:\s*(\./[^\s#]+)", compose)
+    if match:
+        context = lab / match.group(1).strip("\"'")
+        candidate = context / "Dockerfile"
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8")
+    return ""
 
 
 def score_dockerfile(lab: Path) -> tuple[int, list[str]]:
@@ -189,7 +210,8 @@ def discover() -> list[Path]:
             continue
         for lab in sorted(track.iterdir()):
             if lab.is_dir() and not lab.name.startswith((".", "_")):
-                labs.append(lab)
+                if (lab / "lab.yml").is_file():
+                    labs.append(lab)
     return labs
 
 
