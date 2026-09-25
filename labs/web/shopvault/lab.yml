@@ -3,3 +3,4 @@ track: web
 difficulty: hard
 description: An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level access.
 flag_hash: 30f089145a135b77c9c6d1c3480d493145445dd237ac52db0dea7c8ce44d08ff
+techniques: [auth-bypass]
