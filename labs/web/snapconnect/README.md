@@ -16,7 +16,7 @@ Difficulty is easy. Expect to spend 15 to 30 minutes.
 - The `graphql-multipart-request` format
 - A tool that sends raw HTTP, such as `curl`, Burp, or Insomnia
 
-## Setup and goal
+## Setup
 
 Start the lab:
 
@@ -31,11 +31,15 @@ Start the lab:
 
 Registration is open. Create an account to get a session token.
 
+## Goal
+
 Read `/var/www/flag.txt` through the service. Verify your solve from the repository root:
 
 ```
 python3 scripts/check.py labs/web/snapconnect
 ```
+
+See [how to play](/play) for the usual solve loop.
 
 ## Reset
 
