@@ -14,8 +14,10 @@ keywords:
     - medium web practice
     - openlabs threadline
 verified: true
-score: 73
-score_grade: C
+score: 82
+score_grade: B
+linksTo:
+  - technique/idor
 author_name: "Hagr5"
 author_url: "https://github.com/duckurity/openlabs/commits/main/labs/web/threadline"
 author_date: "2026-09-10"
@@ -29,7 +31,7 @@ ogImage: /og/labs-threadline.png
 
 ---
 
-## Scenario
+## Brief
 
 ThreadLine is an online clothing store rolling out a new REST API. During a
 private beta, a customer's account was quietly given a **loyalty retention
@@ -55,7 +57,7 @@ There is no web frontend — this is an API-only challenge. Use `curl`,
 `httpie`, Postman, Burp Repeater, or a script; whatever you're comfortable
 driving raw HTTP requests with.
 
-## Getting started
+## Setup
 
 1. Register your own account:
    ```
@@ -90,6 +92,8 @@ driving raw HTTP requests with.
 
 Get a cart's `final_price` down to **0**, then check out. If you got there
 the *right* way, checkout will hand you a flag.
+
+See [how to play](/play) for the usual solve loop.
 
 ## Rules
 
@@ -130,3 +134,9 @@ from having more than one?
 ---
 
 Good luck — and remember: the interesting bug is rarely the loudest one.
+## Techniques
+
+Practise in this lab:
+
+- [Broken object-level authorization (IDOR)](/technique/idor)
+

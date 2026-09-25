@@ -164,12 +164,13 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read
 
 Source: https://openlabs.duckurity.com/labs/aegis-ctf
 
-## Scenario
+## Brief
 AEGIS is an internal employee portal for a fictional company. From the outside, it looks like a simple web application with a login page, employee profiles, and self-service features.
 Behind the application, multiple backend services communicate with the same underlying data. Your goal is to investigate how these services interact and identify the trust weaknesses between them.
-## Objective
+## Goal
 Recover the full flag by progressing through the different API services exposed by the application.
 The challenge involves multiple API technologies, including REST, GraphQL, and gRPC.
+See [how to play](/play) for the usual solve loop.
 ## Difficulty
 **Hard**
 Experience with Burp Suite and modifying HTTP requests is recommended.
@@ -178,7 +179,7 @@ Experience with Burp Suite and modifying HTTP requests is recommended.
 * A web browser
 * Burp Suite or another HTTP intercepting proxy
 * Basic knowledge of REST APIs, GraphQL, and gRPC
-## Startup
+## Setup
 From the lab directory, run:
 ```bash
 docker compose up --build
@@ -210,6 +211,9 @@ The complete flag requires progress through multiple parts of the application.
 * Automated enumeration and fuzzing are allowed where appropriate.
 * Carefully inspect HTTP responses and API behavior for additional information.
 Good luck!
+## Techniques
+Practise in this lab:
+- [API version enumeration](/technique/api-version-enumeration)
 
 ## Cafe house rules
 
@@ -229,6 +233,10 @@ Find the flag. Verify the solve from the lab directory:
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Cloudvault
 
@@ -250,6 +258,10 @@ Authenticate and explore the API. Retrieve the flag. Verify the solve from the l
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Duck cross
 
@@ -292,6 +304,10 @@ Extract the flag from the restricted project. Verify the solve from the lab dire
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Duckrpc archive
 
@@ -468,17 +484,22 @@ jobs, customers, and outbound email from one portal. The platform reports
 opens on every message it sends.
 You hold a sandbox account for one tenant. The credentials are on the login
 page.
-## Setup and goal
+## Setup
 Start the lab:
 ```
 docker compose up -d --build
 ```
 Open `http://localhost:8080`.
+## Goal
 Recover the flag from the admin export.
 Verify the solve:
 ```
 python3 scripts/check.py labs/web/fieldops-360
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Firmdrama
 
@@ -715,6 +736,10 @@ Escalate from unauthenticated to the manager role and read the manager-only repo
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Authentication bypass](/technique/auth-bypass)
 
 ## Snapconnect
 
@@ -729,7 +754,7 @@ Difficulty is easy. Expect to spend 15 to 30 minutes.
 - GraphQL queries, mutations, and introspection
 - The `graphql-multipart-request` format
 - A tool that sends raw HTTP, such as `curl`, Burp, or Insomnia
-## Setup and goal
+## Setup
 Start the lab:
 ```
  docker compose up -d --build
@@ -739,10 +764,12 @@ Start the lab:
 - API: `POST http://localhost:8081/graphql`
 - API reference: `http://localhost:8081/docs`
 Registration is open. Create an account to get a session token.
+## Goal
 Read `/var/www/flag.txt` through the service. Verify your solve from the repository root:
 ```
 python3 scripts/check.py labs/web/snapconnect
 ```
+See [how to play](/play) for the usual solve loop.
 ## Reset
 ```
 docker compose down -v
@@ -755,6 +782,9 @@ Reset clears uploads and sessions and reseeds the database.
 - The lab runs on your machine. Point your tools at `localhost:8081` only.
 - No brute force is needed.
 - Destroying the service is not the goal. The container resets anyway.
+## Techniques
+Practise in this lab:
+- [Mass assignment](/technique/mass-assignment)
 
 ## Snapsync
 
@@ -855,7 +885,7 @@ Source: https://openlabs.duckurity.com/labs/threadline
 **Category:** Web / API Security
 **Difficulty:** Medium
 ---
-## Scenario
+## Brief
 ThreadLine is an online clothing store rolling out a new REST API. During a
 private beta, a customer's account was quietly given a **loyalty retention
 offer** after they threatened to close their account. The offer was never
@@ -873,7 +903,7 @@ http://<target-host>:8000/api/v1
 There is no web frontend — this is an API-only challenge. Use `curl`,
 `httpie`, Postman, Burp Repeater, or a script; whatever you're comfortable
 driving raw HTTP requests with.
-## Getting started
+## Setup
 1. Register your own account:
    ```
    POST /api/v1/auth/register
@@ -903,6 +933,7 @@ driving raw HTTP requests with.
 ## Goal
 Get a cart's `final_price` down to **0**, then check out. If you got there
 the *right* way, checkout will hand you a flag.
+See [how to play](/play) for the usual solve loop.
 ## Rules
 - Don't attack anything outside this container (it has no internet access
   anyway).
@@ -929,6 +960,9 @@ from having more than one?
 </details>
 ---
 Good luck — and remember: the interesting bug is rarely the loudest one.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Vault api
 
@@ -1287,25 +1321,17 @@ Yes. PATCH is safe when the server allowlists paths and applies authorization an
 
 Source: https://openlabs.duckurity.com/technique/sqli
 
-# SQL Injection
-SQL Injection occurs when untrusted input is incorporated into a database query without appropriate parameterization or validation.
-In this technique, player-controlled input can alter the intended SQL query and may allow access to database records beyond the application's normal search behavior.
-## Typical Impact
-Depending on the application's database and query structure, SQL injection may allow an attacker to:
-- Alter database query logic.
-- Retrieve records that are not normally exposed.
-- Enumerate database schema information.
-- Access sensitive application data.
-## Defensive Guidance
-Applications should use parameterized queries or prepared statements instead of constructing SQL statements through string concatenation.
-Input validation should be used as an additional defensive layer, but should not replace parameterized database access.
+## Overview
+SQL injection occurs when untrusted input is incorporated into a database query without appropriate parameterization or validation. Player-controlled input can alter the intended SQL query and may expose records beyond the application's normal search behavior.
 ## Examples
 See the [duckrpc-archive](/labs/duckrpc-archive) lab for a gRPC archive service that mishandles query input.
 ## Related labs
 - [duckrpc-archive](/labs/duckrpc-archive)
+Browse all [labs](/labs) when it is solved.
 ## FAQ
 ### Is every SQL error a SQL injection?
 No. An error may only mean the query failed. Injection requires proof that attacker-controlled input changed query behavior.
+Read [how to play](/play) for the usual solve loop.
 
 ## Server-side request forgery (SSRF)
 
