@@ -1,6 +1,21 @@
 ---
-title: SQL Injection
-slug: sqli
+title: SQL injection
+description: Learn how unsanitized query input can change database logic and expose records outside normal access rules.
+type: technique
+key: technique-sqli
+slug: technique/sqli
+intent: Learn what SQL injection is and which labs exercise it.
+keywords:
+  primary: SQL injection practice lab
+  secondary:
+    - sqli explained
+    - database query lab
+linksTo:
+  - labs/duckrpc-archive
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
 ---
 
 # SQL Injection
@@ -23,3 +38,17 @@ Depending on the application's database and query structure, SQL injection may a
 Applications should use parameterized queries or prepared statements instead of constructing SQL statements through string concatenation.
 
 Input validation should be used as an additional defensive layer, but should not replace parameterized database access.
+
+## Examples
+
+See the [duckrpc-archive](/labs/duckrpc-archive) lab for a gRPC archive service that mishandles query input.
+
+## Related labs
+
+- [duckrpc-archive](/labs/duckrpc-archive)
+
+## FAQ
+
+### Is every SQL error a SQL injection?
+
+No. An error may only mean the query failed. Injection requires proof that attacker-controlled input changed query behavior.
