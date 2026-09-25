@@ -26,3 +26,5 @@ Authenticate and explore the API. Retrieve the flag. Verify the solve from the l
 ```bash
 python3 ../../../scripts/check.py .
 ```
+
+See [how to play](/play) for the usual solve loop.
