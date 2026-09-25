@@ -44,4 +44,4 @@ volumes:
 
 secrets:
   flag:
-    file: ./internal-service/flag.txt
+    file: ./internal-service/app/flag.txt

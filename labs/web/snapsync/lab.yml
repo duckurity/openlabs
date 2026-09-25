@@ -2,8 +2,5 @@ name: snapsync
 track: web
 difficulty: medium
 description: A staff photo tool where a forged token and a hidden internal route reach the flag.
-techniques:
-  - jwt_algorithm_confusion
-  - excessive_data_exposure
-  - broken_access_control
+techniques: [ssrf]
 flag_hash: 9ac287971d31bf982cca11c07b9cc294edca55c46a4a2fa6a0ff28700e806f90
