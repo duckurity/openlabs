@@ -25,8 +25,13 @@ Flat YAML, one `key: value` per line. Every field is required.
 | `difficulty` | one of `easy`, `medium`, `hard`, `insane` |
 | `description` | one line, shown in the lab index |
 | `flag_hash` | SHA-256 of the full flag string, 64 lowercase hex |
+| `status` | `experimental` or `supported` once migration finishes; see [[Lab catalog status](Lab-Catalog-Status)] |
 
 </div>
+
+During migration, `status` is optional and defaults to `experimental` with a
+validator warning. Uncatalogued directories (no `lab.yml`) are not public
+catalog entries.
 
 ## The brief
 

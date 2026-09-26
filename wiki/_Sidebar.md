@@ -9,6 +9,7 @@
 [[Getting Started](Getting-Started)]
 [[Tracks and Difficulty](Tracks-and-Difficulty)]
 [[Lab Anatomy](Lab-Anatomy)]
+[[Lab catalog status](Lab-Catalog-Status)]
 [[Flag Format](Flag-Format)]
 [[Authoring a Lab](Authoring-a-Lab)]
 [[Reviewer Checklist](Reviewer-Checklist)]
