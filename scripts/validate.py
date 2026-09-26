@@ -26,6 +26,7 @@ HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 FLAG_PLAINTEXT_RE = re.compile(r"duck\{[a-z0-9_]{16,40}\}")
 
 REQUIRED_KEYS = ("name", "track", "difficulty", "description", "flag_hash")
+STATUSES = frozenset({"experimental", "supported"})
 COMPOSE_NAMES = (
     "docker-compose.yml",
     "docker-compose.yaml",
@@ -55,6 +56,50 @@ def parse_bracket_list(text: str) -> list[str]:
     if not (text.startswith("[") and text.endswith("]")):
         return []
     return [item.strip() for item in text[1:-1].split(",") if item.strip()]
+
+
+def check_lab_status(
+    meta: dict[str, str],
+    *,
+    require_status: bool = False,
+) -> tuple[list[str], list[str]]:
+    """Validate the lab catalog status field.
+
+    Returns (errors, warnings). During migration, missing status is a warning
+    and implies experimental. When require_status is true, missing status is
+    an error instead.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    raw = meta.get("status", "").strip()
+    if not raw:
+        if require_status:
+            errors.append("lab.yml: missing or empty `status`")
+        else:
+            warnings.append(
+                "lab.yml: missing `status`; treated as experimental during migration"
+            )
+        return errors, warnings
+    if raw not in STATUSES:
+        errors.append(
+            f"lab.yml: `status` {raw!r} must be one of {sorted(STATUSES)}"
+        )
+    return errors, warnings
+
+
+def discover_uncatalogued_dirs() -> list[Path]:
+    """Return track lab directories that have no lab.yml (not catalogued)."""
+    if not LABS_DIR.is_dir():
+        return []
+    uncatalogued: list[Path] = []
+    for track in sorted(LABS_DIR.iterdir()):
+        if not track.is_dir() or track.name.startswith((".", "_")):
+            continue
+        for lab in sorted(track.iterdir()):
+            if lab.is_dir() and not lab.name.startswith((".", "_")):
+                if not (lab / "lab.yml").is_file():
+                    uncatalogued.append(lab)
+    return uncatalogued
 
 
 def check_lab(lab: Path) -> list[str]:

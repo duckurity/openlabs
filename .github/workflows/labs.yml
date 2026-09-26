@@ -41,6 +41,9 @@ jobs:
       - name: Validate lab structure and metadata
         run: python3 scripts/validate.py
 
+      - name: Run lab status validator fixtures
+        run: python3 scripts/test_validate_status.py
+
       - name: Validate compose files
         run: |
           docker compose version
