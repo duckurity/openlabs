@@ -99,6 +99,19 @@ type(scope): description
 Types: `feat`, `fix`, `docs`, `chore`, `ci`, `refactor`, `perf`, `test`,
 `style`, `build`, `revert`. Example: `feat(web): add duck-cross lab`.
 
+## Workflow files
+
+When you change files under `.github/workflows/`, run:
+
+```bash
+bash scripts/lint_workflows.sh
+```
+
+Install `actionlint` v1.7.7 from
+https://github.com/rhysd/actionlint/releases/tag/v1.7.7 and verify the
+linux_amd64 tarball against `actionlint_1.7.7_checksums.txt` from the same
+release. The script does not download or install tools for you.
+
 ## Pull requests
 
 1. One lab per pull request.
