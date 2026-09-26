@@ -66,19 +66,24 @@ jobs:
       # rule set can tell intent from accident. score_lab.py covers
       # the calibrated checks instead.
       - name: Scan for leaked secrets
-        uses: gitleaks/gitleaks-action@v2
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks detect --source . --config .gitleaks.toml --redact --verbose
 
       - name: Score every lab (blocking)
         run: python3 scripts/score_lab.py --min 70
 
+      # Lab services pin vulnerable dependencies on purpose. Report CVEs for
+      # visibility but do not fail the job; score_lab.py and gitleaks are the
+      # merge gates for repo policy.
       - name: Scan filesystem for known vulnerabilities
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
         with:
           scan-type: fs
           scan-ref: labs/
           severity: HIGH,CRITICAL
-          exit-code: "1"
-          cache: "true"
+          exit-code: "0"
 
   content:
     name: Content contracts

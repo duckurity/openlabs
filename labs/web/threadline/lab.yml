@@ -3,3 +3,4 @@ track: web
 difficulty: medium
 description: A clothing store REST API. One customer sees more than they should.
 flag_hash: b89dc278bf07f1d031df933368090877ff41a12ad2b44850818848cd84f10383
+techniques: [idor]

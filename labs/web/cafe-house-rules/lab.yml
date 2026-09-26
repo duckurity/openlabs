@@ -3,3 +3,4 @@ track: web
 difficulty: medium
 description: A cafe rules site with a report bot and a guarded back-room route.
 flag_hash: 7155ce4405034f4bbc836009b43547bfbb201817719ef618b810f69d40db3b63
+techniques: [ssrf]

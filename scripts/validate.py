@@ -9,6 +9,7 @@ Zero dependencies. Skips labs/_template/. Exits 1 when any lab fails.
 """
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -116,11 +117,28 @@ def check_lab(lab: Path) -> list[str]:
     return errors
 
 
-def check_compose(compose_file: Path) -> str | None:
+def compose_check_env(lab_dir: Path) -> dict[str, str]:
+    env = os.environ.copy()
+    example = lab_dir / ".env.example"
+    if example.is_file():
+        for line in example.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            if key and key not in env:
+                env[key] = value.strip()
+    env.setdefault("FLAG", "duck{compose_validate_placeholder}")
+    return env
+
+
+def check_compose(compose_file: Path, lab_dir: Path) -> str | None:
     result = subprocess.run(
         ["docker", "compose", "-f", str(compose_file), "config", "-q"],
         capture_output=True,
         text=True,
+        env=compose_check_env(lab_dir),
     )
     if result.returncode != 0:
         detail = result.stderr.strip() or f"exit code {result.returncode}"
@@ -137,7 +155,8 @@ def discover_labs() -> list[Path]:
             continue
         for lab in sorted(track.iterdir()):
             if lab.is_dir() and not lab.name.startswith((".", "_")):
-                labs.append(lab)
+                if (lab / "lab.yml").is_file():
+                    labs.append(lab)
     return labs
 
 
@@ -162,7 +181,7 @@ def main() -> int:
             for compose_name in COMPOSE_NAMES:
                 compose_file = lab / compose_name
                 if compose_file.is_file():
-                    error = check_compose(compose_file)
+                    error = check_compose(compose_file, lab)
                     if error:
                         errors.append(error)
         if errors:

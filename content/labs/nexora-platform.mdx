@@ -1,0 +1,66 @@
+---
+title: Nexora platform
+description: Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, OAST, internal reconnaissance, and DNS rebinding to bypass hostname validation and reach internal infrastructure.
+track: web
+difficulty: medium
+port: "8080"
+type: lab
+key: lab-nexora-platform
+slug: labs/nexora-platform
+intent: Solve a medium web lab in Docker.
+keywords:
+  primary: Nexora platform web security lab docker
+  secondary:
+    - medium web practice
+    - openlabs nexora-platform
+verified: true
+score: 97
+score_grade: A
+linksTo:
+  - technique/ssrf
+author_name: "M9nx"
+author_url: "https://github.com/duckurity/openlabs/commits/main/labs/web/nexora-platform"
+author_date: "2026-09-26"
+ogImage: /og/labs-nexora-platform.png
+---
+
+{/* Generated from labs/web/nexora-platform/lab.yml and README.md. Do not edit by hand. Run scripts/sync_site_content.py. */}
+
+`medium` · `web`
+
+## Brief
+
+Nexora is a SaaS integration platform on GCP. Investigate the public app and
+find a path to resources that should stay off the public edge.
+
+## Setup
+
+Run these from the lab directory:
+
+```bash
+docker compose up --build -d
+```
+
+Open `http://localhost:8080`. The OAST dashboard is on port `8081`.
+
+## Goal
+
+Reach the protected internal surface and recover the flag. Verify the solve
+from the lab directory:
+
+```bash
+python3 ../../../scripts/check.py .
+```
+
+## Reset
+
+```bash
+docker compose down -v
+docker compose up --build -d
+```
+## Techniques
+
+Practise in this lab:
+
+- [Server-side request forgery (SSRF)](/technique/ssrf)
+

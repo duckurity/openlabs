@@ -5,7 +5,7 @@
 
 ---
 
-## Scenario
+## Brief
 
 ThreadLine is an online clothing store rolling out a new REST API. During a
 private beta, a customer's account was quietly given a **loyalty retention
@@ -31,7 +31,7 @@ There is no web frontend — this is an API-only challenge. Use `curl`,
 `httpie`, Postman, Burp Repeater, or a script; whatever you're comfortable
 driving raw HTTP requests with.
 
-## Getting started
+## Setup
 
 1. Register your own account:
    ```
@@ -66,6 +66,8 @@ driving raw HTTP requests with.
 
 Get a cart's `final_price` down to **0**, then check out. If you got there
 the *right* way, checkout will hand you a flag.
+
+See [how to play](/play) for the usual solve loop.
 
 ## Rules
 

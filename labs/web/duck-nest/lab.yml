@@ -3,3 +3,4 @@ track: web
 difficulty: medium
 description: An internal project workspace for staff and interns.
 flag_hash: 9b12be6fa6bb0f24c47f8f476fb767b1236751a083907a912c1f37a12fc87b21
+techniques: [idor]

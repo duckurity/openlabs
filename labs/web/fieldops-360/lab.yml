@@ -3,3 +3,4 @@ track: web
 difficulty: medium
 description: A tenant portal with email open tracking and an admin export surface.
 flag_hash: 9390f805f7e74cc8da89f244dbe56d802b75802a7267c222594a23ffb58fd61e
+techniques: [idor]

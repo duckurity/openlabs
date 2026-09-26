@@ -14,8 +14,10 @@ keywords:
     - easy web practice
     - openlabs snapconnect
 verified: true
-score: 75
-score_grade: C
+score: 81
+score_grade: B
+linksTo:
+  - technique/mass-assignment
 author_name: "Ahmed Yasser"
 author_url: "https://github.com/spxios"
 author_avatar: "https://github.com/spxios.png"
@@ -41,7 +43,7 @@ Difficulty is easy. Expect to spend 15 to 30 minutes.
 - The `graphql-multipart-request` format
 - A tool that sends raw HTTP, such as `curl`, Burp, or Insomnia
 
-## Setup and goal
+## Setup
 
 Start the lab:
 
@@ -56,11 +58,15 @@ Start the lab:
 
 Registration is open. Create an account to get a session token.
 
+## Goal
+
 Read `/var/www/flag.txt` through the service. Verify your solve from the repository root:
 
 ```
 python3 scripts/check.py labs/web/snapconnect
 ```
+
+See [how to play](/play) for the usual solve loop.
 
 ## Reset
 
@@ -80,3 +86,9 @@ Reset clears uploads and sessions and reseeds the database.
 - The lab runs on your machine. Point your tools at `localhost:8081` only.
 - No brute force is needed.
 - Destroying the service is not the goal. The container resets anyway.
+## Techniques
+
+Practise in this lab:
+
+- [Mass assignment](/technique/mass-assignment)
+

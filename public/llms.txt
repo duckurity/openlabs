@@ -12,13 +12,13 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Cloudvault](https://openlabs.duckurity.com/labs/cloudvault): A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.
 - [Duck cross](https://openlabs.duckurity.com/labs/duck-cross): A reports portal with a missing object-level authorization check.
 - [Duck nest](https://openlabs.duckurity.com/labs/duck-nest): An internal project workspace for staff and interns.
-- [Duckrpc_archive](https://openlabs.duckurity.com/labs/duckrpc_archive): A gRPC document archive with authentication and a SQL injection vulnerability.
+- [Duckrpc archive](https://openlabs.duckurity.com/labs/duckrpc-archive): A gRPC document archive with authentication and a SQL injection vulnerability.
+- [Duckvault web ctf](https://openlabs.duckurity.com/labs/duckvault-web-ctf): A document management API with a broken object-level authorization check.
 - [Duckvault](https://openlabs.duckurity.com/labs/duckvault): A records portal leaks an internal reference through broken access control and weak authorization.
-- [Duckvault_web_ctf](https://openlabs.duckurity.com/labs/duckvault_web_ctf): A document management API with a broken object-level authorization check.
 - [Fieldops 360](https://openlabs.duckurity.com/labs/fieldops-360): A tenant portal with email open tracking and an admin export surface.
 - [Firmdrama](https://openlabs.duckurity.com/labs/firmdrama): A law firm's meeting-room portal with chained API authorization flaws and a vulnerable legacy template rendere
 - [Invoiceportal](https://openlabs.duckurity.com/labs/invoiceportal): InvoicePortal is a SaaS platform for managing company invoices.
-- [Nexora_platform](https://openlabs.duckurity.com/labs/nexora_platform): Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, O
+- [Nexora platform](https://openlabs.duckurity.com/labs/nexora-platform): Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, O
 - [Shopvault](https://openlabs.duckurity.com/labs/shopvault): An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level acce
 - [Snapconnect](https://openlabs.duckurity.com/labs/snapconnect): SnapConnect is a small social app with profiles and avatars, served by a GraphQL API.
 - [Snapsync](https://openlabs.duckurity.com/labs/snapsync): A staff photo tool where a forged token and a hidden internal route reach the flag.
@@ -33,13 +33,14 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [How to play](https://openlabs.duckurity.com/play): Clone, run, solve. Verify each flag from the repo root.
 - [Tracks](https://openlabs.duckurity.com/tracks): Five lab families. Start with web.
 - [Techniques](https://openlabs.duckurity.com/technique): Vulnerability classes, defined once and exercised across labs.
-- [API version enumeration](https://openlabs.duckurity.com/technique/api-version-enumeration): A current API version hides older deployments. Enumerate the versions and find retired routes still answering 
+- [API version enumeration](https://openlabs.duckurity.com/technique/api-version-enumeration): Learn how to map versioned API surfaces and spot legacy endpoints that no longer meet the current security pol
 - [Authentication bypass](https://openlabs.duckurity.com/technique/auth-bypass): The server trusts a client-supplied field instead of verifying identity against a real credential check.
 - [Command injection](https://openlabs.duckurity.com/technique/command-injection): User input reaches a shell command unsanitized, letting you run commands alongside the intended one.
-- [Broken object-level authorization (IDOR)](https://openlabs.duckurity.com/technique/idor): The server checks who you are but not whether the object is yours. Change the identifier, read someone else's 
-- [Mass assignment](https://openlabs.duckurity.com/technique/mass-assignment): An update endpoint binds every field you send without an allowlist, so a protected property reaches an object 
+- [Broken object-level authorization (IDOR)](https://openlabs.duckurity.com/technique/idor): Learn how missing per-object checks expose records that an authenticated user should not be able to read or ch
+- [Mass assignment](https://openlabs.duckurity.com/technique/mass-assignment): Learn how automatic request binding can let a client change protected object properties.
+- [SQL injection](https://openlabs.duckurity.com/technique/sqli): Learn how unsanitized query input can change database logic and expose records outside normal access rules.
 - [Server-side request forgery (SSRF)](https://openlabs.duckurity.com/technique/ssrf): The server fetches a URL you control, letting you reach internal services it can see but you normally can't.
-- [Server-side template injection (SSTI)](https://openlabs.duckurity.com/technique/ssti): The server renders your text as template source, so a template expression runs under the application's own pri
+- [Server-side template injection (SSTI)](https://openlabs.duckurity.com/technique/ssti): Learn why user input must be treated as template data, never as template source, and how to recognise unsafe r
 
 ## Rules
 

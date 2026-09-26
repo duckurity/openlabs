@@ -164,12 +164,13 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read
 
 Source: https://openlabs.duckurity.com/labs/aegis-ctf
 
-## Scenario
+## Brief
 AEGIS is an internal employee portal for a fictional company. From the outside, it looks like a simple web application with a login page, employee profiles, and self-service features.
 Behind the application, multiple backend services communicate with the same underlying data. Your goal is to investigate how these services interact and identify the trust weaknesses between them.
-## Objective
+## Goal
 Recover the full flag by progressing through the different API services exposed by the application.
 The challenge involves multiple API technologies, including REST, GraphQL, and gRPC.
+See [how to play](/play) for the usual solve loop.
 ## Difficulty
 **Hard**
 Experience with Burp Suite and modifying HTTP requests is recommended.
@@ -178,7 +179,7 @@ Experience with Burp Suite and modifying HTTP requests is recommended.
 * A web browser
 * Burp Suite or another HTTP intercepting proxy
 * Basic knowledge of REST APIs, GraphQL, and gRPC
-## Startup
+## Setup
 From the lab directory, run:
 ```bash
 docker compose up --build
@@ -210,6 +211,9 @@ The complete flag requires progress through multiple parts of the application.
 * Automated enumeration and fuzzing are allowed where appropriate.
 * Carefully inspect HTTP responses and API behavior for additional information.
 Good luck!
+## Techniques
+Practise in this lab:
+- [API version enumeration](/technique/api-version-enumeration)
 
 ## Cafe house rules
 
@@ -229,6 +233,10 @@ Find the flag. Verify the solve from the lab directory:
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Cloudvault
 
@@ -250,6 +258,10 @@ Authenticate and explore the API. Retrieve the flag. Verify the solve from the l
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Duck cross
 
@@ -292,43 +304,48 @@ Extract the flag from the restricted project. Verify the solve from the lab dire
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
-## Duckrpc_archive
+## Duckrpc archive
 
-Source: https://openlabs.duckurity.com/labs/duckrpc_archive
+Source: https://openlabs.duckurity.com/labs/duckrpc-archive
 
-## Scenario
-DuckRPC Archive is an internal document archive service used by employees to access and search company documents.
-The application exposes its functionality through a gRPC interface.
-You have been provided with access to a standard employee account.
-Some internal information may be accessible through the available services.
-Your task is to investigate the application and retrieve the challenge flag.
----
-## Objective
-Investigate the DuckRPC Archive service and retrieve the challenge flag.
----
-## Difficulty
-Medium
----
-## Prerequisites
-The following knowledge and tools may be useful:
-* Basic understanding of gRPC
-* API and service enumeration
-* Authentication tokens and request metadata
-* Basic database and input testing concepts
-* Docker and Docker Compose
-* A gRPC client such as `grpcurl`
----
-## Starting Point
-You have been provided with the following employee credentials:
+DuckRPC Archive is an internal document archive service exposed through gRPC.
+Employees can authenticate and search archived documents using the available gRPC services.
+Some internal records are stored separately from the normal document archive.
+## Brief
+DuckRPC Archive is used internally to search company documents.
+You have been provided with valid employee credentials and access to the gRPC service.
+Investigate the available gRPC services and determine whether the document search functionality can expose sensitive internal records.
+The challenge service is available locally at:
+```text
+localhost:50051
+```
+The service uses gRPC and is not exposed through REST or GraphQL.
+### Credentials
 ```text
 Username: alice
 Password: AliceArchive2026!
 ```
-The application exposes a gRPC service locally.
----
-## Startup
-Start the challenge with:
+## Goal
+Retrieve the challenge flag by exploiting the intended vulnerability in the DuckRPC Archive service.
+The flag follows this format:
+```text
+duck{...}
+```
+## Difficulty
+Medium
+This challenge requires multiple steps, including service enumeration, authentication, vulnerability identification, database enumeration, and exploitation.
+## Prerequisites
+* Basic knowledge of gRPC
+* Basic knowledge of API authentication
+* Familiarity with SQL injection
+* Familiarity with a gRPC client such as `grpcurl`
+## Setup
+Start the challenge from the lab directory:
 ```bash
 docker compose up --build
 ```
@@ -336,47 +353,92 @@ The gRPC service will be available at:
 ```text
 localhost:50051
 ```
----
-## Connection Information
-Protocol:
-```text
-gRPC
-```
-Address:
-```text
-localhost:50051
-```
-The challenge service is configured without TLS for local training purposes.
-Example connection test:
-```bash
-grpcurl -plaintext localhost:50051 list
-```
----
 ## Reset
-To reset the challenge to its initial state:
+To reset the challenge environment:
 ```bash
 docker compose down --remove-orphans
 docker compose up --build
 ```
-The challenge database is initialized automatically when the application starts.
-Any previously issued authentication tokens become invalid after the service is restarted.
----
+## Rules
+* Perform testing only against the provided local challenge environment.
+* Do not target external systems or services.
+* Do not modify the challenge source code while solving it.
 ## Flag Format
+```text
+duck{...}
+```
+## Techniques
+Practise in this lab:
+- [SQL injection](/technique/sqli)
+
+## Duckvault web ctf
+
+Source: https://openlabs.duckurity.com/labs/duckvault-web-ctf
+
+DuckVault is an internal document management API used by employees to store and access company documents.
+Employees can authenticate and access their documents through the available REST API.
+Some internal documents contain references to protected resources.
+## Brief
+DuckVault is used internally to manage company documents.
+You have been provided with valid employee credentials and access to the REST API.
+Investigate the available API endpoints and determine whether document access controls properly restrict users to their own documents.
+The challenge service is available locally at:
+```text
+Host: 127.0.0.1
+Host port: 8000
+Container port: 8000
+```
+The service uses REST and is not exposed through GraphQL or gRPC.
+### Credentials
+```text
+Username: alice
+Password: AliceVault2026!
+```
+## Goal
+Retrieve the challenge flag by exploiting the intended vulnerability in the DuckVault API.
 The flag follows this format:
 ```text
 duck{...}
 ```
----
+## Difficulty
+Easy
+This challenge requires multiple steps, including API enumeration, authentication, object identification, authorization testing, and exploitation.
+## Prerequisites
+* Basic knowledge of HTTP and REST APIs
+* Basic knowledge of API authentication
+* Familiarity with authorization concepts
+* Familiarity with a REST client such as Burp Suite or `curl`
+## Setup
+Start the challenge from the lab directory:
+```bash
+docker compose up --build
+```
+The REST API will be available at:
+```text
+Host: 127.0.0.1
+Host port: 8000
+```
+You can verify that the service is running with:
+```bash
+curl http://127.0.0.1:8000/health
+```
+## Reset
+To reset the challenge environment:
+```bash
+docker compose down --remove-orphans
+docker compose up --build
+```
 ## Rules
 * Perform testing only against the provided local challenge environment.
 * Do not target external systems or services.
-* Do not modify the challenge source code while solving the challenge.
-* Do not inspect or extract the flag directly from configuration files, environment variables, container metadata, or source code.
-* Retrieve the flag through the intended application behavior.
----
-## Notes
-This challenge is designed as a controlled local training environment.
-The challenge should be solved through investigation and interaction with the exposed gRPC services.
+* Do not modify the challenge source code while solving it.
+## Flag Format
+```text
+duck{...}
+```
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Duckvault
 
@@ -411,62 +473,6 @@ The flag format is `duck{...}`.
 Practise in this lab:
 - [Broken object-level authorization (IDOR)](/technique/idor)
 
-## Duckvault_web_ctf
-
-Source: https://openlabs.duckurity.com/labs/duckvault_web_ctf
-
-## Scenario
-DuckVault is an internal document management API used by employees to store and access company documents.
-You have been provided with access to a standard user account.
-Some sensitive information may be accessible through the application's API.
-## Objective
-Investigate the DuckVault API and retrieve the challenge flag.
-## Difficulty
-Easy
-## Prerequisites
-* Basic knowledge of HTTP and REST APIs
-* Basic API enumeration
-* Familiarity with authentication tokens
-* A tool such as Burp Suite, curl, or a web browser
-## Starting Point
-Use the following credentials:
-```text
-Username: alice
-Password: AliceVault2026!
-```
-The application is available at:
-```text
-http://localhost:8000
-```
-## Startup
-Start the challenge with:
-```bash
-docker compose up --build
-```
-Then access:
-```text
-http://localhost:8000
-```
-## Reset
-To reset the challenge to its initial state:
-```bash
-docker compose down --remove-orphans
-docker compose up --build
-```
-The challenge initializes its data automatically on startup.
-## Flag Format
-The flag follows this format:
-```text
-duck{...}
-```
-## Rules
-* Perform testing only against the provided local challenge environment.
-* Do not target external systems or services.
-* Do not modify the challenge source code while solving it.
-## Techniques
-Practise in this lab:
-- [Broken object-level authorization (IDOR)](/technique/idor)
-
 ## Fieldops 360
 
 Source: https://openlabs.duckurity.com/labs/fieldops-360
@@ -478,17 +484,22 @@ jobs, customers, and outbound email from one portal. The platform reports
 opens on every message it sends.
 You hold a sandbox account for one tenant. The credentials are on the login
 page.
-## Setup and goal
+## Setup
 Start the lab:
 ```
 docker compose up -d --build
 ```
 Open `http://localhost:8080`.
+## Goal
 Recover the flag from the admin export.
 Verify the solve:
 ```
 python3 scripts/check.py labs/web/fieldops-360
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Firmdrama
 
@@ -502,7 +513,7 @@ Source: https://openlabs.duckurity.com/labs/firmdrama
 <div align="center">
 # firmdrama
 **RoomReserve · Behind every meeting is a story.**
-[The story](#scenario) · [Your objective](#objective) · [Get started](#quick-start) · [Check a flag](#check-a-captured-flag) · [Reset](#reset-the-lab) · [Rules](#player-rules)
+[The story](#brief) · [Your goal](#goal) · [Setup](#setup) · [Check a flag](#check-a-captured-flag) · [Reset](#reset-the-lab) · [Rules](#player-rules)
 </div>
 | Challenge at a glance | Details |
 | :--- | :--- |
@@ -587,9 +598,10 @@ flags. Each flag uses this format:
 | **Number of flags** | 2 |
 ---
 ## Check a captured flag
-After collecting either flag, verify it locally from the `firmdrama` directory:
+After collecting either flag, verify it locally from the `firmdrama` directory
+with the shared repository checker:
 ```powershell
-python scripts/check.py
+python ../../../scripts/check.py .
 ```
 Paste one captured value at the prompt. The checker reports `checkpoint solved`
 for the intermediate flag and `solved` for the final flag; any other value
@@ -674,35 +686,34 @@ python3 ../../../scripts/check.py .
 Practise in this lab:
 - [Broken object-level authorization (IDOR)](/technique/idor)
 
-## Nexora_platform
+## Nexora platform
 
-Source: https://openlabs.duckurity.com/labs/nexora_platform
+Source: https://openlabs.duckurity.com/labs/nexora-platform
 
-Nexora — Integration & Developer Platform
-# Scenario
-You have access to Nexora, a SaaS integration and developer platform. Nexora production infrastructure is hosted on Google Cloud Platform.
-# Objective
-Investigate Nexora's infrastructure and identify a way to reach resources that should not be directly accessible from the public application. .
-# Difficulty
-Medium
-# Prerequisites
-Basic web application reconnaissance, HTTP fundamentals, REST API basics, GraphQL basics, DNS basics, familiarity with server-side requests, and basic Docker/networking knowledge are helpful.
-# Startup Instructions
-```sh
-docker compose up --build
+`medium` · `web`
+## Brief
+Nexora is a SaaS integration platform on GCP. Investigate the public app and
+find a path to resources that should stay off the public edge.
+## Setup
+Run these from the lab directory:
+```bash
+docker compose up --build -d
 ```
-# Connection Information
-Application: http://localhost:8080
-OAST: http://localhost:8081
-# OAST Service
-The challenge includes a local OAST service that you may use to observe DNS and HTTP interactions generated during testing. It is a replareplacement for burp suite collaborator. Open the dashboard to observe interactions.
-# Reset Instructions
-```sh
+Open `http://localhost:8080`. The OAST dashboard is on port `8081`.
+## Goal
+Reach the protected internal surface and recover the flag. Verify the solve
+from the lab directory:
+```bash
+python3 ../../../scripts/check.py .
+```
+## Reset
+```bash
 docker compose down -v
-docker compose up --build
+docker compose up --build -d
 ```
-# Flag Format
-`duck{****_**_*******}`
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Shopvault
 
@@ -723,6 +734,10 @@ Escalate from unauthenticated to the manager role and read the manager-only repo
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Authentication bypass](/technique/auth-bypass)
 
 ## Snapconnect
 
@@ -737,7 +752,7 @@ Difficulty is easy. Expect to spend 15 to 30 minutes.
 - GraphQL queries, mutations, and introspection
 - The `graphql-multipart-request` format
 - A tool that sends raw HTTP, such as `curl`, Burp, or Insomnia
-## Setup and goal
+## Setup
 Start the lab:
 ```
  docker compose up -d --build
@@ -747,10 +762,12 @@ Start the lab:
 - API: `POST http://localhost:8081/graphql`
 - API reference: `http://localhost:8081/docs`
 Registration is open. Create an account to get a session token.
+## Goal
 Read `/var/www/flag.txt` through the service. Verify your solve from the repository root:
 ```
 python3 scripts/check.py labs/web/snapconnect
 ```
+See [how to play](/play) for the usual solve loop.
 ## Reset
 ```
 docker compose down -v
@@ -763,6 +780,9 @@ Reset clears uploads and sessions and reseeds the database.
 - The lab runs on your machine. Point your tools at `localhost:8081` only.
 - No brute force is needed.
 - Destroying the service is not the goal. The container resets anyway.
+## Techniques
+Practise in this lab:
+- [Mass assignment](/technique/mass-assignment)
 
 ## Snapsync
 
@@ -794,6 +814,9 @@ its flag. Verify the solve from the lab directory:
 ```bash
 python3 ../../../scripts/check.py .
 ```
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Switf01 hit3
 
@@ -860,7 +883,7 @@ Source: https://openlabs.duckurity.com/labs/threadline
 **Category:** Web / API Security
 **Difficulty:** Medium
 ---
-## Scenario
+## Brief
 ThreadLine is an online clothing store rolling out a new REST API. During a
 private beta, a customer's account was quietly given a **loyalty retention
 offer** after they threatened to close their account. The offer was never
@@ -878,7 +901,7 @@ http://<target-host>:8000/api/v1
 There is no web frontend — this is an API-only challenge. Use `curl`,
 `httpie`, Postman, Burp Repeater, or a script; whatever you're comfortable
 driving raw HTTP requests with.
-## Getting started
+## Setup
 1. Register your own account:
    ```
    POST /api/v1/auth/register
@@ -908,6 +931,7 @@ driving raw HTTP requests with.
 ## Goal
 Get a cart's `final_price` down to **0**, then check out. If you got there
 the *right* way, checkout will hand you a flag.
+See [how to play](/play) for the usual solve loop.
 ## Rules
 - Don't attack anything outside this container (it has no internet access
   anyway).
@@ -934,6 +958,9 @@ from having more than one?
 </details>
 ---
 Good luck — and remember: the interesting bug is rarely the loudest one.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Vault api
 
@@ -970,6 +997,9 @@ docker compose down -v
 docker compose up --build -d
 ```
 This restores the database and seeded data.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Techniques
 
@@ -983,18 +1013,76 @@ Start with [broken object-level authorization](/technique/idor). See also [authe
 Source: https://openlabs.duckurity.com/technique/api-version-enumeration
 
 ## Overview
-Improper inventory management means the API catalog is incomplete. The documented version stays current while older versions keep serving traffic, often outside the same review and hardening process. Enumerating `v1`, `v2`, `v3`, or `/api` prefixes surfaces routes nobody told you about.
+API version enumeration is the process of finding and comparing the versions of an API that an application still exposes. A version in a path, hostname, header, or media type is not a vulnerability by itself. The security issue appears when an older surface remains reachable with weaker authorization, validation, rate limits, logging, or business rules.
+This is an inventory problem before it is an exploitation problem. Teams often document the current version while a legacy deployment remains live for an old mobile app, a partner integration, or a forgotten internal client. OWASP describes this wider failure as [improper inventory management](https://owasp.org/API-Security/editions/2023/en/0xa9-improper-inventory-management/).
+> **A version is a separate security surface**
+>
+> Do not assume that a check fixed in one version exists in every version. Compare behaviour with the same authenticated context and request intent.
+## How APIs expose versions
+The version number is not always a path segment. Record the complete request shape before concluding that a version does not exist.
+| Location | Production-style form |
+| --- | --- |
+| Path | `/api/v2/orders` |
+| Hostname | `v1.api.example.test/orders` |
+| Header | `API-Version: 2024-06-01` |
+| Media type | `Accept: application/vnd.example.v1+json` |
+| Query parameter | `/orders?api-version=2024-06-01` |
+| Deployment name | `https://legacy.example.test/api/orders` |
+Versions can also be implied by client bundles, OpenAPI documents, SDK package names, deprecation headers, changelogs, browser network traffic, and error messages. These are discovery clues. Confirm them through the permitted lab interface.
 ## Examples
-Look for a version marker in the URL (`/api/v3/...`), a header, or a hostname. Step the number down. Compare behavior across versions. A retired version may skip the checks the current one enforces.
+### A legacy endpoint has a weaker ownership check
+Consider a project-management service. Its current API checks that a user belongs to the project before returning an export. An older endpoint still accepts the same object reference but looks it up globally after authentication. The version is not the flaw. The missing object-level authorization in the older handler is the flaw.
+This pattern is common when two services, middleware stacks, or codebases own different versions. A fix added to the current service does not automatically protect a legacy service.
+### A retired operation remains published
+A payment provider removes a bulk update operation from its new API documentation. The old operation still answers requests because an API gateway route was never disabled. It may lack newer schema validation, auditing, or per-field authorization. The lesson is to compare the complete route and its controls, not only the version label.
+### Version selection falls back silently
+Some APIs select a version through an `Accept` or custom header. A proxy, SDK, or client bug can drop that header and route a request to a default version. If the default is older and less protected, the fallback becomes part of the security boundary. Capture response headers and content types as well as the response body.
+## A methodical approach in an authorized lab
+Begin with the documented or visible API. Use it as the baseline for route names, methods, authentication, and expected schemas.
+1. Identify every visible version marker in routes, hosts, headers, media types, and documentation.
+2. Build a small version matrix. Keep the method, session, body, and object reference constant for each comparison.
+3. Test only plausible versions and naming patterns supported by the lab evidence.
+4. Record status codes, response headers, fields, schemas, and authorization behaviour for each response.
+5. Treat `401`, `403`, `405`, redirects, and distinct error messages as useful inventory signals. They can prove that a route exists even when access is denied.
+6. Compare controls, not only content. Note differences in ownership checks, validation, pagination, rate limits, and error handling.
+Keep the matrix small and explainable. Broad unbounded scans add noise and can miss version forms that use headers or hostnames. A reproducible request set is more valuable than a long list of guesses.
+## How to compare responses
+Use a consistent table in your notes:
+| Version selector | Route and method | Authentication result | Schema or policy difference |
+| --- | --- | --- | --- |
+| Current baseline | `GET /api/...` | Expected result | Current control observed |
+| Candidate legacy version | Same intent | Denied, accepted, or different | Difference to investigate |
+Do not treat a `404` as conclusive. A gateway may rewrite errors, hide a route, or require a different version selector. A `405 Method Not Allowed` can be strong evidence that a path is real but the method is wrong. A response with a different content type or deprecation header can also identify a distinct handler.
+## Common mistakes
+### Assuming `v1`, `v2`, and `v3` are the only shapes
+Many APIs use dates, vendor media types, dedicated hosts, or unversioned legacy paths. Follow the application's own naming evidence.
+### Calling every old version vulnerable
+A deprecated endpoint can be secure. Report a concrete security regression such as a missing authorization check, an exposed operation, or weaker input validation. "An older version responds" is useful inventory information, not a complete vulnerability finding.
+### Comparing different requests
+If the method, body, object reference, or session changes between tests, the result is ambiguous. Hold them steady while changing the version selector.
+### Forgetting non-production surfaces
+Staging, beta, partner, mobile, and legacy hosts may use different authentication and deployment policies. They matter only when they are in your authorized scope.
+## How developers prevent it
+Maintain an inventory of all hosts, versions, routes, owners, and data classifications. Retire old routes at the gateway and application layers. Apply shared authentication, authorization, validation, logging, and rate-limit controls across every surviving version.
+- Publish an accurate deprecation and retirement schedule.
+- Remove unused routes instead of merely hiding them from documentation.
+- Test old and current versions with the same authorization test suite.
+- Reject unsupported version selectors predictably.
+- Monitor traffic to deprecated versions before removal.
+- Include gateways, serverless functions, partner APIs, and mobile backends in the inventory.
 ## Related labs
-Practise on a live target:
-- [Firmdrama](/labs/firmdrama) — a role-gated Facilities API where the current `v3` works, `v2` is gone, and legacy `v1` still answers.
-Browse all [labs](/labs) when it is solved.
+Apply this technique after studying it:
+- [Firmdrama](/labs/firmdrama)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
 ## FAQ
-**Is version enumeration the same as a shadow API?**
-Shadow APIs are one symptom of poor inventory. This page covers the versioned-surface shape: finding a deprecated deployment that should have been retired.
-**Do I need special tooling?**
-No. `curl` and a scriptable HTTP client are enough. Read [how to play](/play) for the loop.
+### Is API version enumeration the same as finding a shadow API?
+It is one way to find an undocumented or poorly inventoried surface. A shadow API can also be an unversioned service, a forgotten host, or an internal endpoint exposed by mistake.
+### Does a 404 prove that a version does not exist?
+No. The version may use a header, a hostname, a date format, or a gateway that intentionally hides route details. Use the application's evidence and compare request shapes.
+### What makes an old version a security finding?
+A demonstrated difference that weakens security, such as a missing authorization check, an exposed retired operation, or absent input validation. Version age alone is not enough.
+### What should a writeup include?
+Include the baseline request, the exact version selector, the controlled comparison, the observed policy difference, and the affected authorization boundary.
 
 ## Authentication bypass
 
@@ -1037,36 +1125,211 @@ A browser or `curl` is enough to start. Read [how to play](/play) for the loop.
 Source: https://openlabs.duckurity.com/technique/idor
 
 ## Overview
-Broken object-level authorization means the server verifies your session but never checks that the requested object belongs to you. Swap one identifier for another and the server hands over someone else's data with a `200 OK`.
+Broken object-level authorization is an access-control failure. The application verifies that a request came from a signed-in user, then fails to verify that this user may access the *specific* record named in the request. The older term IDOR, or insecure direct object reference, describes a common way the failure appears.
+An object can be an invoice, support case, user profile, document, booking, file, message, or nested resource. The identifier can be a number, UUID, filename, slug, GraphQL variable, or a value hidden in a request body. Its format does not decide security. The server-side authorization check does.
+> **Authentication is not authorization**
+>
+> A valid session proves who sent the request. It does not prove that the sender owns, manages, or may act on the requested object.
+OWASP calls this issue [broken object-level authorization](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/). It is part of the broader broken-access-control family.
+## Where object references appear
+Start by mapping every place where a request selects an object. Do not limit the search to the last number in a URL.
+- Path parameters: `GET /api/invoices/inv_1001`
+- Query parameters: `GET /api/files?file_id=42`
+- JSON bodies: `{"recipient_id":"usr_204"}`
+- Form fields and hidden inputs
+- GraphQL variables and mutation arguments
+- Nested routes: `/teams/team_7/members/usr_204`
+- Storage keys, filenames, download tokens, and object URLs
+References also occur after an object is created. A client may receive an identifier in a list response, a location header, a link, a browser cache entry, or a WebSocket message. Treat each reference as a request for a server-side permission decision.
 ## Examples
-Watch for identifiers in URLs, request bodies, and API paths: `/api/reports/1`, `?user_id=42`, `{"document_id": 7}`. Change the value. Compare the response. A different user's object in the response confirms the flaw.
+### Horizontal access failure
+Consider a multi-tenant billing product. An ordinary customer can view one of their own invoices:
+```http
+GET /api/invoices/inv_1001
+Authorization: Bearer <customer-session>
+```
+An unsafe handler fetches the invoice by the client-supplied ID alone:
+```python
+# Unsafe: the query proves only that the invoice exists.
+invoice = invoices.find_one({"id": invoice_id})
+return invoice
+```
+If `inv_1002` belongs to another customer and the same session receives it, the flaw is horizontal privilege escalation. Both users have the same role. One user crossed an ownership boundary.
+### Cross-tenant access failure
+In a software-as-a-service application, a project manager may be allowed to read every report in their own organisation. A request such as `GET /api/reports/rpt_811` still needs to bind the report to that organisation. A lookup that ignores tenant membership can expose one company to another.
+```python
+# Safer: retrieve the object inside the authenticated tenant boundary.
+report = reports.find_one(
+    {"id": report_id, "tenant_id": current_user.tenant_id}
+)
+if report is None:
+    raise HTTPException(status_code=404)
+return report
+```
+The same rule applies to file downloads. A signed URL or opaque storage key should not replace an access decision if the application expects users to have different permissions.
+### Write and delete failures
+IDOR is not limited to reading data. A customer-service API might correctly show an agent's own drafts but let any authenticated agent update a draft through `PATCH /api/drafts/{id}`. A missing ownership or role check can allow edits, approvals, cancellations, or deletion. Write operations often have a larger business impact than a single data disclosure.
+## How to recognise it in an authorized lab
+Use accounts and objects that the lab provides. Begin with a normal request. Understand its expected response before changing one object reference.
+1. Capture a request for an object that belongs to the current test account.
+2. Record the method, object reference, response status, and meaningful fields.
+3. Identify a second permitted test object with a different owner, tenant, or role boundary.
+4. Change only the object reference. Keep the session and every unrelated field unchanged.
+5. Compare the response with the baseline. Check ownership fields and returned content, not only the status code.
+6. Repeat separately for read, create, update, and delete flows when the lab exposes them.
+A `200 OK` is not proof by itself. The endpoint may return a generic success wrapper, an empty object, or the current user's data. A `403` or `404` can both be valid defensive behaviour. What matters is whether the protected object or action becomes available to the wrong principal.
+Use an intercepting proxy, browser developer tools, or a small repeatable HTTP script. Preserve one clean baseline request. It makes comparisons and writeups far more reliable.
+## Common mistakes and false assumptions
+### "The ID is a UUID, so it is secure"
+UUIDs and long random strings make guessing harder. They do not authorize access. IDs leak through lists, links, exports, logs, referrals, browser history, and normal collaboration features. A stolen or discovered UUID still requires an ownership or policy check.
+### "The UI hides the button"
+The UI is not the security boundary. A route may be hidden from one user while its API still accepts a direct request. Test the request path, not only the screen that generates it.
+### "The list endpoint is protected"
+Collection and detail endpoints often have different code paths. A filtered list can coexist with an unscoped `GET /resource/{id}`, download, update, or export endpoint.
+### "One role check covers every object"
+Role-based access control answers broad questions such as whether someone may use a feature. Object-level authorization adds context: which customer's file, which team's project, which user's profile, and which action on it. Many applications need both checks.
+## Impact
+The impact follows the object and operation. Read access can disclose personal data, financial records, internal files, API keys, or business plans. Write access can alter payment details, permissions, workflow state, or audit records. Cross-tenant exposure can affect every customer of a hosted product.
+State the boundary clearly in a report. For example: "an authenticated user in tenant A can read an invoice belonging to tenant B." Avoid vague claims such as "all data is exposed" unless the evidence proves them.
+## How developers prevent it
+Make authorization part of the object lookup. Query by both the requested ID and the authenticated scope. For more complex policies, use a central authorization service or policy function before returning or changing the object.
+- Derive the actor and tenant from the verified session, not from client-controlled fields.
+- Apply the check to every method and representation, including downloads, exports, and background jobs.
+- Deny by default when an object is missing or outside the allowed scope.
+- Test with at least two users and two tenants. Cover read, update, and delete paths.
+- Log denied decisions without placing sensitive object contents in logs.
+Use opaque identifiers as defense in depth. Do not rely on them as the primary control. [CWE-639](https://cwe.mitre.org/data/definitions/639.html) describes the underlying authorization weakness.
 ## Related labs
-Practise on a live target:
-- [Duck cross](/labs/duck-cross) — five public reports, one restricted report, one missing check.
-Browse all [labs](/labs) when it is solved.
+Apply this technique after studying it:
+- [Duck cross](/labs/duck-cross)
+- [Firmdrama](/labs/firmdrama)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
 ## FAQ
-**Is IDOR the same as broken access control?**
-IDOR is one shape of it. The family covers missing function-level checks too. This page covers the object-level shape only.
-**Do I need special tooling?**
-No. A browser and a willingness to edit one number suffice. Read [how to play](/play) for the loop.
+### Is IDOR the same as broken access control?
+IDOR is a common object-level form of broken access control. Broken access control also includes missing function-level checks and other authorization failures.
+### Can a random identifier prevent IDOR?
+No. It can reduce casual guessing, but it cannot decide whether the requester may use an identifier they already know.
+### Should a secure API return 403 or 404?
+Either can be valid. Many APIs return `404` for an inaccessible object to reduce existence disclosure. The important control is that the server does not return or modify an unauthorized object.
+### What should I keep in a lab writeup?
+Keep the baseline request, the single changed reference, the response evidence, and a concise statement of the crossed authorization boundary.
 
 ## Mass assignment
 
 Source: https://openlabs.duckurity.com/technique/mass-assignment
 
 ## Overview
-Mass assignment happens when a server binds request fields straight onto a database object without an allowlist. The form and the update API accept the same shape, so anything you add to the request is saved. A locked property such as `role_id`, `is_admin`, or `verified` silently changes the object.
+Mass assignment happens when a server takes a client-controlled object and automatically copies its properties onto an internal model. It is also called auto-binding or over-posting. The convenience becomes dangerous when the model contains properties that the client must not set.
+For example, a profile form may only let a user change their display name and time zone. The underlying account record may also contain `is_staff`, `account_tier`, `owner_id`, `credit_limit`, or `email_verified`. If the update endpoint accepts the entire record, an added property can reach the database even though the UI never exposes it.
+OWASP groups these failures under [broken object property level authorization](https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/). Mass assignment describes the unsafe binding mechanism that often enables them.
+> **The request body is the trust boundary**
+>
+> The fields shown by a form are not an allowlist. A client can send any valid JSON property, including one that the front end never renders.
+## Why it happens
+Frameworks make it easy to deserialize JSON into an object, merge a patch into a model, or map fields onto an ORM record. That is useful for public fields. It is unsafe when the same model also contains permissions, ownership, approval state, financial limits, or internal workflow flags.
+Risk grows when an API does any of the following:
+- Binds an entire request object directly to a database entity.
+- Uses a generic `update`, `merge`, or `setattr` loop.
+- Reuses one schema for API input, API output, and storage.
+- Supports `PATCH`, JSON Patch, GraphQL mutations, or bulk-edit features without per-field policy checks.
+- Returns sensitive fields in a response and accepts the same shape on update.
 ## Examples
-Watch profile update, bulk edit, and registration endpoints. The UI sends ten fields. The update path binds eleven. Try adding `"role_id": "499"` or any field that appears in a response but never appears in the form. Compare the object before and after the request.
+### A profile update that trusts every field
+Imagine a customer portal that accepts this normal request:
+```http
+PATCH /api/profile
+Content-Type: application/json
+{
+  "display_name": "Nora",
+  "time_zone": "Africa/Cairo"
+}
+```
+An unsafe handler loops through every submitted property:
+```python
+# Unsafe: each client-supplied name becomes a model update.
+for name, value in request.json.items():
+    setattr(account, name, value)
+database.save(account)
+```
+The issue is not the visible fields. It is the absence of a server-side list of properties this actor may change. A production-style test might add one suspected protected field to an otherwise valid request and then verify whether the server persisted it on the current test account.
+### A registration flow that sets account state
+Registration endpoints can have the same flaw. A service may legitimately accept `name`, `email`, and `password`, while the stored object also includes `plan`, `is_partner`, and `approval_status`. If registration binds the full object, a new account can be created with an unintended state.
+### A generic patch endpoint
+JSON Patch makes each property explicit, but it does not enforce policy on its own:
+```json
+[
+  {"op": "replace", "path": "/display_name", "value": "Nora"},
+  {"op": "replace", "path": "/account_tier", "value": "enterprise"}
+]
+```
+The API must validate every patch path and every requested value. Checking only that the JSON is well formed leaves protected properties reachable.
+## How to recognise it in an authorized lab
+Start with a normal create or update request. Establish which fields are intended to be editable for the current account.
+1. Save a clean baseline request and the resulting object state.
+2. Compare the UI fields, API documentation, request body, and response body.
+3. List fields that look server-owned, role-related, financial, approval-related, or ownership-related.
+4. Add one candidate property to the original valid request. Do not change unrelated fields.
+5. Fetch the current test object's state again and compare the specific property.
+6. Record whether the property was rejected, ignored, normalized, or persisted.
+Test one property at a time. An error may mean a validation rule worked, a type was wrong, or the field was not recognised. A successful HTTP status can also mean the field was silently ignored. Verify the saved state through an allowed response or action.
+Useful places to inspect include account settings, invitations, checkout flows, bulk editors, support tickets, content-management forms, and GraphQL mutations. Look for fields that exist in responses but not in the normal form. Treat them as hypotheses, not proof.
+## What mass assignment is not
+### It is not only an admin flag
+Changing `is_admin` is an obvious example, but protected fields can also control ownership, spending limits, verification, discounts, approval status, feature access, or workflow state. A property can be security-sensitive without having an alarming name.
+### It is not the same as IDOR
+IDOR asks whether the requester may act on a particular object. Mass assignment asks whether the requester may change a particular property. One endpoint can have both problems. A secure design checks object ownership and limits writable properties.
+### It is not proven by an echoed response
+Some APIs reflect unrecognized properties in a temporary response. Others serialize calculated fields that cannot be written. Prove a finding by observing persistent server-side state or a meaningful server-controlled behaviour change in the lab.
+## Impact
+The impact depends on the property. A changed marketing preference may have little effect. A changed role, owner, approval state, or payment limit can undermine an entire business process. Automatic binding can also expose data on reads when an API returns properties that were meant to stay internal.
+Describe the impact as a specific unauthorized state transition. For example: "a standard account can set a server-managed approval state on its own profile." That is stronger and more useful than saying that arbitrary fields are accepted.
+## How developers prevent it
+Use dedicated input schemas. Define the few fields that an endpoint accepts, then construct the update explicitly. Keep permissions and server-managed state outside the client-controlled update object.
+```python
+# Safer: the endpoint chooses each permitted field.
+changes = {
+    "display_name": body.display_name,
+    "time_zone": body.time_zone,
+}
+account.update(changes)
+database.save(account)
+```
+- Allowlist writable fields for each endpoint and role.
+- Use separate request, response, and persistence models.
+- Reject unknown properties where the framework permits it.
+- Validate JSON Patch paths and GraphQL mutation arguments explicitly.
+- Derive ownership, roles, prices, and approvals on the server.
+- Add negative tests for every protected property and sensitive state transition.
+[CWE-915](https://cwe.mitre.org/data/definitions/915.html) covers this class as improperly controlled modification of dynamically determined object attributes.
 ## Related labs
-Practise on a live target:
-- [Firmdrama](/labs/firmdrama) — a meeting-room portal whose profile save accepts a protected role property and a misplaced delegation.
+Apply this technique after studying it:
+- [Firmdrama](/labs/firmdrama)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+## FAQ
+### Is mass assignment the same as broken object property level authorization?
+Mass assignment is a common way an API permits an unauthorized property change. Broken object property level authorization is the broader outcome: the API fails to enforce who may read or modify a sensitive property.
+### Does hiding a field in the UI fix it?
+No. The server must reject or ignore the field. A client can edit a request outside the UI.
+### What is the safest first test?
+Use your own authorized test object, preserve a normal request, add one low-impact candidate property, and verify the stored result. Do not send broad property lists.
+### Can PATCH be secure?
+Yes. PATCH is safe when the server allowlists paths and applies authorization and validation to every supported property.
+
+## SQL injection
+
+Source: https://openlabs.duckurity.com/technique/sqli
+
+## Overview
+SQL injection occurs when untrusted input is incorporated into a database query without appropriate parameterization or validation. Player-controlled input can alter the intended SQL query and may expose records beyond the application's normal search behavior.
+## Examples
+See the [duckrpc-archive](/labs/duckrpc-archive) lab for a gRPC archive service that mishandles query input.
+## Related labs
+- [duckrpc-archive](/labs/duckrpc-archive)
 Browse all [labs](/labs) when it is solved.
 ## FAQ
-**Is mass assignment the same as broken object property level authorization?**
-Mass assignment is one way to reach it. The parent issue is that the server never restricts which properties can change together. This page covers the update-binding shape.
-**Do I need special tooling?**
-No. Any HTTP client that can edit a request body is enough. Read [how to play](/play) for the loop.
+### Is every SQL error a SQL injection?
+No. An error may only mean the query failed. Injection requires proof that attacker-controlled input changed query behavior.
+Read [how to play](/play) for the usual solve loop.
 
 ## Server-side request forgery (SSRF)
 
@@ -1091,15 +1354,74 @@ A browser or `curl` is enough to start. Read [how to play](/play) for the loop.
 Source: https://openlabs.duckurity.com/technique/ssti
 
 ## Overview
-Server-side template injection happens when user-supplied text is interpolated into template source instead of passed as data. A renderer that evaluates `{{ expression }}` inside the input runs the expression on the server. Depending on the engine, that leads to property reads, file reads, or code execution.
+Server-side template injection happens when an application treats user input as template *source* instead of template *data*. Template engines turn a fixed template and a data context into HTML, email, a PDF, a report, or another response. If a user-controlled value becomes part of the template source before rendering, the engine can evaluate template syntax inside that value.
+This is different from simply showing submitted text in a page. A safe application keeps its template fixed and passes untrusted text as a value. An unsafe application builds a new template string from that text and then asks the engine to execute it.
+> **Escaping is not the primary fix**
+>
+> HTML escaping protects the output context. It does not make it safe to compile untrusted text as a server-side template. Keep template source fixed.
+## Why template engines are sensitive
+Template languages provide expressions, variables, loops, conditions, filters, and helper functions. Those features are useful to developers. Once untrusted input reaches the template compiler, the same features can expose data from the rendering context or invoke behaviour the author never intended.
+Potential impact depends on the engine, configuration, available context, and host privileges. A finding might only alter rendered content. It can also disclose server-side values, access files, make internal requests, or lead to server-side code execution in a weakly isolated environment. Do not assume the maximum impact without evidence.
 ## Examples
-Watch preview, invoice, report, and mail-render features. Send `{{7*7}}`. A response of `49` means the input is template source, and the engine is starting to run what you write.
+### A support-email preview
+Imagine a support tool that previews a customer message before sending it. The unsafe implementation builds template source through string concatenation:
+```python
+# Unsafe: message becomes part of the Jinja source code.
+source = "<h1>Support reply</h1><p>" + message + "</p>"
+html = render_template_string(source)
+```
+The safe implementation keeps the page structure in a reviewed template file and supplies `message` as data:
+```python
+# Safer: preview.html is fixed template source.
+html = render_template("preview.html", message=message)
+```
+Inside `preview.html`, the developer renders `{{ message }}`. The syntax belongs to the trusted template, not to the submitted message.
+### A report generator
+Report, invoice, and PDF features often combine user labels with a template engine. A service that formats a title with a language-level string interpolation and then compiles the result as a template creates the same risk. The correct design passes the title, recipient, and report data as named variables to a fixed template.
+### A user-selectable template
+Some products let administrators choose from several approved email layouts. That can be safe when the server maps a short key such as `"receipt"` to an allowlisted template file. It becomes risky when a client can submit raw template text or influence a template path without strict validation. Template-path traversal is a separate issue, but both flaws come from treating template selection as untrusted input.
+## How to recognise it in an authorized lab
+Look for endpoints that render or preview text. Common candidates include emails, notifications, invoices, document generators, report builders, CMS previews, localization features, and printable receipts.
+1. Submit a harmless literal marker and find where it appears in the response.
+2. Use error messages, documentation, response conventions, or client code to form a hypothesis about the template engine.
+3. Submit one harmless arithmetic expression that matches the suspected syntax, such as `{{ 7 * 7 }}` for Jinja-style engines.
+4. Compare the rendered output with the literal baseline. A computed result is evidence that the input reached an expression evaluator.
+5. Confirm the rendering context and input field with a minimal, repeatable request.
+6. Stop at the evidence needed by the lab. Avoid destructive payloads, resource-intensive expressions, and changes outside the authorized target.
+A result such as `49` is a strong signal only when the application returns the rendered server response. A client-side script, a calculation feature, or a different transformation can create misleading output. Capture the request and response. Record why the behaviour indicates server-side template evaluation.
+## Template syntax is engine-specific
+Do not use one syntax everywhere. Template languages differ.
+| Family | Common expression form | Typical use |
+| --- | --- | --- |
+| Jinja and Twig | `{{ 7 * 7 }}` | Python and PHP applications |
+| FreeMarker | `${7 * 7}` | Java applications |
+| EJS | `<%= 7 * 7 %>` | Node.js applications |
+The table is a starting point, not an engine fingerprint. Syntax can be customized, expressions can be disabled, and errors can be hidden. Choose a benign probe only after gathering evidence. Never treat an error string as a full map of the server environment.
+## SSTI, XSS, and similar issues
+### SSTI versus XSS
+Cross-site scripting runs in a visitor's browser. SSTI runs while the server renders a template. XSS defenses such as Content Security Policy and HTML output encoding do not replace a server-side template-source boundary.
+### SSTI versus expression injection
+Some products evaluate expressions in spreadsheets, search filters, workflow rules, or client-side frameworks. The testing method can look similar. Identify the interpreter and where it runs before classifying the issue.
+### Reflected text is not enough
+If a submitted string appears in a response unchanged, it may simply be normal reflection. The key evidence is that the server interpreted template syntax contained in the input.
+## How developers prevent it
+Use static templates stored with the application. Pass user-controlled values as data to the renderer. Keep template selection to a server-side allowlist. Do not use concatenation, runtime compilation, or a dynamic-template API with untrusted text.
+- Separate template source, template selection, and template data.
+- Enable output encoding for the target format, such as HTML, even after fixing SSTI.
+- Keep the rendering process low-privilege and restrict its access to secrets and local files.
+- Treat user-authored templates as a high-risk product feature. Isolate and sandbox them rather than mixing them with application templates.
+- Add tests that submit template delimiters as ordinary user data and assert that they remain literal.
+- Review email, PDF, preview, export, and notification paths during code review.
 ## Related labs
-Practise on a live target:
-- [Firmdrama](/labs/firmdrama) — a legacy `v1` ticket preview that evaluates submitted text as Jinja source.
-Browse all [labs](/labs) when it is solved.
+Apply this technique after studying it:
+- [Firmdrama](/labs/firmdrama)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
 ## FAQ
-**Is SSTI the same as a cross-site scripting bug?**
-No. XSS runs in a visitor's browser. SSTI runs on the server at the application's privilege level, so the stakes are far higher.
-**Do I need special tooling?**
-No. A browser or `curl` is enough to detect it. Read [how to play](/play) for the loop.
+### Is SSTI always remote code execution?
+No. The result depends on the engine, available objects, sandboxing, and process privileges. A safe report describes the behaviour that was actually proven.
+### Does autoescaping prevent SSTI?
+No. Autoescaping protects how a value is placed into output. SSTI begins earlier, when the value is made part of template source.
+### Why use arithmetic as a first test?
+It is a small, non-destructive way to distinguish literal rendering from expression evaluation when the syntax matches the suspected engine.
+### What should I include in a lab writeup?
+Include the benign baseline, the minimal expression, the rendered result, the likely engine evidence, and the security boundary that the server crossed.

@@ -3,3 +3,4 @@ track: web
 difficulty: medium
 description: "Inspect an internal employee management API and recover a protected employee archive. The lab starts with a low-privileged analyst account and explores how security boundaries are enforced across an API."
 flag_hash: "e664cdf2eeb7805adff9880400ae72f43a1ccd6c419237aad905523d2d597c02"
+techniques: [idor]
