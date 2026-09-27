@@ -21,6 +21,7 @@ import argparse
 import json
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -53,7 +54,7 @@ def git_reviewed_commit() -> str:
     return result.stdout.strip()
 
 
-def git_commit_date(commit: str) -> str:
+def git_commit_timestamp_iso(commit: str) -> str:
     result = subprocess.run(
         ["git", "show", "-s", "--format=%cI", commit],
         cwd=REPO_ROOT,
@@ -62,6 +63,23 @@ def git_commit_date(commit: str) -> str:
         text=True,
     )
     return result.stdout.strip()
+
+
+def git_reviewed_on_utc(commit: str) -> str:
+    """Calendar date of the committer timestamp in UTC.
+
+    Do not slice ``%cI``; GitHub merge commits often carry a +03:00 offset that
+    rolls the local calendar day ahead of UTC and breaks wiki --check on CI.
+    """
+    result = subprocess.run(
+        ["git", "show", "-s", "--format=%ct", commit],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    ts = int(result.stdout.strip())
+    return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
 
 
 def run_validate_inventory() -> dict:
@@ -196,7 +214,7 @@ def local_ci_commands() -> list[dict]:
 
 def build_report() -> dict:
     commit = git_reviewed_commit()
-    commit_timestamp = git_commit_date(commit)
+    commit_timestamp = git_commit_timestamp_iso(commit)
     inventory = run_validate_inventory()
     manifest = supported_manifest(inventory)
     validate_exit = exit_code_for_report(inventory)
@@ -213,7 +231,7 @@ def build_report() -> dict:
         "version": REPORT_VERSION,
         "parent_issue": 72,
         "reviewed_commit": commit,
-        "reviewed_on": commit_timestamp[:10],
+        "reviewed_on": git_reviewed_on_utc(commit),
         "commit_timestamp": commit_timestamp,
         "catalog": inventory["catalog"],
         "uncatalogued": inventory["uncatalogued"],
