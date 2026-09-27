@@ -12,7 +12,9 @@ on:
       - "scripts/fixtures/ci_routing_matrix.json"
       - "scripts/fixtures/m0_exit_criteria.json"
       - "scripts/fixtures/m0_branch_protection.json"
+      - "scripts/fixtures/lab_author_github.json"
       - "scripts/test_ci_routing_matrix.py"
+      - "scripts/test_sync_site_content.py"
       - "scripts/baseline_report.py"
       - "scripts/test_baseline_report.py"
   push:
@@ -26,7 +28,9 @@ on:
       - "scripts/fixtures/ci_routing_matrix.json"
       - "scripts/fixtures/m0_exit_criteria.json"
       - "scripts/fixtures/m0_branch_protection.json"
+      - "scripts/fixtures/lab_author_github.json"
       - "scripts/test_ci_routing_matrix.py"
+      - "scripts/test_sync_site_content.py"
       - "scripts/baseline_report.py"
       - "scripts/test_baseline_report.py"
   workflow_dispatch:
@@ -61,3 +65,6 @@ jobs:
 
       - name: Validate M0 baseline report
         run: python3 scripts/test_baseline_report.py
+
+      - name: Validate lab author GitHub fixture
+        run: python3 scripts/test_sync_site_content.py
