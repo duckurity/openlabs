@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -26,6 +27,11 @@ def main() -> int:
         if got != expected:
             failures += 1
             print(f"github_login_from_git_name({name!r}): got {got!r}, want {expected!r}")
+    fixture = Path(__file__).resolve().parent / "fixtures" / "lab_author_github.json"
+    data = json.loads(fixture.read_text(encoding="utf-8"))
+    if data.get("labs", {}).get("labs/web/firmdrama") != "ziadelboshy":
+        failures += 1
+        print("lab_author_github.json must map firmdrama to ziadelboshy")
     if failures:
         print(f"failed {failures} cases")
         return 1

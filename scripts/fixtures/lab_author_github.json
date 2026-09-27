@@ -1,0 +1,8 @@
+{
+  "version": "openlabs.lab_author_github.v1",
+  "labs": {
+    "labs/web/firmdrama": "ziadelboshy",
+    "labs/web/snapsync": "marokhaled9876",
+    "labs/web/vault-api": "ziadelgoharyy"
+  }
+}
