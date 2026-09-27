@@ -5,6 +5,9 @@
   "author": "Mohamed Swilam",
   "private": true,
   "license": "UNLICENSED",
+  "overrides": {
+    "glob": "^11.0.3"
+  },
   "scripts": {
     "build": "nest build",
     "start": "node dist/main",
@@ -43,7 +46,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.4.5",
+    "@nestjs/cli": "10.4.9",
     "@nestjs/schematics": "^10.1.4",
     "@nestjs/testing": "^10.4.0",
     "@types/bcryptjs": "^2.4.6",
