@@ -280,7 +280,7 @@ jobs:
       - name: Regenerate lab pages
         run: |
           python3 scripts/sync_catalog_public.py --check
-          python3 scripts/sync_site_content.py
+          python3 scripts/sync_site_content.py --check
           python3 scripts/test_lab_author_metadata.py
 
       - name: Check strict SEO contracts

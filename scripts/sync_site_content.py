@@ -278,11 +278,12 @@ def resolve_creator_login(
     cache: dict,
     overrides: dict[str, str],
 ) -> str:
+    override = overrides.get(lab_rel, "").strip()
+    if override:
+        return override
     login = login_from_email(email.strip()) or commit_login(owner_repo, sha.strip(), cache)
     if not login:
         login = github_login_from_git_name(name)
-    if not login:
-        login = overrides.get(lab_rel, "").strip()
     if not login:
         pr = introducing_pr(owner_repo, lab_rel, cache)
         login = str(pr.get("author", "")).strip()
@@ -299,10 +300,12 @@ def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     """
     owner_repo = repo_slug()
     cache = github_cache_load()
+    history_path = lab_dir / "lab.yml"
+    git_path = str(history_path if history_path.is_file() else lab_dir)
     try:
         out = subprocess.run(
             ["git", "log", "--reverse", "--no-merges", "--format=%H|%an|%ae|%ad",
-             "--date=short", "--", str(lab_dir)],
+             "--date=short", "--", git_path],
             capture_output=True,
             text=True,
             cwd=ROOT,
@@ -315,8 +318,6 @@ def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     sha, _, rest = out[0].partition("|")
     name, _, email_date = rest.partition("|")
     email, _, date = email_date.partition("|")
-    lab_rel = lab_dir.relative_to(ROOT).as_posix()
-
     lab_rel = lab_dir.relative_to(ROOT).as_posix()
     overrides = load_creator_login_overrides()
 
