@@ -152,11 +152,23 @@ def github_cache_save(cache: dict) -> None:
     GITHUB_CACHE.write_text(json.dumps(cache, indent=2), encoding="utf-8")
 
 
+def sync_hermetic() -> bool:
+    import os
+
+    return os.environ.get("OPENLABS_SYNC_HERMETIC", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+
+
 def github_api(path: str) -> object | None:
     """GET a GitHub API path. Returns None offline, unauthenticated-limited,
     or on any failure — callers always fall back to local git data."""
     import os
 
+    if sync_hermetic():
+        return None
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "openlabs-sync",

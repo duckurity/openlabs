@@ -278,6 +278,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Regenerate lab pages
+        env:
+          OPENLABS_SYNC_HERMETIC: "1"
         run: |
           python3 scripts/sync_catalog_public.py --check
           python3 scripts/sync_site_content.py --check
