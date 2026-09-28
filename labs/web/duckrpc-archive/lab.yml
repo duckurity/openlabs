@@ -3,5 +3,5 @@ track: web
 difficulty: medium
 description: A gRPC document archive with authentication and a SQL injection vulnerability.
 flag_hash: 0d8a8e8a4519e388cb242a4ecf6318d9b32ccd92644d72f90b0f927e37c1818a
-status: supported
+status: experimental
 techniques: [sqli]

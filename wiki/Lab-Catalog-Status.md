@@ -46,6 +46,10 @@ Promotion and demotion rules stay in this page. **`duck-cross`** is the
 reference supported lab; CI proves L0–L6 with
 `python3 scripts/prove_reference_lab.py`.
 
+In [#99](https://github.com/duckurity/openlabs/issues/99), labs without
+per-lab L0–L6 evidence were set to `experimental` until promotion pulls
+add evidence in the same change.
+
 ## Local checks
 
 ```bash

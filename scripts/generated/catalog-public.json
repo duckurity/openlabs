@@ -2,6 +2,38 @@
   "catalogued_count": 20,
   "experimental": [
     {
+      "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
+      "difficulty": "hard",
+      "name": "aegis-ctf",
+      "path": "labs/web/aegis-ctf",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "A cafe rules site with a report bot and a guarded back-room route.",
+      "difficulty": "medium",
+      "name": "cafe-house-rules",
+      "path": "labs/web/cafe-house-rules",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.",
+      "difficulty": "hard",
+      "name": "cloudvault",
+      "path": "labs/web/cloudvault",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "An internal project workspace for staff and interns.",
+      "difficulty": "medium",
+      "name": "duck-nest",
+      "path": "labs/web/duck-nest",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
       "description": "A tenant document API with a gRPC transcoding authorization bypass.",
       "difficulty": "medium",
       "name": "duckexchange",
@@ -10,10 +42,66 @@
       "track": "web"
     },
     {
+      "description": "A gRPC document archive with authentication and a SQL injection vulnerability.",
+      "difficulty": "medium",
+      "name": "duckrpc-archive",
+      "path": "labs/web/duckrpc-archive",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "A records portal leaks an internal reference through broken access control and weak authorization.",
+      "difficulty": "medium",
+      "name": "duckvault",
+      "path": "labs/web/duckvault",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "A document management API with a broken object-level authorization check.",
+      "difficulty": "easy",
+      "name": "duckvault-web-ctf",
+      "path": "labs/web/duckvault-web-ctf",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "A tenant portal with email open tracking and an admin export surface.",
+      "difficulty": "medium",
+      "name": "fieldops-360",
+      "path": "labs/web/fieldops-360",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "A law firm's meeting-room portal with chained API authorization flaws and a vulnerable legacy template renderer.",
+      "difficulty": "hard",
+      "name": "firmdrama",
+      "path": "labs/web/firmdrama",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
       "description": "InvoicePortal is a SaaS platform for managing company invoices.",
       "difficulty": "medium",
       "name": "invoiceportal",
       "path": "labs/web/invoiceportal",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, OAST, internal reconnaissance, and DNS rebinding to bypass hostname validation and reach internal infrastructure.",
+      "difficulty": "medium",
+      "name": "nexora-platform",
+      "path": "labs/web/nexora-platform",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level access.",
+      "difficulty": "hard",
+      "name": "shopvault",
+      "path": "labs/web/shopvault",
       "status": "experimental",
       "track": "web"
     },
@@ -34,15 +122,39 @@
       "track": "web"
     },
     {
+      "description": "A task-management platform with a chained REST, GraphQL, and gRPC attack path.",
+      "difficulty": "hard",
+      "name": "switf01-hit3",
+      "path": "labs/web/switf01-hit3",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "An e-commerce GraphQL API with a chained authentication bypass, SSRF, and command injection vulnerability.",
+      "difficulty": "hard",
+      "name": "techvault",
+      "path": "labs/web/techvault",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
       "description": "A clothing store REST API. One customer sees more than they should.",
       "difficulty": "medium",
       "name": "threadline",
       "path": "labs/web/threadline",
       "status": "experimental",
       "track": "web"
+    },
+    {
+      "description": "Inspect an internal employee management API and recover a protected employee archive. The lab starts with a low-privileged analyst account and explores how security boundaries are enforced across an API.",
+      "difficulty": "medium",
+      "name": "vault-api",
+      "path": "labs/web/vault-api",
+      "status": "experimental",
+      "track": "web"
     }
   ],
-  "experimental_count": 5,
+  "experimental_count": 19,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
     "directory_count": 25,
@@ -57,126 +169,14 @@
   },
   "supported": [
     {
-      "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
-      "difficulty": "hard",
-      "name": "aegis-ctf",
-      "path": "labs/web/aegis-ctf",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "A cafe rules site with a report bot and a guarded back-room route.",
-      "difficulty": "medium",
-      "name": "cafe-house-rules",
-      "path": "labs/web/cafe-house-rules",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.",
-      "difficulty": "hard",
-      "name": "cloudvault",
-      "path": "labs/web/cloudvault",
-      "status": "supported",
-      "track": "web"
-    },
-    {
       "description": "A reports portal with a missing object-level authorization check.",
       "difficulty": "easy",
       "name": "duck-cross",
       "path": "labs/web/duck-cross",
       "status": "supported",
       "track": "web"
-    },
-    {
-      "description": "An internal project workspace for staff and interns.",
-      "difficulty": "medium",
-      "name": "duck-nest",
-      "path": "labs/web/duck-nest",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "A gRPC document archive with authentication and a SQL injection vulnerability.",
-      "difficulty": "medium",
-      "name": "duckrpc-archive",
-      "path": "labs/web/duckrpc-archive",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "A records portal leaks an internal reference through broken access control and weak authorization.",
-      "difficulty": "medium",
-      "name": "duckvault",
-      "path": "labs/web/duckvault",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "A document management API with a broken object-level authorization check.",
-      "difficulty": "easy",
-      "name": "duckvault-web-ctf",
-      "path": "labs/web/duckvault-web-ctf",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "A tenant portal with email open tracking and an admin export surface.",
-      "difficulty": "medium",
-      "name": "fieldops-360",
-      "path": "labs/web/fieldops-360",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "A law firm's meeting-room portal with chained API authorization flaws and a vulnerable legacy template renderer.",
-      "difficulty": "hard",
-      "name": "firmdrama",
-      "path": "labs/web/firmdrama",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, OAST, internal reconnaissance, and DNS rebinding to bypass hostname validation and reach internal infrastructure.",
-      "difficulty": "medium",
-      "name": "nexora-platform",
-      "path": "labs/web/nexora-platform",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level access.",
-      "difficulty": "hard",
-      "name": "shopvault",
-      "path": "labs/web/shopvault",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "A task-management platform with a chained REST, GraphQL, and gRPC attack path.",
-      "difficulty": "hard",
-      "name": "switf01-hit3",
-      "path": "labs/web/switf01-hit3",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "An e-commerce GraphQL API with a chained authentication bypass, SSRF, and command injection vulnerability.",
-      "difficulty": "hard",
-      "name": "techvault",
-      "path": "labs/web/techvault",
-      "status": "supported",
-      "track": "web"
-    },
-    {
-      "description": "Inspect an internal employee management API and recover a protected employee archive. The lab starts with a low-privileged analyst account and explores how security boundaries are enforced across an API.",
-      "difficulty": "medium",
-      "name": "vault-api",
-      "path": "labs/web/vault-api",
-      "status": "supported",
-      "track": "web"
     }
   ],
-  "supported_count": 15,
+  "supported_count": 1,
   "version": "openlabs.catalog-public.v1"
 }

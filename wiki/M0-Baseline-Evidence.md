@@ -6,8 +6,8 @@ Reviewed on `2026-09-28`. Regenerate with `python3 scripts/baseline_report.py --
 
 ## Catalog manifest
 
-- Supported: **15**
-- Experimental: **5**
+- Supported: **1**
+- Experimental: **19**
 - Invalid status: **0**
 - Uncatalogued directories: **5**
 
@@ -17,21 +17,7 @@ At least one lab must be the verified reference (`duck-cross`).
 
 | Path | Name | Validates | Reference |
 |:---|:---|:---:|:---:|
-| `labs/web/aegis-ctf` | aegis-ctf | yes | no |
-| `labs/web/cafe-house-rules` | cafe-house-rules | yes | no |
-| `labs/web/cloudvault` | cloudvault | yes | no |
 | `labs/web/duck-cross` | duck-cross | yes | yes |
-| `labs/web/duck-nest` | duck-nest | yes | no |
-| `labs/web/duckrpc-archive` | duckrpc-archive | yes | no |
-| `labs/web/duckvault` | duckvault | yes | no |
-| `labs/web/duckvault-web-ctf` | duckvault-web-ctf | yes | no |
-| `labs/web/fieldops-360` | fieldops-360 | yes | no |
-| `labs/web/firmdrama` | firmdrama | yes | no |
-| `labs/web/nexora-platform` | nexora-platform | yes | no |
-| `labs/web/shopvault` | shopvault | yes | no |
-| `labs/web/switf01-hit3` | switf01-hit3 | yes | no |
-| `labs/web/techvault` | techvault | yes | no |
-| `labs/web/vault-api` | vault-api | yes | no |
 
 ## Validation results
 
@@ -65,11 +51,25 @@ Run the script locally or read CI artifacts; this report does not start containe
 
 ### Experimental labs (not promoted)
 
+- `labs/web/aegis-ctf` (validates)
+- `labs/web/cafe-house-rules` (validates)
+- `labs/web/cloudvault` (validates)
+- `labs/web/duck-nest` (validates)
 - `labs/web/duckexchange` (validates)
+- `labs/web/duckrpc-archive` (validates)
+- `labs/web/duckvault` (validates)
+- `labs/web/duckvault-web-ctf` (validates)
+- `labs/web/fieldops-360` (validates)
+- `labs/web/firmdrama` (validates)
 - `labs/web/invoiceportal` (validates)
+- `labs/web/nexora-platform` (validates)
+- `labs/web/shopvault` (validates)
 - `labs/web/snapconnect` (validates)
 - `labs/web/snapsync` (validates)
+- `labs/web/switf01-hit3` (validates)
+- `labs/web/techvault` (validates)
 - `labs/web/threadline` (validates)
+- `labs/web/vault-api` (validates)
 
 ### Triage follow-ups (from M0-05)
 

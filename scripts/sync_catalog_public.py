@@ -107,7 +107,7 @@ def render_readme_body(catalog: dict, chips: dict[str, str]) -> str:
     header = (
         f"<sub>{supported} supported · {experimental} experimental</sub>\n\n"
         "<div align=\"center\">\n\n"
-        f"**{supported} supported** labs ship with maintainer evidence. "
+        "**Supported** labs have documented L0–L6 evidence on file. "
         f"**{experimental} experimental** labs are runnable but not promoted. "
         "Experimental entries are not guaranteed supported.\n\n"
     )
