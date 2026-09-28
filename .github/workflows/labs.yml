@@ -174,6 +174,7 @@ jobs:
           python3 scripts/test_lab_triage_inventory.py
           python3 scripts/test_sync_catalog_public.py
           python3 scripts/test_baseline_report.py
+          python3 scripts/test_lab_author_metadata.py
           python3 scripts/baseline_report.py --check --wiki wiki/M0-Baseline-Evidence.md
 
       - name: Validate compose files
@@ -280,6 +281,7 @@ jobs:
         run: |
           python3 scripts/sync_catalog_public.py --check
           python3 scripts/sync_site_content.py
+          python3 scripts/test_lab_author_metadata.py
 
       - name: Check strict SEO contracts
         run: pnpm exec contentbit doctor --strict-seo
