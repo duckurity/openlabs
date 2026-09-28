@@ -28,8 +28,9 @@ pushes stop expensive work.
 
 `push` to `main` and `workflow_dispatch` always run every labs job.
 
-Pull requests run **Detect change scope** first, then only the jobs marked
-`true` in the step summary.
+Pull requests always start the **labs** workflow and run **Detect change scope**
+first. Path filters in that job mark which expensive jobs run; **CI required**
+still reports on every pull request.
 
 **Dependabot pull requests** always run the full baseline (same jobs as `push`
 to `main`). Root `package.json` / lockfile bumps only matched the content
@@ -45,7 +46,7 @@ M0 wiki check) on the PR but ran it on merge to `main`.
 | `templates/labsheet.cls` only | no | no | no | yes | no |
 | `content/**/*.mdx` only | no | no | yes | no | no |
 | `labs/web/duck-cross/**` | yes | yes | yes | yes | yes |
-| `wiki/**` only | workflow does not start | | | | |
+| `wiki/**` only | no | no | no | no | no |
 
 Machine-readable examples live in
 `scripts/fixtures/ci_routing_matrix.json`. Verify with

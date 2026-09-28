@@ -2,16 +2,6 @@ name: labs
 
 on:
   pull_request:
-    paths:
-      - "labs/**"
-      - "scripts/**"
-      - "content/**"
-      - "contentbit.config.ts"
-      - "contentbit.seo.config.ts"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "templates/**"
-      - ".github/workflows/labs.yml"
   push:
     branches: [main]
     paths:

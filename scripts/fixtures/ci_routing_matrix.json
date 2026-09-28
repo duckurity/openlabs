@@ -47,7 +47,12 @@
     },
     {
       "change": "wiki/Home.md only",
-      "labs_workflow_triggers": false
+      "run_validate": false,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": false,
+      "note": "pull_request runs labs workflow; path filter skips expensive jobs"
     }
   ]
 }
