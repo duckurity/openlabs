@@ -67,6 +67,8 @@ jobs:
               - 'scripts/test_status*.py'
               - 'scripts/test_lab_triage*.py'
               - 'scripts/test_sync_catalog*.py'
+              - 'scripts/test_sync_site_content.py'
+              - 'scripts/fixtures/lab_author_github.json'
               - 'scripts/test_baseline_report.py'
               - 'scripts/baseline_report.py'
               - 'scripts/fixtures/**'
@@ -183,6 +185,7 @@ jobs:
           python3 scripts/test_status_aware_inventory.py
           python3 scripts/test_lab_triage_inventory.py
           python3 scripts/test_sync_catalog_public.py
+          python3 scripts/test_sync_site_content.py
           python3 scripts/test_baseline_report.py
           python3 scripts/baseline_report.py --check --wiki wiki/M0-Baseline-Evidence.md
 

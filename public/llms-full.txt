@@ -157,9 +157,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-<!-- catalog-public:start -->
 The public catalog lists **15 supported** and **5 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
-<!-- catalog-public:end -->
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 

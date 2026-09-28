@@ -30,6 +30,7 @@ LABS = ROOT / "labs"
 OUT = ROOT / "content" / "labs"
 CONTENT = ROOT / "content"
 PUBLIC = ROOT / "public"
+AUTHOR_GITHUB_PATH = Path(__file__).resolve().parent / "fixtures" / "lab_author_github.json"
 
 FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 
@@ -195,6 +196,22 @@ def github_login_from_git_name(name: str) -> str:
     return candidate
 
 
+def lab_author_github_overrides() -> dict[str, str]:
+    try:
+        data = json.loads(AUTHOR_GITHUB_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    labs = data.get("labs")
+    if not isinstance(labs, dict):
+        return {}
+    return {str(key): str(value).strip() for key, value in labs.items() if value}
+
+
+def apply_github_login(creator: dict[str, str], login: str) -> None:
+    creator["author_url"] = f"https://github.com/{login}"
+    creator["author_avatar"] = f"https://github.com/{login}.png"
+
+
 def commit_login(owner_repo: str, sha: str, cache: dict) -> str:
     """GitHub login for a commit sha, cached. Empty when unresolvable."""
     key = f"commit:{sha}"
@@ -279,19 +296,20 @@ def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     creator: dict[str, str] = {"author_name": name.strip()}
     if date.strip():
         creator["author_date"] = date.strip()
-    login = login_from_email(email.strip()) or commit_login(owner_repo, sha.strip(), cache)
+    login = (
+        login_from_email(email.strip())
+        or commit_login(owner_repo, sha.strip(), cache)
+        or github_login_from_git_name(name)
+    )
+    override = lab_author_github_overrides().get(lab_rel, "").strip()
+    if override:
+        login = override
     if login:
-        creator["author_url"] = f"https://github.com/{login}"
-        creator["author_avatar"] = f"https://github.com/{login}.png"
+        apply_github_login(creator, login)
     else:
-        login = github_login_from_git_name(name)
-        if login:
-            creator["author_url"] = f"https://github.com/{login}"
-            creator["author_avatar"] = f"https://github.com/{login}.png"
-        else:
-            creator["author_url"] = (
-                f"https://github.com/{owner_repo}/commits/main/{lab_rel}"
-            )
+        creator["author_url"] = (
+            f"https://github.com/{owner_repo}/commits/main/{lab_rel}"
+        )
 
     verifier: dict[str, str] = {}
     pr = introducing_pr(owner_repo, lab_rel, cache)
