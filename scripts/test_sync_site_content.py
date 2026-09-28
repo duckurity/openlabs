@@ -16,6 +16,7 @@ def main() -> int:
     failures = 0
     cases = [
         ("mirnashams01-star", "mirnashams01-star"),
+        ("suhila1.c", "suhila1.c"),
         ("moayedellah", "moayedellah"),
         ("Ziad Osama El-Boshy", ""),
         ("", ""),

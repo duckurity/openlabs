@@ -181,8 +181,27 @@ def login_from_email(email: str) -> str:
 
 
 GITHUB_LOGIN_RE = re.compile(
-    r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$"
+    r"^[a-zA-Z0-9](?:[a-zA-Z0-9.-]{0,37}[a-zA-Z0-9])?$"
 )
+
+CREATOR_LOGINS_PATH = (
+    Path(__file__).resolve().parent / "fixtures" / "lab_creator_github.json"
+)
+
+GITHUB_PROFILE_URL_RE = re.compile(
+    r"^https://github\.com/[a-zA-Z0-9](?:[a-zA-Z0-9.-]{0,37}[a-zA-Z0-9])?$"
+)
+
+
+def load_creator_login_overrides() -> dict[str, str]:
+    try:
+        data = json.loads(CREATOR_LOGINS_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    labs = data.get("labs")
+    if not isinstance(labs, dict):
+        return {}
+    return {str(key): str(value) for key, value in labs.items() if value}
 
 
 def github_login_from_git_name(name: str) -> str:
@@ -240,12 +259,34 @@ def introducing_pr(owner_repo: str, lab_rel: str, cache: dict) -> dict:
         if not isinstance(files, list):
             continue
         if any(str(f.get("filename", "")).startswith(lab_rel + "/") for f in files):
+            author = (pr.get("user") or {}).get("login", "")
             merger = (pr.get("merged_by") or {}).get("login", "")
-            result = {"number": number, "merger": merger}
+            result = {"number": number, "merger": merger, "author": author}
             break
     if result:
         cache[key] = {**result, "ts": time.time()}
     return result
+
+
+def resolve_creator_login(
+    *,
+    sha: str,
+    email: str,
+    name: str,
+    lab_rel: str,
+    owner_repo: str,
+    cache: dict,
+    overrides: dict[str, str],
+) -> str:
+    login = login_from_email(email.strip()) or commit_login(owner_repo, sha.strip(), cache)
+    if not login:
+        login = github_login_from_git_name(name)
+    if not login:
+        login = overrides.get(lab_rel, "").strip()
+    if not login:
+        pr = introducing_pr(owner_repo, lab_rel, cache)
+        login = str(pr.get("author", "")).strip()
+    return login
 
 
 def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
@@ -276,22 +317,26 @@ def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     email, _, date = email_date.partition("|")
     lab_rel = lab_dir.relative_to(ROOT).as_posix()
 
-    creator: dict[str, str] = {"author_name": name.strip()}
+    lab_rel = lab_dir.relative_to(ROOT).as_posix()
+    overrides = load_creator_login_overrides()
+
+    login = resolve_creator_login(
+        sha=sha,
+        email=email,
+        name=name.strip(),
+        lab_rel=lab_rel,
+        owner_repo=owner_repo,
+        cache=cache,
+        overrides=overrides,
+    )
+
+    creator: dict[str, str] = {}
     if date.strip():
         creator["author_date"] = date.strip()
-    login = login_from_email(email.strip()) or commit_login(owner_repo, sha.strip(), cache)
     if login:
+        creator["author_name"] = login
         creator["author_url"] = f"https://github.com/{login}"
         creator["author_avatar"] = f"https://github.com/{login}.png"
-    else:
-        login = github_login_from_git_name(name)
-        if login:
-            creator["author_url"] = f"https://github.com/{login}"
-            creator["author_avatar"] = f"https://github.com/{login}.png"
-        else:
-            creator["author_url"] = (
-                f"https://github.com/{owner_repo}/commits/main/{lab_rel}"
-            )
 
     verifier: dict[str, str] = {}
     pr = introducing_pr(owner_repo, lab_rel, cache)
