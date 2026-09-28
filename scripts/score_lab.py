@@ -62,9 +62,27 @@ SECRET_RES = (
 
 FLAG_PLAINTEXT_RE = re.compile(r"duck\{[a-z0-9_]{16,40}\}")
 
+# Hermetic scoring: ignore vendored trees that are not part of the lab image.
+_SKIP_DIR_NAMES = frozenset(
+    {
+        ".git",
+        "__pycache__",
+        "dist",
+        "node_modules",
+        "vendor",
+    }
+)
+
 
 def lab_files(lab: Path) -> list[Path]:
-    return [p for p in lab.rglob("*") if p.is_file() and ".git" not in p.parts]
+    files: list[Path] = []
+    for path in lab.rglob("*"):
+        if not path.is_file():
+            continue
+        if _SKIP_DIR_NAMES.intersection(path.relative_to(lab).parts):
+            continue
+        files.append(path)
+    return sorted(files)
 
 
 def score_structure(lab: Path) -> tuple[int, list[str]]:
