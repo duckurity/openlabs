@@ -94,12 +94,28 @@ def test_setup_dry_run_envelope() -> None:
 
 
 def test_doctor_fix_dry_run_planned_fixes() -> None:
-    code, out, _err = _run(["--json", "--dry-run", "doctor", "--fix"])
-    assert code == 0
-    payload = _json(out, label="doctor-fix-dry.json")
-    assert payload["data"]["fix"] is True
-    assert PLANNED_CONFIG_FIX in payload["data"]["planned_fixes"]
-    assert PLANNED_CATALOG_FIX in payload["data"]["planned_fixes"]
+    from openlabs_cli.repo_config import config_path, load_config
+
+    cfg = config_path(REPO_ROOT)
+    backup: str | None = None
+    if cfg.is_file():
+        backup = cfg.read_text(encoding="utf-8")
+        cfg.unlink()
+    assert load_config(REPO_ROOT) is None
+    try:
+        code, out, err = _run(["--json", "--dry-run", "doctor", "--fix"])
+        assert code == 0, f"exit={code} stderr={err!r} stdout={out[:500]!r}"
+        payload = _json(out, label="doctor-fix-dry.json")
+        assert payload["data"]["fix"] is True
+        planned = payload["data"]["planned_fixes"]
+        assert PLANNED_CONFIG_FIX in planned
+        assert PLANNED_CATALOG_FIX in planned
+    finally:
+        if backup is not None:
+            cfg.parent.mkdir(parents=True, exist_ok=True)
+            cfg.write_text(backup, encoding="utf-8")
+        elif cfg.is_file():
+            cfg.unlink()
 
 
 def test_doctor_json_read_only() -> None:
