@@ -81,6 +81,12 @@ python3 scripts/test_contract.py         # contract conformance gate (M1-08)
 python3 scripts/test_openlabs_cli.py     # openlabs CLI core (M2-02)
 python3 scripts/test_openlabs_issue.py     # issue explain and bundle (M2-03)
 python3 scripts/test_openlabs_lab_discovery.py  # lab list and selection (M2-04)
+python3 scripts/test_openlabs_environment.py  # preflight probes (M2-05)
+python3 scripts/test_openlabs_doctor.py     # setup and doctor (M2-05)
+python3 scripts/test_openlabs_state.py      # state and locking (M2-06)
+python3 scripts/test_openlabs_namespace.py  # compose namespacing (M2-06)
+python3 scripts/test_openlabs_port.py       # host port policy (M2-06)
+python3 scripts/test_openlabs_lab_setup.py  # lab setup transaction (M2-06)
 ./openlabs --help                        # CLI entry (M2-02)
 python3 scripts/validate_issue_forms.py   # issue form labels and intake links
 python3 scripts/validate.py --compose    # + docker compose config

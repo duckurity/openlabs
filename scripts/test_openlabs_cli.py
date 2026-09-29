@@ -73,12 +73,13 @@ def test_unknown_command_json() -> None:
     assert payload["diagnostics"][0]["key"] == "lifecycle.cli.usage"
 
 
-def test_setup_not_implemented_json() -> None:
+def test_setup_json_envelope() -> None:
     code, out, _err = _run(["--json", "setup"])
-    assert code == 1
     payload = _validate_json(out, label="setup.json")
     assert payload["command"] == "setup"
-    assert payload["diagnostics"][0]["key"] == "lifecycle.cli.not_implemented"
+    assert payload["data"]["action"] == "run"
+    assert "checks" in payload["data"]
+    assert "tier" in payload["data"]
 
 
 def test_repo_layout_invalid() -> None:
@@ -161,7 +162,7 @@ def main() -> int:
         test_version_json_envelope,
         test_help_json_envelope,
         test_unknown_command_json,
-        test_setup_not_implemented_json,
+        test_setup_json_envelope,
         test_repo_layout_invalid,
         test_dry_run_flag_reaches_envelope,
         test_redaction_in_diagnostic_message,

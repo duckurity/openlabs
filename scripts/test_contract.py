@@ -18,6 +18,12 @@ STEPS = (
     "test_openlabs_cli.py",
     "test_openlabs_issue.py",
     "test_openlabs_lab_discovery.py",
+    "test_openlabs_environment.py",
+    "test_openlabs_doctor.py",
+    "test_openlabs_state.py",
+    "test_openlabs_namespace.py",
+    "test_openlabs_port.py",
+    "test_openlabs_lab_setup.py",
 )
 
 
