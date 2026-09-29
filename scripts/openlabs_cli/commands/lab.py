@@ -28,6 +28,10 @@ def handle_lab(ctx: CliContext, args: list[str]) -> CliResult:
     tail = args[1:]
     if action == "list":
         return handle_list(ctx, tail)
+    if action == "setup":
+        from openlabs_cli.lab_setup import handle_lab_setup
+
+        return handle_lab_setup(ctx, tail)
     result = CliResult.not_implemented("lab", f"openlabs lab {action}")
     result.data["action"] = action
     return result
