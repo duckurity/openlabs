@@ -17,23 +17,42 @@ verifies a player's flag against the stored SHA-256 hash.
 | `labs/<track>/<lab>/` | one lab; tracks: `web`, `binary`, `crypto`, `network`, `osint` |
 | `labs/_template/` | skeleton for new labs, skipped by validation |
 | `scripts/validate.py` | CI validator, zero dependencies |
+| `scripts/validate_issue_forms.py` | checks issue form labels and intake links, zero dependencies |
 | `scripts/check.py` | player flag checker, zero dependencies |
 | `scripts/make_badges.py` | badge and chip generator, needs `fonttools` and vendored fonts |
 | `scripts/make_lab_pdf.py` | branded challenge-sheet PDF, template-driven, needs `xelatex` + `rsvg-convert` |
 | `templates/labsheet.cls` | layout and type system the PDF fills; never edited by hand past the generator |
 | `scripts/test_brand.sh` | integration-test the brand pipeline in a temp clone |
 | `BRAND.md` | color, type, badge, and pipeline reference |
+| `scripts/sync_catalog_public.py` | public catalog counts and README/wiki/site listings from `lab.yml`, zero dependencies |
 | `scripts/sync_wiki.py` | asset version bumps and wiki repo sync, zero dependencies |
 | `scripts/sync_site_content.py` | generates `content/labs/` from `labs/` at build time; zero dependencies |
 | `scripts/score_lab.py` | scores each lab 0-100 (structure, secrets, Dockerfile, compose, docs); blocks CI below 70 |
+| `scripts/baseline_report.py` | M0 baseline evidence report for issue #72; zero dependencies |
 | `.github/assets/fonts/` | vendored Funnel Display cuts, SIL OFL 1.1 |
 | `wiki/` | GitHub wiki source: player, authoring, and review guides |
 | `app/`, `components/`, `content/`, `lib/`, `hooks/` | Next.js library site at the repo root, deployed to GitHub Pages |
 | `content/labs/` | generated from `labs/` by `prebuild`/`predev`; gitignored, never edited by hand |
 | `app/styles/theming.css` | design tokens: palette, type, radius; edit here, never hardcode values in components |
 | `.github/workflows/site.yml` | syncs content, builds the site, and deploys to Pages on `main` |
-| `.github/workflows/labs.yml` | CI: validator, security scans + score gate (min 70), content contracts |
+| `.github/workflows/labs.yml` | CI: validate, security, content, PDF; required check `CI required` |
 | `.github/workflows/brand.yml` | regenerates badges, bumps asset versions, syncs the wiki |
+| `contracts/` | JSON Schema, diagnostics registry, CLI spec (spec only until shipped) |
+| `scripts/openlabs_contract.py` | shared `lab.yml` parser and v1 typed model |
+| `scripts/test_contract.py` | local and CI contract conformance gate |
+
+## Lab metadata contract (v1 frozen)
+
+- Every catalogued `lab.yml` declares `contract_version: 1`.
+- Required keys: `name`, `track`, `difficulty`, `description`, `flag_hash`, `status`,
+  `techniques` (may be `[]`). Optional: `checkpoint_flag_hash`, `port`.
+- Unknown top-level keys fail strict validation with stable `OL-####` ids from
+  `contracts/diagnostics.json`.
+- Do not add duplicate `parse_flat_yaml` or `parse_lab_yml` helpers outside
+  `openlabs_contract.py`.
+- `contracts/cli-v1.md` describes a future CLI; do not document `openlabs` as
+  shipped. Point players and contributors at `validate.py` and `check.py`.
+- Freeze record: `wiki/M1-09-Contract-v1-Freeze.md`.
 
 ## Voice rules for any text you write
 
@@ -58,9 +77,25 @@ verifies a player's flag against the stored SHA-256 hash.
 
 ```bash
 python3 scripts/validate.py              # structure + metadata
+python3 scripts/test_contract.py         # contract conformance gate (M1-08)
+python3 scripts/test_openlabs_cli.py     # openlabs CLI core (M2-02)
+python3 scripts/test_openlabs_issue.py     # issue explain and bundle (M2-03)
+python3 scripts/test_openlabs_lab_discovery.py  # lab list and selection (M2-04)
+python3 scripts/test_openlabs_environment.py  # preflight probes (M2-05)
+python3 scripts/test_openlabs_doctor.py     # setup and doctor (M2-05)
+python3 scripts/test_openlabs_state.py      # state and locking (M2-06)
+python3 scripts/test_openlabs_namespace.py  # compose namespacing (M2-06)
+python3 scripts/test_openlabs_port.py       # host port policy (M2-06)
+python3 scripts/test_openlabs_lab_setup.py  # lab setup transaction (M2-06)
+python3 scripts/test_openlabs_lifecycle.py  # lab start, status, stop, reset (M2-07)
+python3 scripts/test_openlabs_reset_safety.py  # reset safety and compose argv guards (M2-07)
+./openlabs --help                        # CLI entry (M2-02)
+python3 scripts/validate_issue_forms.py   # issue form labels and intake links
 python3 scripts/validate.py --compose    # + docker compose config
 python3 scripts/check.py labs/web/duck-cross
 python3 scripts/make_badges.py           # regenerate badges and chips
+python3 scripts/sync_catalog_public.py --write  # public catalog counts and listings
+python3 scripts/sync_catalog_public.py --check  # fail if generated catalog output is stale
 python3 scripts/make_lab_pdf.py --all --strict   # rebuild every lab sheet pdf
 python3 scripts/sync_wiki.py bump        # hash-stamp asset refs (?v=)
 python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo
@@ -68,6 +103,8 @@ bash scripts/test_brand.sh               # integration-test the brand pipeline
 python3 scripts/sync_site_content.py      # regenerate content/labs/ manually
 python3 scripts/sync_site_content.py --check  # verify generated output matches
 python3 scripts/score_lab.py --min 70     # score every lab, fail below 70
+python3 scripts/baseline_report.py --check --wiki wiki/M0-Baseline-Evidence.md
+python3 scripts/test_baseline_report.py
 pnpm run build                            # build the library site
 pnpm run dev                              # serve the site locally
 ```

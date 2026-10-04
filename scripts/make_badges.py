@@ -27,11 +27,12 @@ from fontTools.pens.boundsPen import BoundsPen
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from catalog_public import public_counts  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FONT_DIR = REPO_ROOT / ".github/assets/fonts"
 BOLD = FONT_DIR / "FunnelDisplay-Bold.otf"
-LABS_DIR = REPO_ROOT / "labs"
-
 # brand tokens (single source of truth)
 INK = "#1E1E1E"
 WARM = "#F4F2F1"
@@ -60,18 +61,13 @@ def die(msg: str, code: int = 1) -> None:
 
 
 def count_labs() -> int:
-    """Count lab directories across tracks, mirroring validate.py rules."""
-    if not LABS_DIR.is_dir():
-        return 0
-    n = 0
-    for track in sorted(LABS_DIR.iterdir()):
-        if not track.is_dir() or track.name.startswith((".", "_")):
-            continue
-        n += sum(
-            1 for lab in track.iterdir()
-            if lab.is_dir() and not lab.name.startswith((".", "_"))
-        )
-    return n
+    """Deprecated: public totals come from catalog_public.public_counts()."""
+    supported, experimental = public_counts()
+    return supported + experimental
+
+
+def public_lab_counts() -> tuple[int, int]:
+    return public_counts()
 
 
 def load_font(path: Path) -> tuple[TTFont, dict, float]:
@@ -230,12 +226,14 @@ def main() -> int:
 
     bold = load_font(BOLD)
 
-    n_labs = count_labs()
+    supported, experimental = public_lab_counts()
     badges = {
         "code-license": [("code", "label"), ("Apache-2.0", "value")],
         "content-license": [("content", "label"), ("CC-BY-4.0", "value")],
-        "labs-count": [("labs", "label"), (str(n_labs), "accent"),
-                       ("live", "value")],
+        "labs-supported": [("labs", "label"), (str(supported), "accent"),
+                           ("supported", "value")],
+        "labs-experimental": [("labs", "label"), (str(experimental), "accent"),
+                              ("experimental", "value")],
         "docker": [("docker", "label"), ("compose v2", "value")],
         "checker": [("checker", "label"), ("python3", "value")],
     }
@@ -250,7 +248,9 @@ def main() -> int:
         manifest = {
             "generator": GENERATOR,
             "generated_at": GENERATED_AT,
-            "lab_count": n_labs,
+            "supported_count": supported,
+            "experimental_count": experimental,
+            "lab_count": supported + experimental,
             "files": [
                 {
                     "name": p.name,
@@ -267,8 +267,10 @@ def main() -> int:
         out_display = args.out.relative_to(REPO_ROOT)
     except ValueError:
         out_display = args.out
-    print(f"{n_labs} lab{'s' if n_labs != 1 else ''}; "
-          f"wrote {len(written)} svgs to {out_display}")
+    print(
+        f"{supported} supported, {experimental} experimental; "
+        f"wrote {len(written)} svgs to {out_display}"
+    )
     return 0
 
 

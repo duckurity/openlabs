@@ -1,0 +1,9 @@
+name: fixture-lab
+track: web
+difficulty: easy
+description: First description line.
+description: Duplicate key.
+contract_version: 1
+flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+status: experimental
+techniques: [idor]

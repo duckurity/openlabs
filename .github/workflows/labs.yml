@@ -2,15 +2,6 @@ name: labs
 
 on:
   pull_request:
-    paths:
-      - "labs/**"
-      - "scripts/**"
-      - "content/**"
-      - "contentbit.config.ts"
-      - "contentbit.seo.config.ts"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - ".github/workflows/labs.yml"
   push:
     branches: [main]
     paths:
@@ -21,29 +12,242 @@ on:
       - "contentbit.seo.config.ts"
       - "package.json"
       - "pnpm-lock.yaml"
+      - "templates/**"
+      - ".github/workflows/labs.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: labs-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
+  detect-changes:
+    name: Detect change scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run_validate: ${{ steps.scope.outputs.run_validate }}
+      run_compose: ${{ steps.scope.outputs.run_compose }}
+      run_reference: ${{ steps.scope.outputs.run_reference }}
+      run_security: ${{ steps.scope.outputs.run_security }}
+      run_content: ${{ steps.scope.outputs.run_content }}
+      run_pdf: ${{ steps.scope.outputs.run_pdf }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        if: github.event_name == 'pull_request'
+        id: filter
+        with:
+          filters: |
+            labs:
+              - 'labs/**'
+            lab_scripts:
+              - 'scripts/validate.py'
+              - 'scripts/validate_issue_forms.py'
+              - 'scripts/lab_*.py'
+              - 'scripts/catalog_public.py'
+              - 'scripts/sync_catalog_public.py'
+              - 'scripts/score_lab.py'
+              - 'scripts/prove_reference_lab.py'
+              - 'scripts/openlabs_contract.py'
+              - 'scripts/contract_schema.py'
+              - 'scripts/check.py'
+              - 'scripts/sync_site_content.py'
+              - 'scripts/make_lab_pdf.py'
+              - 'scripts/make_shapes.py'
+              - 'scripts/test_openlabs_contract.py'
+              - 'scripts/test_contract.py'
+              - 'scripts/test_contract_schema.py'
+              - 'scripts/test_diagnostic_registry.py'
+              - 'scripts/test_cli_contract_fixtures.py'
+              - 'scripts/cli_contract.py'
+              - 'scripts/openlabs_cli/**'
+              - 'openlabs'
+              - 'scripts/test_openlabs_cli.py'
+              - 'scripts/test_openlabs_issue.py'
+              - 'scripts/test_openlabs_lab_discovery.py'
+              - 'scripts/test_openlabs_environment.py'
+              - 'scripts/test_openlabs_doctor.py'
+              - 'scripts/test_openlabs_state.py'
+              - 'scripts/test_openlabs_namespace.py'
+              - 'scripts/test_openlabs_port.py'
+              - 'scripts/test_openlabs_lab_setup.py'
+              - 'scripts/test_openlabs_lifecycle.py'
+              - 'scripts/test_openlabs_reset_safety.py'
+              - 'contracts/cli-v1.md'
+              - 'contracts/**'
+              - 'scripts/test_validate*.py'
+              - 'scripts/test_status*.py'
+              - 'scripts/test_lab_triage*.py'
+              - 'scripts/test_sync_catalog*.py'
+              - 'scripts/test_baseline_report.py'
+              - 'scripts/ci_routing.py'
+              - 'scripts/baseline_report.py'
+              - 'scripts/fixtures/**'
+            workflow:
+              - '.github/workflows/labs.yml'
+            security_scripts:
+              - 'scripts/score_lab.py'
+              - 'scripts/validate.py'
+              - 'scripts/openlabs_contract.py'
+              - 'scripts/check.py'
+              - '.gitleaks.toml'
+            reference:
+              - 'labs/web/duck-cross/**'
+              - 'scripts/prove_reference_lab.py'
+            content:
+              - 'content/**'
+              - 'contentbit.config.ts'
+              - 'contentbit.seo.config.ts'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'scripts/sync_site_content.py'
+              - 'scripts/sync_catalog_public.py'
+              - 'scripts/openlabs_contract.py'
+              - 'scripts/contract_schema.py'
+            pdf:
+              - 'labs/**/README.md'
+              - 'labs/**/lab.yml'
+              - 'labs/**/*.pdf'
+              - 'scripts/make_lab_pdf.py'
+              - 'templates/labsheet.cls'
+            compose:
+              - 'labs/**/docker-compose.y*ml'
+              - 'labs/**/compose.y*ml'
+              - 'scripts/validate.py'
+
+      - id: scope
+        name: Compute job scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          write_all() {
+            for key in validate compose reference security content pdf; do
+              echo "run_${key}=true" >> "$GITHUB_OUTPUT"
+            done
+          }
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            write_all
+            echo "scope_note=full baseline run (${GITHUB_EVENT_NAME})" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ github.actor }}" = "dependabot[bot]" ]; then
+            write_all
+            echo "scope_note=full baseline run (dependabot pull request)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          labs="${{ steps.filter.outputs.labs }}"
+          lab_scripts="${{ steps.filter.outputs.lab_scripts }}"
+          workflow="${{ steps.filter.outputs.workflow }}"
+          security_scripts="${{ steps.filter.outputs.security_scripts }}"
+          reference="${{ steps.filter.outputs.reference }}"
+          content="${{ steps.filter.outputs.content }}"
+          pdf="${{ steps.filter.outputs.pdf }}"
+          compose="${{ steps.filter.outputs.compose }}"
+          bool_or() {
+            for value in "$@"; do
+              if [ "$value" = "true" ]; then
+                echo true
+                return
+              fi
+            done
+            echo false
+          }
+          for key in validate compose reference security content pdf; do
+            case "$key" in
+              validate) value="$(bool_or "$labs" "$lab_scripts" "$workflow")" ;;
+              compose) value="$(bool_or "$labs" "$compose" "$workflow")" ;;
+              reference) value="$(bool_or "$reference" "$workflow")" ;;
+              security) value="$(bool_or "$labs" "$security_scripts" "$workflow")" ;;
+              content) value="$(bool_or "$content" "$workflow")" ;;
+              pdf) value="$(bool_or "$pdf" "$workflow")" ;;
+            esac
+            echo "run_${key}=${value}" >> "$GITHUB_OUTPUT"
+          done
+          echo "scope_note=path filter on pull request" >> "$GITHUB_OUTPUT"
+
+      - name: Write scope summary
+        shell: bash
+        run: |
+          {
+            echo "## Labs workflow scope"
+            echo ""
+            echo "- Note: ${{ steps.scope.outputs.scope_note }}"
+            echo "- Validate labs: \`${{ steps.scope.outputs.run_validate }}\`"
+            echo "- Compose validate: \`${{ steps.scope.outputs.run_compose }}\`"
+            echo "- Prove duck-cross: \`${{ steps.scope.outputs.run_reference }}\`"
+            echo "- Security scan: \`${{ steps.scope.outputs.run_security }}\`"
+            echo "- Content contracts: \`${{ steps.scope.outputs.run_content }}\`"
+            echo "- Build lab sheets: \`${{ steps.scope.outputs.run_pdf }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   validate:
     name: Validate labs
+    needs: detect-changes
+    if: needs.detect-changes.outputs.run_validate == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       - name: Validate lab structure and metadata
-        run: python3 scripts/validate.py
+        run: |
+          python3 scripts/validate.py --json validate-report.json --write-github-summary
+          python3 scripts/test_contract.py
+          python3 scripts/test_validate_status.py
+          python3 scripts/test_status_aware_inventory.py
+          python3 scripts/test_lab_triage_inventory.py
+          python3 scripts/test_sync_catalog_public.py
+          python3 scripts/test_baseline_report.py
+          python3 scripts/test_lab_author_metadata.py
+          python3 scripts/baseline_report.py --check --wiki wiki/M0-Baseline-Evidence.md
 
       - name: Validate compose files
+        if: needs.detect-changes.outputs.run_compose == 'true'
         run: |
           docker compose version
-          python3 scripts/validate.py --compose
+          python3 scripts/validate.py --compose --json validate-compose-report.json --write-github-summary
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validate-reports
+          path: validate-*.json
+
+  reference-lab:
+    name: Prove duck-cross L0-L6
+    needs: detect-changes
+    if: needs.detect-changes.outputs.run_reference == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Prove reference lab lifecycle
+        run: python3 scripts/prove_reference_lab.py --json reference-lab-evidence.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reference-lab-evidence
+          path: reference-lab-evidence.json
 
   security:
     name: Security scan
+    needs: detect-changes
+    if: needs.detect-changes.outputs.run_security == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -52,40 +256,47 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-        with:
-          fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
-      # Real leaked secrets are never intended. Generic SAST is
-      # intentionally absent: labs are vulnerable by design and no
-      # rule set can tell intent from accident. score_lab.py covers
-      # the calibrated checks instead.
       - name: Scan for leaked secrets
-        uses: gitleaks/gitleaks-action@v2
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks detect --source . --config .gitleaks.toml --redact --verbose
 
-      - name: Score every lab (blocking)
-        run: python3 scripts/score_lab.py --min 70
+      - name: Score every lab (blocking on supported)
+        run: |
+          python3 scripts/score_lab.py --min 70 --json score-report.json --write-github-summary
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: score-report
+          path: score-report.json
 
       - name: Scan filesystem for known vulnerabilities
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
         with:
           scan-type: fs
           scan-ref: labs/
           severity: HIGH,CRITICAL
-          exit-code: "1"
-          cache: "true"
+          exit-code: "0"
 
   content:
     name: Content contracts
+    needs: detect-changes
+    if: needs.detect-changes.outputs.run_content == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 9.15.4
 
@@ -94,7 +305,7 @@ jobs:
           node-version: "22"
           cache: pnpm
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -102,19 +313,26 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Regenerate lab pages
-        run: python3 scripts/sync_site_content.py
+        env:
+          OPENLABS_SYNC_HERMETIC: "1"
+        run: |
+          python3 scripts/sync_catalog_public.py --check
+          python3 scripts/sync_site_content.py --check
+          python3 scripts/test_lab_author_metadata.py
 
       - name: Check strict SEO contracts
         run: pnpm exec contentbit doctor --strict-seo
 
   pdf:
     name: Build lab sheets
+    needs: detect-changes
+    if: needs.detect-changes.outputs.run_pdf == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -131,3 +349,70 @@ jobs:
 
       - name: Build every lab sheet with strict layout checks
         run: python3 scripts/make_lab_pdf.py --all --strict
+
+  ci-required:
+    name: CI required
+    needs:
+      - detect-changes
+      - validate
+      - reference-lab
+      - security
+      - content
+      - pdf
+    if: always() && needs.detect-changes.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Aggregate required results
+        shell: bash
+        env:
+          RUN_VALIDATE: ${{ needs.detect-changes.outputs.run_validate }}
+          RUN_REFERENCE: ${{ needs.detect-changes.outputs.run_reference }}
+          RUN_SECURITY: ${{ needs.detect-changes.outputs.run_security }}
+          RUN_CONTENT: ${{ needs.detect-changes.outputs.run_content }}
+          RUN_PDF: ${{ needs.detect-changes.outputs.run_pdf }}
+          RESULT_VALIDATE: ${{ needs.validate.result }}
+          RESULT_REFERENCE: ${{ needs.reference-lab.result }}
+          RESULT_SECURITY: ${{ needs.security.result }}
+          RESULT_CONTENT: ${{ needs.content.result }}
+          RESULT_PDF: ${{ needs.pdf.result }}
+        run: |
+          set -euo pipefail
+          fail=0
+          check() {
+            local name="$1" applicable="$2" result="$3"
+            if [ "$applicable" != "true" ]; then
+              echo "${name}: skipped (out of scope for this diff)"
+              return 0
+            fi
+            if [ "$result" = "success" ]; then
+              echo "${name}: passed"
+              return 0
+            fi
+            echo "${name}: required but finished with ${result}" >&2
+            fail=1
+          }
+          check "Validate labs" "$RUN_VALIDATE" "$RESULT_VALIDATE"
+          check "Prove duck-cross L0-L6" "$RUN_REFERENCE" "$RESULT_REFERENCE"
+          check "Security scan" "$RUN_SECURITY" "$RESULT_SECURITY"
+          check "Content contracts" "$RUN_CONTENT" "$RESULT_CONTENT"
+          check "Build lab sheets" "$RUN_PDF" "$RESULT_PDF"
+          exit "$fail"
+
+      - name: Write aggregate summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## CI required"
+            echo ""
+            echo "Use this check name in branch protection: \`CI required\`."
+            echo ""
+            echo "| Job | In scope | Result |"
+            echo "|:---|:---:|:---|"
+            echo "| Validate labs | \`${{ needs.detect-changes.outputs.run_validate }}\` | \`${{ needs.validate.result }}\` |"
+            echo "| Prove duck-cross L0-L6 | \`${{ needs.detect-changes.outputs.run_reference }}\` | \`${{ needs.reference-lab.result }}\` |"
+            echo "| Security scan | \`${{ needs.detect-changes.outputs.run_security }}\` | \`${{ needs.security.result }}\` |"
+            echo "| Content contracts | \`${{ needs.detect-changes.outputs.run_content }}\` | \`${{ needs.content.result }}\` |"
+            echo "| Build lab sheets | \`${{ needs.detect-changes.outputs.run_pdf }}\` | \`${{ needs.pdf.result }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

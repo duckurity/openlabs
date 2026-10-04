@@ -1,7 +1,20 @@
 name: Lab idea
 description: Propose a lab for the library
-labels: ["lab idea"]
+labels:
+  - enhancement
+  - component:lab
+  - needs-triage
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste flags, tokens, API keys, or private host paths. Lab
+        vulnerabilities you want players to find belong in the lab design, not
+        in this form.
+
+        Report repository or infrastructure vulnerabilities through
+        [private vulnerability reporting](https://github.com/duckurity/openlabs/security/advisories/new),
+        not through public issues.
   - type: dropdown
     id: track
     attributes:

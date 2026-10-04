@@ -1,0 +1,10 @@
+{
+  "contract_version": 1,
+  "name": "Bad_Name",
+  "track": "web",
+  "difficulty": "easy",
+  "description": "Invalid lab slug.",
+  "flag_hash": "1001444936d1ac7055a213bde05726f86f482f72555d2e6bb8dde40cbabbeb06",
+  "status": "experimental",
+  "techniques": ["idor"]
+}

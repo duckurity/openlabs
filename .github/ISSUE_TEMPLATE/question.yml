@@ -1,0 +1,65 @@
+name: Question
+description: Ask about solving a lab or local setup
+labels:
+  - question
+  - needs-triage
+title: "[Question]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste flags, tokens, API keys, or sensitive host paths. Redact
+        hostnames, IPs, and file paths that identify your machine.
+
+        Report repository or infrastructure vulnerabilities through
+        [private vulnerability reporting](https://github.com/duckurity/openlabs/security/advisories/new),
+        not through public issues.
+  - type: input
+    id: lab
+    attributes:
+      label: Lab (if any)
+      description: Full path, for example labs/web/duck-cross. Leave blank for general setup questions.
+    validations:
+      required: false
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What are you trying to do, and where are you stuck?
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Windows (WSL)
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: CPU architecture
+      options:
+        - x86_64
+        - arm64
+        - other
+    validations:
+      required: true
+  - type: input
+    id: docker-version
+    attributes:
+      label: Docker version
+      description: Output of `docker version` (client section is enough).
+    validations:
+      required: false
+  - type: input
+    id: compose-version
+    attributes:
+      label: Compose version
+      description: Output of `docker compose version`.
+    validations:
+      required: false

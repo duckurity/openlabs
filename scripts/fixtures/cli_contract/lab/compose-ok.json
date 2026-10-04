@@ -1,0 +1,10 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": false,
+  "data": {"action": "compose", "lab": "labs/web/duck-cross", "rendered": true},
+  "diagnostics": [],
+  "meta": {"redacted": false}
+}

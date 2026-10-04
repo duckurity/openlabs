@@ -1,0 +1,157 @@
+{
+  "version": "openlabs.triage.v1",
+  "reviewed_on": "2026-09-26",
+  "parent_issue": 68,
+  "labs": {
+    "labs/web/Sayed_Khashana_REST_API_IDOR_CTF": {
+      "action": "keep_uncatalogued",
+      "owner": "maintainers",
+      "blocker": "Directory name violates NAME_RE; cannot ship lab.yml without a rename.",
+      "follow_up_title": "M0-05 follow-up: rename and catalog Sayed Khashana REST IDOR lab"
+    },
+    "labs/web/aegis-ctf": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/cafe-house-rules": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/cloudvault": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/duck-cross": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/duck-nest": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/duckcorp-savegame": {
+      "action": "keep_uncatalogued",
+      "owner": "maintainers",
+      "blocker": "No compose file; player brief sections missing; score below gate.",
+      "follow_up_title": "M0-05 follow-up: compose and lab.yml for duckcorp-savegame or approved removal"
+    },
+    "labs/web/duckdesk": {
+      "action": "keep_uncatalogued",
+      "owner": "maintainers",
+      "blocker": "No lab.yml; README lacks required brief sections; score below gate.",
+      "follow_up_title": "M0-05 follow-up: catalog duckdesk as experimental"
+    },
+    "labs/web/duckexchange": {
+      "action": "catalog_experimental_review",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": "M0-05 follow-up: L0-L6 review for duckexchange promotion"
+    },
+    "labs/web/duckfleet": {
+      "action": "keep_uncatalogued",
+      "owner": "maintainers",
+      "blocker": "No lab.yml; score below gate.",
+      "follow_up_title": "M0-05 follow-up: catalog duckfleet as experimental"
+    },
+    "labs/web/duckmarket": {
+      "action": "keep_uncatalogued",
+      "owner": "maintainers",
+      "blocker": "No lab.yml; score below gate.",
+      "follow_up_title": "M0-05 follow-up: catalog duckmarket as experimental"
+    },
+    "labs/web/duckrpc-archive": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/duckvault": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/duckvault-web-ctf": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/fieldops-360": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/firmdrama": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/invoiceportal": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": "M0-05 follow-up: raise invoiceportal score hygiene (optional)"
+    },
+    "labs/web/nexora-platform": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/shopvault": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/snapconnect": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": "M0-05 follow-up: snapconnect techniques and docs score pass"
+    },
+    "labs/web/snapsync": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": "M0-05 follow-up: snapsync techniques and Dockerfile score pass"
+    },
+    "labs/web/switf01-hit3": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/techvault": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/threadline": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
+    "labs/web/vault-api": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    }
+  }
+}

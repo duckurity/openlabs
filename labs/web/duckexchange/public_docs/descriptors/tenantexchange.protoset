@@ -1,0 +1,14 @@
+
+«
+tenantexchange.prototenantexchangegoogle/api/annotations.proto"H
+GetDocumentRequest
+	tenant_id (	RtenantId
+doc_id (	RdocId"ï
+DocumentReply
+	tenant_id (	RtenantId
+doc_id (	RdocId
+title (	Rtitle
+body (	Rbody&
+classification (	Rclassification2ñ
+	Documentsà
+GetDocument".tenantexchange.GetDocumentRequest.tenantexchange.DocumentReply"6Ç”‰ì0./api/v1/tenants/{tenant_id}/documents/{doc_id}bproto3

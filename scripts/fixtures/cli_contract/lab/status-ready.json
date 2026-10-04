@@ -1,0 +1,18 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": false,
+  "data": {
+    "action": "status",
+    "lab": "duck-cross",
+    "lifecycle": "ready",
+    "recorded": "ready",
+    "compose": "running",
+    "url": "http://127.0.0.1:8377",
+    "drift": false
+  },
+  "diagnostics": [],
+  "meta": {"redacted": false}
+}

@@ -1,0 +1,8 @@
+name: fixture-lab
+track: web
+difficulty: easy
+contract_version: 1
+flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+status: experimental
+techniques: [ssrf]
+description: "Value with # not a comment"

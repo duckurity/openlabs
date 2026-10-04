@@ -157,6 +157,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
+The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -164,12 +165,13 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read
 
 Source: https://openlabs.duckurity.com/labs/aegis-ctf
 
-## Scenario
+## Brief
 AEGIS is an internal employee portal for a fictional company. From the outside, it looks like a simple web application with a login page, employee profiles, and self-service features.
 Behind the application, multiple backend services communicate with the same underlying data. Your goal is to investigate how these services interact and identify the trust weaknesses between them.
-## Objective
+## Goal
 Recover the full flag by progressing through the different API services exposed by the application.
 The challenge involves multiple API technologies, including REST, GraphQL, and gRPC.
+See [how to play](/play) for the usual solve loop.
 ## Difficulty
 **Hard**
 Experience with Burp Suite and modifying HTTP requests is recommended.
@@ -178,7 +180,7 @@ Experience with Burp Suite and modifying HTTP requests is recommended.
 * A web browser
 * Burp Suite or another HTTP intercepting proxy
 * Basic knowledge of REST APIs, GraphQL, and gRPC
-## Startup
+## Setup
 From the lab directory, run:
 ```bash
 docker compose up --build
@@ -210,6 +212,9 @@ The complete flag requires progress through multiple parts of the application.
 * Automated enumeration and fuzzing are allowed where appropriate.
 * Carefully inspect HTTP responses and API behavior for additional information.
 Good luck!
+## Techniques
+Practise in this lab:
+- [API version enumeration](/technique/api-version-enumeration)
 
 ## Cafe house rules
 
@@ -229,6 +234,10 @@ Find the flag. Verify the solve from the lab directory:
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Cloudvault
 
@@ -250,6 +259,10 @@ Authenticate and explore the API. Retrieve the flag. Verify the solve from the l
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Duck cross
 
@@ -268,6 +281,16 @@ Open `http://localhost:8377`.
 Find the restricted report. Extract its flag. Verify the solve from the lab directory:
 ```bash
 python3 ../../../scripts/check.py .
+```
+## Reference lifecycle
+This lab is the M0 reference for L0–L6 evidence. Levels map to contract
+validate, compose render, image build, bounded startup, player smoke, intended
+solve via `scripts/check.py`, then teardown plus a second clean start.
+CI runs `python3 scripts/prove_reference_lab.py` under compose project
+`openlabs-ref-duck-cross`. Failure logs redact flag values.
+Reset a CI-style run:
+```bash
+docker compose -p openlabs-ref-duck-cross down -v
 ```
 ## Techniques
 Practise in this lab:
@@ -292,6 +315,59 @@ Extract the flag from the restricted project. Verify the solve from the lab dire
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
+
+## Duckexchange
+
+Source: https://openlabs.duckurity.com/labs/duckexchange
+
+**Category:** Web
+**Difficulty:** Medium
+**Flag format:** `duck{...}`
+**Estimated time:** 30–60 minutes
+## Brief
+DuckExchange is the delivery-review portal used by Legal Operations and the
+incident-response team. Each customer has its own workspace, and analysts can
+review the delivery queue for their tenant. External packets may be held for
+ownership review before they can be released.
+An incident packet is stuck in that queue. Find it and recover the flag.
+## Goal
+Investigate DuckExchange and recover the challenge flag.
+## Setup
+For a hosted instance, use the challenge URL provided by the organizer:
+```text
+http://HOST:4000
+```
+For a local copy, start the lab from this directory:
+```sh
+docker compose up -d
+```
+Then open `http://127.0.0.1:4000`.
+Create an analyst account, then sign in with the credentials you registered.
+Passwords must be at least eight characters and contain an uppercase letter, a
+lowercase letter, a number, and a special character.
+You only need the challenge URL. A browser, Burp Suite, or `curl` is enough;
+source code and access to the host are not required.
+## Reset
+For a hosted instance, ask the organizer to reset the challenge. For an
+authorized local deployment, reset it with:
+```sh
+docker compose down -v
+docker compose up -d --build
+```
+Do not edit the application source or database files by hand.
+## Rules
+- Test only the assigned challenge instance.
+- Do not attack the host, Docker daemon, other containers, or external systems.
+- Do not run denial-of-service or destructive tests.
+- Keep any recovered flag and account credentials private.
+## Techniques
+Practise in this lab:
+- [SQL injection](/technique/sqli)
+- [API version enumeration](/technique/api-version-enumeration)
 
 ## Duckrpc archive
 
@@ -353,7 +429,7 @@ duck{...}
 ```
 ## Techniques
 Practise in this lab:
-- [SQL Injection](/technique/sqli)
+- [SQL injection](/technique/sqli)
 
 ## Duckvault web ctf
 
@@ -468,17 +544,22 @@ jobs, customers, and outbound email from one portal. The platform reports
 opens on every message it sends.
 You hold a sandbox account for one tenant. The credentials are on the login
 page.
-## Setup and goal
+## Setup
 Start the lab:
 ```
 docker compose up -d --build
 ```
 Open `http://localhost:8080`.
+## Goal
 Recover the flag from the admin export.
 Verify the solve:
 ```
 python3 scripts/check.py labs/web/fieldops-360
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Firmdrama
 
@@ -665,35 +746,34 @@ python3 ../../../scripts/check.py .
 Practise in this lab:
 - [Broken object-level authorization (IDOR)](/technique/idor)
 
-## Nexora_platform
+## Nexora platform
 
-Source: https://openlabs.duckurity.com/labs/nexora_platform
+Source: https://openlabs.duckurity.com/labs/nexora-platform
 
-Nexora — Integration & Developer Platform
-# Scenario
-You have access to Nexora, a SaaS integration and developer platform. Nexora production infrastructure is hosted on Google Cloud Platform.
-# Objective
-Investigate Nexora's infrastructure and identify a way to reach resources that should not be directly accessible from the public application. .
-# Difficulty
-Medium
-# Prerequisites
-Basic web application reconnaissance, HTTP fundamentals, REST API basics, GraphQL basics, DNS basics, familiarity with server-side requests, and basic Docker/networking knowledge are helpful.
-# Startup Instructions
-```sh
-docker compose up --build
+`medium` · `web`
+## Brief
+Nexora is a SaaS integration platform on GCP. Investigate the public app and
+find a path to resources that should stay off the public edge.
+## Setup
+Run these from the lab directory:
+```bash
+docker compose up --build -d
 ```
-# Connection Information
-Application: http://localhost:8080
-OAST: http://localhost:8081
-# OAST Service
-The challenge includes a local OAST service that you may use to observe DNS and HTTP interactions generated during testing. It is a replareplacement for burp suite collaborator. Open the dashboard to observe interactions.
-# Reset Instructions
-```sh
+Open `http://localhost:8080`. The OAST dashboard is on port `8081`.
+## Goal
+Reach the protected internal surface and recover the flag. Verify the solve
+from the lab directory:
+```bash
+python3 ../../../scripts/check.py .
+```
+## Reset
+```bash
 docker compose down -v
-docker compose up --build
+docker compose up --build -d
 ```
-# Flag Format
-`duck{****_**_*******}`
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Shopvault
 
@@ -714,6 +794,10 @@ Escalate from unauthenticated to the manager role and read the manager-only repo
 ```bash
 python3 ../../../scripts/check.py .
 ```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Authentication bypass](/technique/auth-bypass)
 
 ## Snapconnect
 
@@ -728,7 +812,7 @@ Difficulty is easy. Expect to spend 15 to 30 minutes.
 - GraphQL queries, mutations, and introspection
 - The `graphql-multipart-request` format
 - A tool that sends raw HTTP, such as `curl`, Burp, or Insomnia
-## Setup and goal
+## Setup
 Start the lab:
 ```
  docker compose up -d --build
@@ -738,10 +822,12 @@ Start the lab:
 - API: `POST http://localhost:8081/graphql`
 - API reference: `http://localhost:8081/docs`
 Registration is open. Create an account to get a session token.
+## Goal
 Read `/var/www/flag.txt` through the service. Verify your solve from the repository root:
 ```
 python3 scripts/check.py labs/web/snapconnect
 ```
+See [how to play](/play) for the usual solve loop.
 ## Reset
 ```
 docker compose down -v
@@ -754,6 +840,9 @@ Reset clears uploads and sessions and reseeds the database.
 - The lab runs on your machine. Point your tools at `localhost:8081` only.
 - No brute force is needed.
 - Destroying the service is not the goal. The container resets anyway.
+## Techniques
+Practise in this lab:
+- [Mass assignment](/technique/mass-assignment)
 
 ## Snapsync
 
@@ -785,6 +874,9 @@ its flag. Verify the solve from the lab directory:
 ```bash
 python3 ../../../scripts/check.py .
 ```
+## Techniques
+Practise in this lab:
+- [Server-side request forgery (SSRF)](/technique/ssrf)
 
 ## Switf01 hit3
 
@@ -848,28 +940,27 @@ Practise in this lab:
 
 Source: https://openlabs.duckurity.com/labs/threadline
 
-**Category:** Web / API Security
-**Difficulty:** Medium
+# ThreadLine — `MEDIUM` · `web`
 ---
-## Scenario
-ThreadLine is an online clothing store rolling out a new REST API. During a
-private beta, a customer's account was quietly given a **loyalty retention
-offer** after they threatened to close their account. The offer was never
-meant to be public, and it was never meant to be discoverable by anyone but
-the customer themselves.
-You've been dropped into the beta as a regular shopper with one goal:
-**get the Premium Leather Jacket for free**, the way it was never supposed to
-happen.
----
-## What you're given
-A running instance of the ThreadLine API at:
-```
-http://<target-host>:8000/api/v1
-```
+## Brief
+ThreadLine sells clothing through a REST API. No frontend, no docs. You
+hold a normal customer account. A flag sits somewhere in the checkout
+flow.
+A customer's account was quietly given a loyalty retention offer after
+they threatened to close their account. The offer was never meant to be
+public — get the Premium Leather Jacket for free, the way it was never
+supposed to happen.
+## Setup
+The API listens on port **`1000`**. All endpoints are under
+`http://<target-host>:1000/api/v1`.
+docker compose up --build -d
+curl -s http://127.0.0.1:1000/api/v1/health
+text
+Wait for `{"status":"ok"}` before sending further requests.
 There is no web frontend — this is an API-only challenge. Use `curl`,
 `httpie`, Postman, Burp Repeater, or a script; whatever you're comfortable
 driving raw HTTP requests with.
-## Getting started
+## Setup
 1. Register your own account:
    ```
    POST /api/v1/auth/register
@@ -898,14 +989,18 @@ driving raw HTTP requests with.
 | GET    | `/api/v1/health`              | Liveness check                 |
 ## Goal
 Get a cart's `final_price` down to **0**, then check out. If you got there
-the *right* way, checkout will hand you a flag.
+the *right* way, checkout will hand you a flag. It matches `duck{...}`.
+## Reset
+docker compose restart
+text
+State resets to the seeded starting point on every restart.
+See [how to play](/play) for the usual solve loop.
 ## Rules
 - Don't attack anything outside this container (it has no internet access
   anyway).
 - Don't brute-force passwords or run heavy fuzzing that could take the
   service down for other players — this is a logic challenge, not a
   denial-of-service exercise.
-- The flag format is `duck{...}`.
 ## Hints
 <details>
 <summary>Hint 1</summary>
@@ -925,6 +1020,9 @@ from having more than one?
 </details>
 ---
 Good luck — and remember: the interesting bug is rarely the loudest one.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Vault api
 
@@ -961,6 +1059,9 @@ docker compose down -v
 docker compose up --build -d
 ```
 This restores the database and seeded data.
+## Techniques
+Practise in this lab:
+- [Broken object-level authorization (IDOR)](/technique/idor)
 
 ## Techniques
 
@@ -1276,22 +1377,21 @@ Use your own authorized test object, preserve a normal request, add one low-impa
 ### Can PATCH be secure?
 Yes. PATCH is safe when the server allowlists paths and applies authorization and validation to every supported property.
 
-## SQL Injection
+## SQL injection
 
-Source: https://openlabs.duckurity.com/sqli
+Source: https://openlabs.duckurity.com/technique/sqli
 
-# SQL Injection
-SQL Injection occurs when untrusted input is incorporated into a database query without appropriate parameterization or validation.
-In this technique, player-controlled input can alter the intended SQL query and may allow access to database records beyond the application's normal search behavior.
-## Typical Impact
-Depending on the application's database and query structure, SQL injection may allow an attacker to:
-- Alter database query logic.
-- Retrieve records that are not normally exposed.
-- Enumerate database schema information.
-- Access sensitive application data.
-## Defensive Guidance
-Applications should use parameterized queries or prepared statements instead of constructing SQL statements through string concatenation.
-Input validation should be used as an additional defensive layer, but should not replace parameterized database access.
+## Overview
+SQL injection occurs when untrusted input is incorporated into a database query without appropriate parameterization or validation. Player-controlled input can alter the intended SQL query and may expose records beyond the application's normal search behavior.
+## Examples
+See the [duckrpc-archive](/labs/duckrpc-archive) lab for a gRPC archive service that mishandles query input.
+## Related labs
+- [duckrpc-archive](/labs/duckrpc-archive)
+Browse all [labs](/labs) when it is solved.
+## FAQ
+### Is every SQL error a SQL injection?
+No. An error may only mean the query failed. Injection requires proof that attacker-controlled input changed query behavior.
+Read [how to play](/play) for the usual solve loop.
 
 ## Server-side request forgery (SSRF)
 

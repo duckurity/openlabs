@@ -11,13 +11,16 @@
 <p align="center">
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/code-license-dark.svg?v=6164d6e0"><img src=".github/assets/badges/code-license-light.svg?v=d7baa62a" alt="code: Apache-2.0" height="20"></picture></a>
   <a href="LICENSE-CONTENT"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/content-license-dark.svg?v=b83304a6"><img src=".github/assets/badges/content-license-light.svg?v=b42ada1f" alt="content: CC-BY-4.0" height="20"></picture></a>
-  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-count-dark.svg?v=ba17c239"><img src=".github/assets/badges/labs-count-light.svg?v=21a61df4" alt="labs: 1 live" height="20"></picture>
+  <!-- catalog-public:badges-start -->
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-supported-dark.svg?v=5fbde818"><img src=".github/assets/badges/labs-supported-light.svg?v=154daa66" alt="labs: 1 supported" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-experimental-dark.svg?v=01e16b65"><img src=".github/assets/badges/labs-experimental-light.svg?v=7b1e1bb3" alt="labs: 19 experimental" height="20"></picture>
+<!-- catalog-public:badges-end -->
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/docker-dark.svg?v=2b6c885f"><img src=".github/assets/badges/docker-light.svg?v=d7abbc30" alt="docker: compose v2" height="20"></picture>
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/checker-dark.svg?v=cff908fc"><img src=".github/assets/badges/checker-light.svg?v=6052eb0b" alt="checker: python3" height="20"></picture>
 </p>
 
 <p align="center">
-  <a href="#get-solving">Quick start</a> · <a href="#labs-1-live">Labs</a> · <a href="https://github.com/Duckurity/openlabs/wiki">Wiki</a> · <a href="#contribute">Contribute</a>
+  <a href="#get-solving">Quick start</a> · <a href="#labs-catalog">Labs</a> · <a href="https://github.com/Duckurity/openlabs/wiki">Wiki</a> · <a href="#contribute">Contribute</a>
 </p>
 
 ## Listen
@@ -99,15 +102,47 @@ not how long it takes.
 
 </div>
 
-## Labs <sub>24 live</sub>
+## Labs <span id="labs-catalog"></span>
+
+<!-- catalog-public:start -->
+<sub>1 supported · 19 experimental</sub>
 
 <div align="center">
 
+**Supported** labs have documented L0–L6 evidence on file. **19 experimental** labs are runnable but not promoted. Experimental entries are not guaranteed supported.
+
 | Lab | Track | Difficulty | Description |
 |:---:|:---:|:---:|:---|
-| [`duck-cross`](labs/web/duck-cross) | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg?v=78286c0b"><img src=".github/assets/badges/chip-easy-light.svg?v=cb5cf439" alt="EASY" height="18"></picture> | a reports portal with a missing object-level authorization check |
+| [`duck-cross`](labs/web/duck-cross) | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg?v=78286c0b"><img src=".github/assets/badges/chip-easy-light.svg?v=cb5cf439" alt="EASY" height="18"></picture> | A reports portal with a missing object-level authorization check. |
+
+### Experimental
+
+| Lab | Status | Track | Difficulty | Description |
+|:---:|:---:|:---:|:---:|:---|
+| [`aegis-ctf`](labs/web/aegis-ctf) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | Chained API trust vulnerabilities across REST, GraphQL, and gRPC. |
+| [`cafe-house-rules`](labs/web/cafe-house-rules) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A cafe rules site with a report bot and a guarded back-room route. |
+| [`cloudvault`](labs/web/cloudvault) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault. |
+| [`duck-nest`](labs/web/duck-nest) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | An internal project workspace for staff and interns. |
+| [`duckexchange`](labs/web/duckexchange) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A tenant document API with a gRPC transcoding authorization bypass. |
+| [`duckrpc-archive`](labs/web/duckrpc-archive) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A gRPC document archive with authentication and a SQL injection vulnerability. |
+| [`duckvault`](labs/web/duckvault) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A records portal leaks an internal reference through broken access control and weak authorization. |
+| [`duckvault-web-ctf`](labs/web/duckvault-web-ctf) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg?v=78286c0b"><img src=".github/assets/badges/chip-easy-light.svg?v=cb5cf439" alt="EASY" height="18"></picture> | A document management API with a broken object-level authorization check. |
+| [`fieldops-360`](labs/web/fieldops-360) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A tenant portal with email open tracking and an admin export surface. |
+| [`firmdrama`](labs/web/firmdrama) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | A law firm's meeting-room portal with chained API authorization flaws and a vulnerable legacy template renderer. |
+| [`invoiceportal`](labs/web/invoiceportal) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | InvoicePortal is a SaaS platform for managing company invoices. |
+| [`nexora-platform`](labs/web/nexora-platform) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, OAST, internal reconnaissance, and DNS rebinding to bypass hostname validation and reach internal infrastructure. |
+| [`shopvault`](labs/web/shopvault) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level access. |
+| [`snapconnect`](labs/web/snapconnect) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg?v=78286c0b"><img src=".github/assets/badges/chip-easy-light.svg?v=cb5cf439" alt="EASY" height="18"></picture> | SnapConnect is a small social app with profiles and avatars, served by a GraphQL API. |
+| [`snapsync`](labs/web/snapsync) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A staff photo tool where a forged token and a hidden internal route reach the flag. |
+| [`switf01-hit3`](labs/web/switf01-hit3) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | A task-management platform with a chained REST, GraphQL, and gRPC attack path. |
+| [`techvault`](labs/web/techvault) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | An e-commerce GraphQL API with a chained authentication bypass, SSRF, and command injection vulnerability. |
+| [`threadline`](labs/web/threadline) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A clothing store REST API. One customer sees more than they should. |
+| [`vault-api`](labs/web/vault-api) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | Inspect an internal employee management API and recover a protected employee archive. The lab starts with a low-privileged analyst account and explores how security boundaries are enforced across an API. |
+
+Uncatalogued directories are omitted from public totals. Maintainers track them in the [lab triage inventory](https://github.com/Duckurity/openlabs/wiki/Lab-Triage-Inventory).
 
 </div>
+<!-- catalog-public:end -->
 
 ## Flag format
 

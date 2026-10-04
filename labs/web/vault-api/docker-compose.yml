@@ -32,10 +32,9 @@ services:
     ports:
       - "0.0.0.0:8080:8000"
 
-    # FLAG is injected at runtime. Compose auto-loads the sibling .env file
-    # so `cp .env.example .env` (then edit FLAG) is all local setup requires.
+    # FLAG is injected at runtime via a sibling .env file (see .env.example).
     environment:
-      FLAG: ${FLAG:-duck{flag_not_configured}}
+      FLAG: ${FLAG:?Set FLAG in .env before starting the lab}
 
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]

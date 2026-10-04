@@ -1,0 +1,403 @@
+{
+  "contract_version": 1,
+  "id_prefix": "OL",
+  "entries": [
+    {
+      "id": "OL-0001",
+      "key": "contract.parse.missing_file",
+      "summary": "lab.yml file is missing at the expected path"
+    },
+    {
+      "id": "OL-0002",
+      "key": "contract.parse.invalid_encoding",
+      "summary": "lab.yml is not valid UTF-8"
+    },
+    {
+      "id": "OL-0003",
+      "key": "contract.parse.indented_key",
+      "summary": "lab.yml uses indented mapping syntax, which v1 rejects"
+    },
+    {
+      "id": "OL-0004",
+      "key": "contract.parse.unknown_field",
+      "summary": "lab.yml contains an unknown top-level field"
+    },
+    {
+      "id": "OL-0005",
+      "key": "contract.parse.duplicate_key",
+      "summary": "lab.yml repeats a top-level field"
+    },
+    {
+      "id": "OL-0006",
+      "key": "contract.parse.unsupported_list_syntax",
+      "summary": "lab.yml uses YAML list syntax instead of a bracket list"
+    },
+    {
+      "id": "OL-0007",
+      "key": "contract.parse.unsupported_block_scalar",
+      "summary": "lab.yml uses block scalar syntax, which v1 rejects"
+    },
+    {
+      "id": "OL-0008",
+      "key": "contract.parse.unterminated_quote",
+      "summary": "lab.yml has an unterminated quoted value"
+    },
+    {
+      "id": "OL-0009",
+      "key": "contract.parse.invalid_scalar",
+      "summary": "lab.yml has an invalid quoted scalar"
+    },
+    {
+      "id": "OL-0010",
+      "key": "contract.parse.invalid_techniques",
+      "summary": "techniques must be a bracket list"
+    },
+    {
+      "id": "OL-0011",
+      "key": "contract.parse.invalid_contract_version",
+      "summary": "contract_version must be integer 1"
+    },
+    {
+      "id": "OL-0012",
+      "key": "contract.parse.unsupported_contract_version",
+      "summary": "contract_version is not supported in this milestone"
+    },
+    {
+      "id": "OL-0013",
+      "key": "contract.parse.invalid_port",
+      "summary": "port must be an integer"
+    },
+    {
+      "id": "OL-0014",
+      "key": "contract.parse.missing_required",
+      "summary": "lab.yml is missing a required field"
+    },
+    {
+      "id": "OL-0015",
+      "key": "contract.parse.empty_required",
+      "summary": "lab.yml has an empty required field"
+    },
+    {
+      "id": "OL-0016",
+      "key": "contract.schema.unknown_property",
+      "summary": "record contains an unknown property after parsing"
+    },
+    {
+      "id": "OL-0017",
+      "key": "contract.schema.missing_required_property",
+      "summary": "record is missing a required property"
+    },
+    {
+      "id": "OL-0018",
+      "key": "contract.schema.invalid_contract_version",
+      "summary": "record contract_version must be 1"
+    },
+    {
+      "id": "OL-0019",
+      "key": "contract.schema.invalid_name",
+      "summary": "record name must be a lowercase hyphenated slug"
+    },
+    {
+      "id": "OL-0020",
+      "key": "contract.schema.invalid_track",
+      "summary": "record track must be a supported track enum"
+    },
+    {
+      "id": "OL-0021",
+      "key": "contract.schema.invalid_difficulty",
+      "summary": "record difficulty must be a supported enum"
+    },
+    {
+      "id": "OL-0022",
+      "key": "contract.schema.invalid_description",
+      "summary": "record description must be a non-empty string"
+    },
+    {
+      "id": "OL-0023",
+      "key": "contract.schema.invalid_flag_hash",
+      "summary": "record flag_hash must be 64 lowercase hex digits"
+    },
+    {
+      "id": "OL-0024",
+      "key": "contract.schema.invalid_status",
+      "summary": "record status must be experimental or supported"
+    },
+    {
+      "id": "OL-0025",
+      "key": "contract.schema.invalid_techniques_type",
+      "summary": "record techniques must be an array"
+    },
+    {
+      "id": "OL-0026",
+      "key": "contract.schema.invalid_technique_slug",
+      "summary": "record techniques entry must be a slug"
+    },
+    {
+      "id": "OL-0027",
+      "key": "contract.schema.duplicate_technique",
+      "summary": "record techniques contains a duplicate slug"
+    },
+    {
+      "id": "OL-0028",
+      "key": "contract.schema.invalid_checkpoint_flag_hash",
+      "summary": "record checkpoint_flag_hash must be 64 lowercase hex digits"
+    },
+    {
+      "id": "OL-0029",
+      "key": "contract.schema.invalid_port",
+      "summary": "record port must be an integer from 1 to 65535"
+    },
+    {
+      "id": "OL-0030",
+      "key": "contract.context.name_directory_mismatch",
+      "summary": "name does not match the lab directory basename"
+    },
+    {
+      "id": "OL-0031",
+      "key": "contract.context.track_directory_mismatch",
+      "summary": "track does not match the parent directory track"
+    },
+    {
+      "id": "OL-0032",
+      "key": "contract.context.technique_page_missing",
+      "summary": "technique slug has no content/technique page"
+    },
+    {
+      "id": "OL-0033",
+      "key": "contract.context.invalid_track_directory",
+      "summary": "lab directory is not under a supported track folder"
+    },
+    {
+      "id": "OL-0034",
+      "key": "lifecycle.interaction.non_interactive_required",
+      "summary": "command needs confirmation but --non-interactive is set",
+      "area": "lifecycle",
+      "user_action": "run a mutating command with --non-interactive",
+      "evidence": [
+        "Re-run without --non-interactive",
+        "Provide explicit flags documented in contracts/cli-v1.md"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "safe_fix": "Remove --non-interactive when the command requires confirmation",
+      "manual_fix": "Run the command interactively or supply the documented non-interactive flags"
+    },
+    {
+      "id": "OL-0035",
+      "key": "lifecycle.platform.unsupported_architecture",
+      "summary": "host architecture is not supported for guaranteed lifecycle on this lab",
+      "area": "platform",
+      "user_action": "run a guaranteed lifecycle command on an unsupported CPU architecture",
+      "evidence": [
+        "Check uname -m output",
+        "Review wiki/M2-Lifecycle-Decisions support tiers"
+      ],
+      "docs_anchor": "wiki/M2-Lifecycle-Decisions.md",
+      "platforms": [
+        "tier3"
+      ],
+      "manual_fix": "Use a Tier 1 Linux x86_64 host or wait for per-lab evidence on this architecture"
+    },
+    {
+      "id": "OL-0036",
+      "key": "lifecycle.port.conflict",
+      "summary": "requested host port is occupied and policy forbids silent reassignment",
+      "area": "lifecycle",
+      "user_action": "bind a host port for lab setup or start",
+      "evidence": [
+        "Check listeners on the requested port",
+        "Inspect .openlabs/state for host_port when present"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "safe_fix": "Pick a free port when policy allows automatic selection",
+      "manual_fix": "Stop the conflicting service or pass --port with a free port"
+    },
+    {
+      "id": "OL-0037",
+      "key": "lifecycle.compose.unsafe_container_name",
+      "summary": "compose file declares container_name, which breaks OpenLabs namespacing",
+      "area": "lifecycle",
+      "user_action": "run lifecycle mutation on a compose file with container_name",
+      "evidence": [
+        "Search the compose file for container_name",
+        "Review lab list blockers output"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "manual_fix": "Remove container_name in a lab fix PR or choose a supported lab"
+    },
+    {
+      "id": "OL-0038",
+      "key": "lifecycle.state.interrupted",
+      "summary": "previous lifecycle command stopped mid-transaction; state must be reconciled",
+      "area": "lifecycle",
+      "user_action": "resume after an interrupted lifecycle command",
+      "evidence": [
+        "Run openlabs lab status",
+        "Check .openlabs/logs for the partial run"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "safe_fix": "Run openlabs lab status to reconcile state",
+      "manual_fix": "Run openlabs lab reset then lab setup when policy allows",
+      "rollback": "Reset removes only the OpenLabs compose project"
+    },
+    {
+      "id": "OL-0039",
+      "key": "lifecycle.lab.unsupported_operation",
+      "summary": "lab status or compose safety blocks a guaranteed lifecycle operation",
+      "area": "lifecycle",
+      "user_action": "request a guaranteed lifecycle operation on an experimental lab",
+      "evidence": [
+        "Run openlabs lab list and read blockers",
+        "Confirm lab status is supported"
+      ],
+      "docs_anchor": "wiki/M2-Lifecycle-Decisions.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "manual_fix": "Use duck-cross for the supported lifecycle path or run maintainer scripts only"
+    },
+    {
+      "id": "OL-0040",
+      "key": "environment.docker.client_missing",
+      "summary": "docker client binary is not available on PATH",
+      "area": "environment",
+      "user_action": "run a command that needs the Docker client",
+      "evidence": [
+        "Run docker --version",
+        "Confirm docker is on PATH"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "manual_fix": "Install Docker Engine or Docker Desktop per platform docs"
+    },
+    {
+      "id": "OL-0041",
+      "key": "environment.docker.daemon_unavailable",
+      "summary": "docker daemon is not reachable",
+      "area": "environment",
+      "user_action": "run a command that needs a running Docker daemon",
+      "evidence": [
+        "Run docker info",
+        "Confirm the daemon service is running"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "manual_fix": "Start Docker Engine or Docker Desktop and retry"
+    },
+    {
+      "id": "OL-0042",
+      "key": "lifecycle.cli.usage",
+      "summary": "command line usage is invalid",
+      "area": "cli",
+      "user_action": "invoke openlabs with invalid arguments",
+      "evidence": [
+        "Run openlabs --help",
+        "Compare argv with contracts/cli-v1.md"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "safe_fix": "Fix argv ordering and command spelling"
+    },
+    {
+      "id": "OL-0043",
+      "key": "lifecycle.cli.internal",
+      "summary": "unexpected internal CLI failure",
+      "area": "cli",
+      "user_action": "recover from an unexpected CLI failure",
+      "evidence": [
+        "Re-run with --json",
+        "Run openlabs issue bundle and inspect diagnostics"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "manual_fix": "File a bug with the redacted bundle; do not paste secrets"
+    },
+    {
+      "id": "OL-0044",
+      "key": "lifecycle.cli.not_implemented",
+      "summary": "command behavior is not implemented in this milestone slice",
+      "area": "cli",
+      "user_action": "call a command slice not shipped yet",
+      "evidence": [
+        "Check milestone status in wiki/M2-Lifecycle-Decisions.md"
+      ],
+      "docs_anchor": "wiki/M2-Lifecycle-Decisions.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "manual_fix": "Use the documented repository scripts until the CLI slice lands"
+    },
+    {
+      "id": "OL-0045",
+      "key": "environment.repo.layout_invalid",
+      "summary": "current directory is not inside an OpenLabs repository root",
+      "area": "environment",
+      "user_action": "run openlabs outside a repository checkout",
+      "evidence": [
+        "Confirm AGENTS.md exists in the current tree",
+        "Clone the openlabs repository"
+      ],
+      "docs_anchor": "contracts/cli-v1.md",
+      "platforms": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ],
+      "manual_fix": "cd into the repository root and retry"
+    },
+    {
+      "id": "OL-0046",
+      "key": "lifecycle.cli.unknown_diagnostic",
+      "summary": "diagnostic id is not registered",
+      "area": "cli",
+      "user_action": "look up a diagnostic id with openlabs issue explain",
+      "evidence": [
+        "Run openlabs issue explain OL-#### with a valid id",
+        "Search contracts/diagnostics.json"
+      ],
+      "docs_anchor": "contracts/diagnostics.json",
+      "platforms": ["tier1", "tier2", "tier3"],
+      "safe_fix": "Use an id from contracts/diagnostics.json",
+      "manual_fix": "Upgrade openlabs if the id comes from a newer milestone"
+    }
+  ]
+}

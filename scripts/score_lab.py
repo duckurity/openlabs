@@ -2,24 +2,51 @@
 """Score a lab 0-100 across five static categories. Zero dependencies.
 
 Imported by scripts/sync_site_content.py (display) and run in CI as a
-blocking gate. Hermetic: local file checks only, no network, no Docker.
+blocking gate on supported labs. Hermetic: local file checks only, no
+network, no Docker.
 
-    python3 scripts/score_lab.py                 # score every lab
-    python3 scripts/score_lab.py --min 70        # exit 1 below threshold
+    python3 scripts/score_lab.py
+    python3 scripts/score_lab.py --min 70
+    python3 scripts/score_lab.py --json score-report.json
     python3 scripts/score_lab.py labs/web/duck-cross
 
-Categories: structure 25, secrets 25, Dockerfile 20, compose 15, docs 15.
+Exit codes:
+    0  no supported lab below threshold; supported catalog non-empty
+    1  supported lab below threshold
+    2  usage error
+    3  supported catalog is empty
+
+Experimental scores below threshold are advisory only.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate import check_lab, parse_flat_yaml
+from lab_inventory import (  # noqa: E402
+    EXIT_CATALOG,
+    EXIT_OK,
+    EXIT_USAGE,
+    LabRecord,
+    STATUS_SELECTIONS,
+    build_inventory_report,
+    catalog_counts,
+    discover_catalog,
+    exit_code_for_report,
+    format_github_step_summary,
+    format_terminal_summary,
+    in_selection,
+    lab_name,
+    lab_status,
+)
+from openlabs_contract import load_lab_metadata  # noqa: E402
+from validate import check_lab  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 LABS = ROOT / "labs"
@@ -36,9 +63,27 @@ SECRET_RES = (
 
 FLAG_PLAINTEXT_RE = re.compile(r"duck\{[a-z0-9_]{16,40}\}")
 
+# Hermetic scoring: ignore vendored trees that are not part of the lab image.
+_SKIP_DIR_NAMES = frozenset(
+    {
+        ".git",
+        "__pycache__",
+        "dist",
+        "node_modules",
+        "vendor",
+    }
+)
+
 
 def lab_files(lab: Path) -> list[Path]:
-    return [p for p in lab.rglob("*") if p.is_file() and ".git" not in p.parts]
+    files: list[Path] = []
+    for path in lab.rglob("*"):
+        if not path.is_file():
+            continue
+        if _SKIP_DIR_NAMES.intersection(path.relative_to(lab).parts):
+            continue
+        files.append(path)
+    return sorted(files)
 
 
 def score_structure(lab: Path) -> tuple[int, list[str]]:
@@ -70,7 +115,28 @@ def score_secrets(lab: Path) -> tuple[int, list[str]]:
 
 def read_dockerfile(lab: Path) -> str:
     dockerfile = lab / "Dockerfile"
-    return dockerfile.read_text(encoding="utf-8") if dockerfile.is_file() else ""
+    if dockerfile.is_file():
+        return dockerfile.read_text(encoding="utf-8")
+    compose = read_compose(lab)
+    if not compose:
+        return ""
+    match = re.search(
+        r"(?ms)^\s*build:\s*\n\s*context:\s*(\S+)\s*\n\s*dockerfile:\s*(\S+)",
+        compose,
+    )
+    if match:
+        context = lab / match.group(1).strip("\"'")
+        dockerfile_name = match.group(2).strip("\"'")
+        candidate = context / dockerfile_name
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8")
+    match = re.search(r"(?m)^\s*build:\s*(\./[^\s#]+)", compose)
+    if match:
+        context = lab / match.group(1).strip("\"'")
+        candidate = context / "Dockerfile"
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8")
+    return ""
 
 
 def score_dockerfile(lab: Path) -> tuple[int, list[str]]:
@@ -136,8 +202,13 @@ def score_docs(lab: Path, readme: str) -> tuple[int, list[str]]:
     if not (lab / f"{lab.name}.pdf").is_file():
         score -= 3
         notes.append("docs: no challenge-sheet PDF beside the lab")
-    meta = parse_flat_yaml((lab / "lab.yml").read_text(encoding="utf-8")) if (lab / "lab.yml").is_file() else {}
-    if not meta.get("techniques", "").strip("[] "):
+    yml = lab / "lab.yml"
+    techniques = ()
+    if yml.is_file():
+        result = load_lab_metadata(yml)
+        if result.record is not None:
+            techniques = result.record.techniques
+    if not techniques:
         score -= 3
         notes.append("docs: lab.yml names no techniques")
     return max(0, score), notes
@@ -182,45 +253,94 @@ def score_lab(lab: Path) -> dict:
     }
 
 
-def discover() -> list[Path]:
-    labs: list[Path] = []
-    for track in sorted(LABS.iterdir()):
-        if not track.is_dir() or track.name.startswith((".", "_")):
-            continue
-        for lab in sorted(track.iterdir()):
-            if lab.is_dir() and not lab.name.startswith((".", "_")):
-                labs.append(lab)
-    return labs
+def run_score(
+    targets: list[Path], *, minimum: int
+) -> list[LabRecord]:
+    records: list[LabRecord] = []
+    for lab in targets:
+        result = score_lab(lab)
+        total = result["score"]
+        ok = total >= minimum
+        errors: list[str] = []
+        if not ok:
+            errors.append(f"score {total} below threshold {minimum} (grade {result['grade']})")
+            errors.extend(result["notes"])
+        records.append(
+            LabRecord(
+                path=lab.relative_to(ROOT).as_posix(),
+                name=lab_name(lab),
+                status=lab_status(lab),
+                ok=ok,
+                errors=errors,
+            )
+        )
+    return records
 
 
 def main() -> int:
-    raw = sys.argv[1:]
-    args: list[str] = []
-    minimum = THRESHOLD
-    skip_next = False
-    for i, arg in enumerate(raw):
-        if skip_next:
-            skip_next = False
-            continue
-        if arg.startswith("--min="):
-            minimum = int(arg.split("=", 1)[1])
-        elif arg == "--min" and i + 1 < len(raw):
-            minimum = int(raw[i + 1])
-            skip_next = True
-        else:
-            args.append(arg)
-    targets = [Path(a) for a in args] if args else discover()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "labs",
+        nargs="*",
+        type=Path,
+        help="lab paths (default: every catalogued lab)",
+    )
+    parser.add_argument("--min", type=int, default=THRESHOLD, metavar="N")
+    parser.add_argument(
+        "--status",
+        choices=sorted(STATUS_SELECTIONS),
+        default="all",
+        help="filter JSON results; blocking exit uses supported scores",
+    )
+    parser.add_argument("--json", type=Path, metavar="FILE")
+    parser.add_argument(
+        "--write-github-summary",
+        action="store_true",
+        help="append GitHub Actions step summary when GITHUB_STEP_SUMMARY is set",
+    )
+    args = parser.parse_args()
+
+    if args.status not in STATUS_SELECTIONS:
+        print(f"invalid --status {args.status!r}", file=sys.stderr)
+        return EXIT_USAGE
+
+    all_labs, uncatalogued = discover_catalog()
+    targets = args.labs if args.labs else all_labs
     if not targets:
-        print("score: no labs found")
-        return 1
-    results = [score_lab(lab) for lab in targets]
-    print(json.dumps(results, indent=2))
-    failing = [r for r in results if r["score"] < minimum]
-    if failing:
-        names = ", ".join(f"{r['name']} ({r['score']})" for r in failing)
-        print(f"score: below threshold {minimum}: {names}", file=sys.stderr)
-        return 1
-    return 0
+        print("score: no labs found", file=sys.stderr)
+        return EXIT_CATALOG
+
+    records = run_score(targets, minimum=args.min)
+    report = build_inventory_report(
+        records,
+        selection=args.status,
+        uncatalogued=uncatalogued,
+        tool="score_lab",
+        catalog=catalog_counts(all_labs),
+    )
+    report["threshold"] = args.min
+
+    for record in records:
+        if not in_selection(record.status, args.status) or record.ok:
+            continue
+        print(f"{record.path}:")
+        for error in record.errors:
+            print(f"  - {error}")
+
+    print(format_terminal_summary(report))
+
+    if args.json:
+        args.json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
+    if args.write_github_summary:
+        summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary_path:
+            with open(summary_path, "a", encoding="utf-8") as handle:
+                handle.write(format_github_step_summary(report))
+
+    if args.status == "experimental":
+        return EXIT_OK
+    return exit_code_for_report(report)
 
 
 if __name__ == "__main__":

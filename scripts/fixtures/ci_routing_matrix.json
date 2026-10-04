@@ -1,0 +1,91 @@
+{
+  "workflow_file": ".github/workflows/labs.yml",
+  "required_check": "CI required",
+  "full_run_events": ["push", "workflow_dispatch"],
+  "full_run_pull_request_actors": ["dependabot[bot]"],
+  "examples": [
+    {
+      "change": "dependabot: package.json only (root site deps)",
+      "actor": "dependabot[bot]",
+      "changed_files": ["package.json"],
+      "run_validate": true,
+      "run_security": true,
+      "run_content": true,
+      "run_pdf": true,
+      "run_reference": true
+    },
+    {
+      "change": "scripts/validate_issue_forms.py only",
+      "changed_files": ["scripts/validate_issue_forms.py"],
+      "run_validate": true,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": false
+    },
+    {
+      "change": "templates/labsheet.cls only",
+      "changed_files": ["templates/labsheet.cls"],
+      "run_validate": false,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": true,
+      "run_reference": false
+    },
+    {
+      "change": "labs/web/duck-cross/README.md",
+      "changed_files": ["labs/web/duck-cross/README.md"],
+      "run_validate": true,
+      "run_security": true,
+      "run_content": false,
+      "run_pdf": true,
+      "run_reference": true
+    },
+    {
+      "change": "content/guide.mdx only",
+      "changed_files": ["content/guide.mdx"],
+      "run_validate": false,
+      "run_security": false,
+      "run_content": true,
+      "run_pdf": false,
+      "run_reference": false
+    },
+    {
+      "change": "contracts/lab.schema.json only",
+      "changed_files": ["contracts/lab.schema.json"],
+      "run_validate": true,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": false
+    },
+    {
+      "change": "scripts/openlabs_contract.py only",
+      "changed_files": ["scripts/openlabs_contract.py"],
+      "run_validate": true,
+      "run_security": true,
+      "run_content": true,
+      "run_pdf": false,
+      "run_reference": false
+    },
+    {
+      "change": "scripts/test_contract.py only",
+      "changed_files": ["scripts/test_contract.py"],
+      "run_validate": true,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": false
+    },
+    {
+      "change": "wiki/Home.md only",
+      "changed_files": ["wiki/Home.md"],
+      "run_validate": false,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": false,
+      "note": "pull_request runs labs workflow; path filter skips expensive jobs"
+    }
+  ]
+}

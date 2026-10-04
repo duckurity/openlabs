@@ -1,6 +1,8 @@
+contract_version: 1
 name: techvault
 track: web
 difficulty: hard
 description: An e-commerce GraphQL API with a chained authentication bypass, SSRF, and command injection vulnerability.
 flag_hash: ba56db20da6d371aedaca4bc4adcbaef35cc0ee75378b0c2bab3487d77c95834
+status: experimental
 techniques: [auth-bypass, ssrf, command-injection]

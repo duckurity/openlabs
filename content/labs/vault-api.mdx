@@ -1,6 +1,6 @@
 ---
 title: Vault api
-description: "Inspect an internal employee management API and recover a protected employee archive. The lab starts with a low-privileged analyst account and explores how security boundaries are enforced across an API."
+description: Inspect an internal employee management API and recover a protected employee archive. The lab starts with a low-privileged analyst account and explores how security boundaries are enforced across an API.
 track: web
 difficulty: medium
 port: "8080"
@@ -14,9 +14,12 @@ keywords:
     - medium web practice
     - openlabs vault-api
 verified: true
-score: 69
-score_grade: D
-author_name: "Ziad Elgohary"
+score: 92
+score_grade: A
+status: experimental
+linksTo:
+  - technique/idor
+author_name: "ziadelgoharyy"
 author_url: "https://github.com/ziadelgoharyy"
 author_avatar: "https://github.com/ziadelgoharyy.png"
 author_date: "2026-09-10"
@@ -74,3 +77,9 @@ docker compose up --build -d
 ```
 
 This restores the database and seeded data.
+## Techniques
+
+Practise in this lab:
+
+- [Broken object-level authorization (IDOR)](/technique/idor)
+

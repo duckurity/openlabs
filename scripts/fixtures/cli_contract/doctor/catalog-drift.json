@@ -1,0 +1,22 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "doctor",
+  "ok": false,
+  "exit_code": 1,
+  "dry_run": false,
+  "data": {
+    "action": "run",
+    "summary": "catalog drift detected"
+  },
+  "diagnostics": [
+    {
+      "id": "OL-0030",
+      "key": "contract.context.name_directory_mismatch",
+      "message": "[OL-0030] `name` 'example' does not match directory 'duck-cross'"
+    }
+  ],
+  "meta": {
+    "duration_ms": 840,
+    "redacted": true
+  }
+}

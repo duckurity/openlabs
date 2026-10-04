@@ -23,3 +23,5 @@ Find the flag. Verify the solve from the lab directory:
 ```bash
 python3 ../../../scripts/check.py .
 ```
+
+See [how to play](/play) for the usual solve loop.

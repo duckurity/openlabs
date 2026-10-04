@@ -1,0 +1,6 @@
+name: valid-supported
+track: web
+difficulty: easy
+description: Fixture lab with supported status.
+flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+status: supported

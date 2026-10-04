@@ -21,6 +21,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from openlabs_contract import load_lab_metadata  # noqa: E402
+
 LABS = ROOT / "labs"
 OUT = ROOT / "public" / "shapes"
 
@@ -75,11 +78,10 @@ def render(name: str, flag_hash: str) -> bytes:
 
 
 def read_flag_hash(lab_yml: Path) -> str | None:
-    for line in lab_yml.read_text(encoding="utf-8").splitlines():
-        key, _, value = line.partition(":")
-        if key.strip() == "flag_hash":
-            return value.strip()
-    return None
+    result = load_lab_metadata(lab_yml)
+    if result.record is None:
+        return None
+    return result.record.flag_hash
 
 
 def build() -> list[str]:

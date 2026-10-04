@@ -1,0 +1,48 @@
+{
+  "version": "openlabs.branch_protection.v1",
+  "parent_issue": 72,
+  "prerequisite_issue": 71,
+  "required_status_checks": [
+    {
+      "name": "CI required",
+      "workflow": "labs.yml",
+      "job": "ci-required"
+    },
+    {
+      "name": "Lint workflows",
+      "workflow": "workflow-lint.yml",
+      "job": "actionlint",
+      "when": "Pull requests that touch `.github/workflows/**` or workflow lint scripts."
+    }
+  ],
+  "recommended_rules": [
+    {
+      "setting": "Require a pull request before merging",
+      "value": "enabled for `main`"
+    },
+    {
+      "setting": "Require status checks to pass",
+      "value": "**CI required** always; **Lint workflows** when workflow files change"
+    },
+    {
+      "setting": "Require branches to be up to date",
+      "value": "enabled (recommended after first protected test PR passes)"
+    },
+    {
+      "setting": "Allow force pushes",
+      "value": "disabled on `main`"
+    },
+    {
+      "setting": "Allow deletions",
+      "value": "disabled on `main`"
+    }
+  ],
+  "maintainer_bypass_policy": "Organization or repository admins may bypass required checks only for documented emergencies. Record the reason, actor, and follow-up pull request in the M0 milestone completion comment.",
+  "verification_record": {
+    "verified_by": null,
+    "verified_on": null,
+    "settings_export_url": null,
+    "protected_branch_test_pr": null,
+    "notes": "Fill after manual configuration. Do not enable required checks until M0-08 merge proves **CI required** on `main`."
+  }
+}

@@ -15,40 +15,14 @@ Quoted values, inline comments, duplicate fields, and extra text are rejected.
 
 import hashlib
 import hmac
-import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from openlabs_contract import read_player_flag_hashes  # noqa: E402
+
 FINAL_HASH_FIELD = "flag_hash"
 CHECKPOINT_HASH_FIELD = "checkpoint_flag_hash"
-HASH_LINE_RE = re.compile(r"^(flag_hash|checkpoint_flag_hash): ([0-9a-f]{64})$")
-HASH_FIELD_PREFIX_RE = re.compile(r"^[ \t]*(flag_hash|checkpoint_flag_hash)\b")
-
-
-def read_flag_hashes(lab: Path) -> dict[str, str]:
-    """Read one strict final hash and an optional strict checkpoint hash."""
-    hashes: dict[str, str] = {}
-    metadata = lab / "lab.yml"
-
-    for line_number, line in enumerate(metadata.read_text(encoding="utf-8").splitlines(), start=1):
-        field = HASH_FIELD_PREFIX_RE.match(line)
-        if field is None:
-            continue
-
-        key = field.group(1)
-        match = HASH_LINE_RE.fullmatch(line)
-        if match is None:
-            raise ValueError(
-                f"lab.yml in {lab} has invalid {key} on line {line_number}; "
-                f"expected `{key}: <64 lowercase hex characters>`"
-            )
-        if key in hashes:
-            raise ValueError(f"lab.yml in {lab} has duplicate {key} on line {line_number}")
-        hashes[key] = match.group(2)
-
-    if FINAL_HASH_FIELD not in hashes:
-        raise ValueError(f"lab.yml in {lab} has no {FINAL_HASH_FIELD}")
-    return hashes
 
 
 def flag_stage(flag: str, hashes: dict[str, str]) -> str | None:
@@ -74,7 +48,7 @@ def main() -> int:
         return 2
 
     try:
-        hashes = read_flag_hashes(lab)
+        hashes = read_player_flag_hashes(lab)
     except OSError:
         print(f"could not read {metadata}")
         return 2

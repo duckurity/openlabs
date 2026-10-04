@@ -38,8 +38,9 @@ echo "== make_badges =="
 # (MANIFEST.json includes a wall-clock timestamp).
 out="$(python3 scripts/make_badges.py --out "$WORK/badges" --no-manifest)"
 echo "$out"
-echo "$out" | grep -q "1 lab; wrote 18 svgs" \
-    || { echo "expected '1 lab; wrote 18 svgs' in: $out"; exit 1; }
+expected_counts="$(python3 -c "import sys; sys.path.insert(0,'scripts'); from catalog_public import public_counts; s,e=public_counts(); print(f'{s} supported, {e} experimental')")"
+echo "$out" | grep -Fq "$expected_counts" \
+    || { echo "expected '$expected_counts' in: $out"; exit 1; }
 
 # Determinism: a second run must produce byte-identical output.
 mkdir -p "$WORK/badges2"
@@ -53,10 +54,14 @@ python3 scripts/make_badges.py --out "$WORK/badges-manifest" >/dev/null
 test -f "$WORK/badges-manifest/MANIFEST.json" \
     || { echo "MANIFEST.json not written"; exit 1; }
 python3 -c "
-import json
+import json, sys
+sys.path.insert(0, 'scripts')
+from catalog_public import public_counts
+s, e = public_counts()
 m = json.load(open('$WORK/badges-manifest/MANIFEST.json'))
-assert m['lab_count'] == 1, m
-assert len(m['files']) == 18, m
+assert m['supported_count'] == s, m
+assert m['experimental_count'] == e, m
+assert len(m['files']) == 20, m
 print('manifest: ok')
 "
 
@@ -81,9 +86,12 @@ echo "$second" | grep -q "asset versions up to date" \
     || { echo "bump is not idempotent: $second"; exit 1; }
 echo "idempotency: ok"
 
-# Heading count normalization
-grep -q "## Labs <sub>1 live</sub>" README.md \
-    || { echo "heading count not normalized to 1"; exit 1; }
+python3 scripts/sync_catalog_public.py --write >/dev/null
+grep -Fq "supported ·" README.md \
+    || { echo "README missing generated supported/experimental heading"; exit 1; }
+python3 scripts/sync_catalog_public.py --check >/dev/null \
+    || { echo "catalog public drift check failed after write"; exit 1; }
+echo "catalog public: ok"
 
 # --- sync_wiki wiki (dry run) ---------------------------------------------
 

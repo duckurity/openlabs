@@ -1,0 +1,10 @@
+{
+  "contract_version": 1,
+  "name": "duck-cross",
+  "track": "web",
+  "difficulty": "easy",
+  "description": "Malformed flag hash.",
+  "flag_hash": "NOT_A_HASH",
+  "status": "supported",
+  "techniques": ["idor"]
+}

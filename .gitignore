@@ -13,3 +13,4 @@ tsconfig.tsbuildinfo
 .contentbit/
 # GitHub API cache for the lab sync. Regenerates automatically.
 .cache/
+.openlabs/

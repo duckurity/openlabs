@@ -1,0 +1,18 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": true,
+  "data": {
+    "action": "reset",
+    "lab": "labs/web/duck-cross",
+    "project": "openlabs-ref-duck-cross",
+    "planned": ["docker compose down --remove-orphans"]
+  },
+  "diagnostics": [],
+  "meta": {
+    "redacted": false,
+    "reset_safe": true
+  }
+}

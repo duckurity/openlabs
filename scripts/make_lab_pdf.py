@@ -46,6 +46,9 @@ from pathlib import Path
 from typing import Sequence
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from openlabs_contract import format_validate_error, legacy_string_map, load_lab_metadata  # noqa: E402
+
 TEMPLATES = REPO_ROOT / "templates"
 ASSETS = REPO_ROOT / ".github" / "assets"
 FONTS = ASSETS / "fonts"
@@ -61,7 +64,6 @@ COMPOSE_NAMES = (
     "compose.yaml",
 )
 
-META_KEY_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z][A-Za-z0-9_-]*):(?:\s*(?P<value>.*))?$")
 HEADING_RE = re.compile(r"^(?P<marks>#{1,6})[ \t]+(?P<title>.+?)\s*#*\s*$")
 FENCE_RE = re.compile(r"^\s*(?P<fence>`{3,}|~{3,})(?:[^`]*)$")
 UNORDERED_LIST_RE = re.compile(r"^\s*[-*+]\s+(?P<text>.+)$")
@@ -83,10 +85,6 @@ INLINE_TOKEN_RE = re.compile(
     r"|(?P<strong>(?:\*\*(?P<strong_star>[^*\n]+)\*\*|__(?P<strong_under>[^_\n]+)__))"
     r"|(?P<em>(?:\*(?P<em_star>[^*\n]+)\*|_(?P<em_under>[^_\n]+)_))"
 )
-
-
-class MetadataError(ValueError):
-    """Raised when a lab.yml file is outside this dependency-free contract."""
 
 
 class MarkdownError(ValueError):
@@ -131,117 +129,22 @@ def die(msg: str, code: int = 1) -> None:
     sys.exit(code)
 
 
-def strip_inline_comment(value: str) -> str:
-    """Remove an unquoted YAML comment while retaining literal ``#`` values."""
-    quote: str | None = None
-    escaped = False
-    for index, char in enumerate(value):
-        if quote == '"' and char == "\\" and not escaped:
-            escaped = True
-            continue
-        if char in "\"'" and not escaped:
-            if quote is None:
-                quote = char
-            elif quote == char:
-                quote = None
-        elif char == "#" and quote is None and (index == 0 or value[index - 1].isspace()):
-            return value[:index].rstrip()
-        escaped = False
-    return value.rstrip()
-
-
-def parse_yaml_scalar(value: str, line_number: int) -> str:
-    """Read a scalar used by the flat lab.yml contract."""
-    value = strip_inline_comment(value).strip()
-    if not value:
-        return ""
-    if value[0] not in "\"'":
-        return value
-    quote = value[0]
-    if len(value) < 2 or value[-1] != quote:
-        raise MetadataError(f"line {line_number}: unterminated quoted value")
-    if quote == "'":
-        return value[1:-1].replace("''", "'")
-    try:
-        return json.loads(value)
-    except json.JSONDecodeError as exc:
-        raise MetadataError(f"line {line_number}: invalid double-quoted value") from exc
-
-
-def fold_yaml_block(lines: list[str]) -> str:
-    """Fold the simple ``>`` block scalar form accepted by this parser."""
-    folded: list[str] = []
-    for line in lines:
-        if not line:
-            if folded and folded[-1] != "\n":
-                folded.append("\n")
-            continue
-        if folded and folded[-1] != "\n":
-            folded.append(" ")
-        folded.append(line)
-    return "".join(folded)
-
-
-def parse_flat_yaml(text: str) -> dict[str, str]:
-    """Parse supported flat metadata and reject ambiguous YAML with a line number."""
-    data: dict[str, str] = {}
-    lines = text.splitlines()
-    index = 0
-    while index < len(lines):
-        raw = lines[index]
-        line_number = index + 1
-        stripped = raw.strip()
-        if not stripped or stripped.startswith("#"):
-            index += 1
-            continue
-
-        match = META_KEY_RE.match(raw)
-        if not match or match.group("indent"):
-            raise MetadataError(f"line {line_number}: expected an unindented key: value mapping")
-        key = match.group("key")
-        if key in data:
-            raise MetadataError(f"line {line_number}: duplicate key `{key}`")
-
-        value = strip_inline_comment(match.group("value") or "").strip()
-        if not value and index + 1 < len(lines) and re.match(r"^\s+-\s+\S", lines[index + 1]):
-            items: list[str] = []
-            index += 1
-            while index < len(lines):
-                item = re.match(r"^\s+-\s+(?P<value>.+?)\s*$", lines[index])
-                if item is None:
-                    break
-                items.append(parse_yaml_scalar(item.group("value"), index + 1))
-                index += 1
-            data[key] = "[" + ", ".join(items) + "]"
-            continue
-        if value not in {"|", ">"}:
-            data[key] = parse_yaml_scalar(value, line_number)
-            index += 1
-            continue
-
-        style = value
-        index += 1
-        block: list[str] = []
-        while index < len(lines):
-            candidate = lines[index]
-            if candidate.strip() and not candidate[0].isspace():
-                break
-            block.append(candidate.lstrip() if candidate.strip() else "")
-            index += 1
-        if not block:
-            raise MetadataError(f"line {line_number}: block scalar has no content")
-        data[key] = "\n".join(block) if style == "|" else fold_yaml_block(block)
-    return data
-
-
 def load_meta(lab: Path) -> dict[str, str]:
     meta_path = lab / "lab.yml"
     if not meta_path.is_file():
         die(f"missing lab.yml in {lab}")
     try:
-        return parse_flat_yaml(meta_path.read_text(encoding="utf-8"))
-    except (MetadataError, OSError, UnicodeDecodeError) as exc:
+        result = load_lab_metadata(meta_path)
+    except (OSError, UnicodeDecodeError) as exc:
         die(f"invalid {meta_path}: {exc}")
+    if result.record is None:
+        message = (
+            format_validate_error(result.diagnostics[0])
+            if result.diagnostics
+            else "invalid lab.yml"
+        )
+        die(f"invalid {meta_path}: {message}")
+    return legacy_string_map(result.record)
 
 
 def escape_latex_inline(text: str) -> str:

@@ -34,7 +34,7 @@ jobs:
           persist-credentials: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -48,6 +48,9 @@ jobs:
 
       - name: Bump asset version parameters
         run: python3 scripts/sync_wiki.py bump
+
+      - name: Refresh public catalog listings
+        run: python3 scripts/sync_catalog_public.py --write
 
       - name: Commit refreshed assets
         id: commit
