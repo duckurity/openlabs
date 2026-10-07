@@ -1,10 +1,9 @@
-FROM python:3.12-alpine@sha256:b64631e04e4920160c50fbe8d8df828f7f35f06f425cb44aa09bca53e708a35a
+FROM python:3.12.15-alpine3.24@sha256:8a001d79e5a57ae4de7faa57af12f3d589058ea06ac42ec850c1cb0ac325bd21
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-RUN apk upgrade --no-cache \
-    && addgroup -S ingress && adduser -S -G ingress ingress
+RUN addgroup -S ingress && adduser -S -G ingress ingress
 
 # The proxy uses only the Python standard library. Remove the package installer
 # and bootstrap module so the final runtime carries no pip CVEs.
