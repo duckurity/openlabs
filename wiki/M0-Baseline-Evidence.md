@@ -2,7 +2,7 @@
 
 Auditable M0 completion record for [#72](https://github.com/duckurity/openlabs/issues/72) (M0-09). Use it before enabling branch protection on `main`. Depends on [#71](https://github.com/duckurity/openlabs/issues/71) (**CI required**).
 
-Reviewed on `2026-09-29`. Regenerate with `python3 scripts/baseline_report.py --write-wiki wiki/M0-Baseline-Evidence.md`. Write `--json` when you need the reviewed git commit and full inventory snapshot.
+Reviewed on `2026-10-08`. Regenerate with `python3 scripts/baseline_report.py --write-wiki wiki/M0-Baseline-Evidence.md`. Write `--json` when you need the reviewed git commit and full inventory snapshot.
 
 ## Catalog manifest
 
@@ -93,6 +93,7 @@ Run these from a clean checkout when reproducing **CI required** scope on `main`
 
 ```bash
 python3 scripts/validate.py
+python3 scripts/test_m2.py
 python3 scripts/test_contract.py
 python3 scripts/test_validate_status.py
 python3 scripts/test_status_aware_inventory.py
@@ -112,7 +113,9 @@ python3 scripts/validate.py --compose
 ### Prove duck-cross L0-L6
 
 ```bash
-python3 scripts/prove_reference_lab.py --json reference-lab-evidence.json
+python3 scripts/prove_reference_lab.py --json reference-lab-evidence-raw.json
+python3 scripts/evidence_artifact.py bound reference-lab-evidence-raw.json reference-lab-evidence.json
+python3 scripts/run_m2_tier1_lifecycle.py --json m2-tier1-lifecycle-evidence.json
 ```
 
 ### Security scan

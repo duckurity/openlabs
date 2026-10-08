@@ -11,21 +11,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = REPO_ROOT / "scripts"
 
 STEPS = (
+    "test_m2.py",
     "test_openlabs_contract.py",
     "test_contract_schema.py",
-    "test_diagnostic_registry.py",
-    "test_cli_contract_fixtures.py",
-    "test_openlabs_cli.py",
-    "test_openlabs_issue.py",
-    "test_openlabs_lab_discovery.py",
-    "test_openlabs_environment.py",
-    "test_openlabs_doctor.py",
-    "test_openlabs_state.py",
-    "test_openlabs_namespace.py",
-    "test_openlabs_port.py",
-    "test_openlabs_lab_setup.py",
-    "test_openlabs_lifecycle.py",
-    "test_openlabs_reset_safety.py",
 )
 
 
