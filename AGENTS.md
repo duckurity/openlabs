@@ -77,6 +77,7 @@ verifies a player's flag against the stored SHA-256 hash.
 
 ```bash
 python3 scripts/validate.py              # structure + metadata
+python3 scripts/test_m2.py                 # non-Docker M2 CLI and lifecycle gates
 python3 scripts/test_contract.py         # contract conformance gate (M1-08)
 python3 scripts/test_openlabs_cli.py     # openlabs CLI core (M2-02)
 python3 scripts/test_openlabs_issue.py     # issue explain and bundle (M2-03)
