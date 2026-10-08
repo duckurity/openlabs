@@ -28,10 +28,19 @@ REQUIRED_KEYS = frozenset(
 )
 CONTRACT_PATHS = (
     "scripts/test_contract.py",
+    "scripts/test_m2.py",
     "scripts/openlabs_contract.py",
     "contracts/lab.schema.json",
     "contracts/diagnostics.json",
     "contracts/cli-v1.md",
+)
+TIER1_REFERENCE_PATHS = (
+    "openlabs",
+    "scripts/openlabs_cli/lab_verify.py",
+    "scripts/run_m2_tier1_lifecycle.py",
+    "scripts/prove_reference_lab.py",
+    "scripts/diagnostic_registry.py",
+    "labs/web/duck-cross/README.md",
 )
 
 
@@ -93,6 +102,18 @@ def check_contract_paths_in_filters(filters: dict) -> int:
     return failures
 
 
+def check_tier1_reference_paths(filters: dict) -> int:
+    from ci_routing import path_matches_pattern
+
+    patterns = filters.get("reference", ())
+    failures = 0
+    for path in TIER1_REFERENCE_PATHS:
+        if not any(path_matches_pattern(path, pattern) for pattern in patterns):
+            failures += 1
+            print(f"reference filter missing tier1 path coverage for {path}")
+    return failures
+
+
 def check_permissions() -> int:
     if labs_workflow_permissions_read_only():
         return 0
@@ -109,6 +130,7 @@ def main() -> int:
         print(exc, file=sys.stderr)
         return 1
     failures += check_contract_paths_in_filters(filters)
+    failures += check_tier1_reference_paths(filters)
     failures += check_routing_examples(data, filters)
     failures += check_permissions()
     if failures:

@@ -78,6 +78,51 @@
       "run_reference": false
     },
     {
+      "change": "openlabs wrapper only",
+      "changed_files": ["openlabs"],
+      "run_validate": true,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": true
+    },
+    {
+      "change": "scripts/openlabs_cli/lab_verify.py only",
+      "changed_files": ["scripts/openlabs_cli/lab_verify.py"],
+      "run_validate": true,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": true
+    },
+    {
+      "change": "scripts/diagnostic_registry.py only",
+      "changed_files": ["scripts/diagnostic_registry.py"],
+      "run_validate": true,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": true
+    },
+    {
+      "change": "scripts/test_m2.py only",
+      "changed_files": ["scripts/test_m2.py"],
+      "run_validate": true,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": false
+    },
+    {
+      "change": "scripts/run_m2_tier1_lifecycle.py only",
+      "changed_files": ["scripts/run_m2_tier1_lifecycle.py"],
+      "run_validate": true,
+      "run_security": false,
+      "run_content": false,
+      "run_pdf": false,
+      "run_reference": true
+    },
+    {
       "change": "wiki/Home.md only",
       "changed_files": ["wiki/Home.md"],
       "run_validate": false,
