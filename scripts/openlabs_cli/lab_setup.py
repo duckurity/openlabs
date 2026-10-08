@@ -82,17 +82,9 @@ def _wait_ready(base_url: str) -> bool:
 
 
 def _verify_duck_cross(base_url: str) -> tuple[bool, str]:
-    if not _http_ready(base_url):
-        return False, "player entry page failed"
-    try:
-        request = urllib.request.Request(f"{base_url}/api/reports/1", method="GET")
-        with urllib.request.urlopen(request, timeout=10.0) as response:
-            body = response.read().decode("utf-8", "replace")
-        if response.status != 200 or "mill lane" not in body.lower():
-            return False, "public report workflow failed"
-    except (OSError, urllib.error.URLError):
-        return False, "public report workflow failed"
-    return True, "supported verification passed"
+    from openlabs_cli.verification import adapters
+
+    return adapters.setup_smoke_l4("duck-cross", base_url)
 
 
 def _fail_setup(
