@@ -17,9 +17,9 @@ SCRIPTS = REPO_ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 from cli_contract import validate_envelope  # noqa: E402
-from openlabs_cli.app import run_cli  # noqa: E402
 from openlabs_cli.context import CliContext  # noqa: E402
 from openlabs_cli.envelope import build_envelope, Diagnostic, CliResult  # noqa: E402
+from openlabs_cli.environment_probe import CheckResult, EnvironmentReport  # noqa: E402
 from openlabs_cli.root import find_repo_root  # noqa: E402
 
 
@@ -74,12 +74,60 @@ def test_unknown_command_json() -> None:
 
 
 def test_setup_json_envelope() -> None:
-    code, out, _err = _run(["--json", "setup"])
-    payload = _validate_json(out, label="setup.json")
+    report = EnvironmentReport(
+        checks=(
+            CheckResult(name="repo_root", ok=True, detail=str(REPO_ROOT)),
+            CheckResult(name="python", ok=True, detail="3.12"),
+        ),
+        tier="tier1",
+        runtime="docker",
+        missing=(),
+        guidance=(),
+    )
+    ctx = CliContext(repo_root=REPO_ROOT, json_mode=True)
+    with mock.patch(
+        "openlabs_cli.commands.setup.run_environment_probe",
+        return_value=report,
+    ):
+        from openlabs_cli.commands.setup import handle_setup  # noqa: E402
+
+        result = handle_setup(ctx, [])
+    envelope = build_envelope(result, ctx)
+    payload = envelope
+    errors = validate_envelope(payload, path="setup.json")
+    assert not errors
     assert payload["command"] == "setup"
     assert payload["data"]["action"] == "run"
     assert "checks" in payload["data"]
     assert "tier" in payload["data"]
+
+
+def test_setup_missing_docker_diagnostic() -> None:
+    report = EnvironmentReport(
+        checks=(
+            CheckResult(
+                name="docker_client",
+                ok=False,
+                detail="missing",
+                diagnostic_key="environment.docker.client_missing",
+            ),
+        ),
+        tier="unsupported",
+        runtime="unknown",
+        missing=("docker_client",),
+        guidance=("install Docker Engine",),
+    )
+    ctx = CliContext(repo_root=REPO_ROOT, json_mode=True)
+    with mock.patch(
+        "openlabs_cli.commands.setup.run_environment_probe",
+        return_value=report,
+    ):
+        from openlabs_cli.commands.setup import handle_setup  # noqa: E402
+
+        result = handle_setup(ctx, [])
+    envelope = build_envelope(result, ctx)
+    assert envelope["ok"] is False
+    assert envelope["diagnostics"][0]["key"] == "environment.docker.client_missing"
 
 
 def test_repo_layout_invalid() -> None:
@@ -163,6 +211,7 @@ def main() -> int:
         test_help_json_envelope,
         test_unknown_command_json,
         test_setup_json_envelope,
+        test_setup_missing_docker_diagnostic,
         test_repo_layout_invalid,
         test_dry_run_flag_reaches_envelope,
         test_redaction_in_diagnostic_message,
