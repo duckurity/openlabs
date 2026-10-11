@@ -7,6 +7,10 @@
 
 [[Home](Home)]
 [[Getting Started](Getting-Started)]
+[[OpenLabs CLI](OpenLabs-CLI)]
+[[Platform support tiers](Platform-Support-Tiers)]
+[[CLI troubleshooting](CLI-Troubleshooting)]
+[[M2 release evidence](M2-Release-Evidence)]
 [[Tracks and Difficulty](Tracks-and-Difficulty)]
 [[Lab Anatomy](Lab-Anatomy)]
 [[Lab catalog status](Lab-Catalog-Status)]

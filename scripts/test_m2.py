@@ -26,6 +26,8 @@ STEPS = (
     "test_openlabs_verify.py",
     "test_cli_contract_fixtures.py",
     "test_diagnostic_registry.py",
+    "test_m2_docs.py",
+    "test_m2_release_report.py",
 )
 
 

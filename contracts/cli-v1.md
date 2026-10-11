@@ -2,8 +2,8 @@
 
 Specification for the `openlabs` player and maintainer CLI (M2). M1-07
 introduced the envelope; M2-01 extends commands, lifecycle state, support tiers,
-and safety rules. The executable lands in M2-02; repository scripts remain usable
-for debugging until the CLI is shipped.
+and safety rules. The executable ships from `./openlabs` (M2-02). Repository scripts remain usable
+for debugging.
 
 Human decisions live in `wiki/M1-Contract-Decisions.md` and
 `wiki/M2-Lifecycle-Decisions.md`. Golden JSON examples live under

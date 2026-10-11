@@ -49,9 +49,10 @@ This wiki serves three audiences.
 
 | You are | Start here |
 |:---:|:---|
-| A player | [Getting Started](Getting-Started) |
+| A player | [Getting Started](Getting-Started) · [OpenLabs CLI](OpenLabs-CLI) |
 | A content writer | [Authoring a Lab](Authoring-a-Lab) |
 | A reviewer | [Reviewer Checklist](Reviewer-Checklist) |
+| Lifecycle support | [Platform support tiers](Platform-Support-Tiers) · [CLI troubleshooting](CLI-Troubleshooting) |
 
 </div>
 
@@ -67,12 +68,12 @@ This wiki serves three audiences.
 
 ```bash
 git clone https://github.com/Duckurity/openlabs
-cd openlabs/labs/web/duck-cross
-docker compose up -d
+cd openlabs
+./openlabs lab setup duck-cross
 ```
 
 Open `http://localhost:8377`. Verify a solve with
-`python3 scripts/check.py labs/web/duck-cross`.
+`python3 scripts/check.py labs/web/duck-cross`. See [OpenLabs CLI](OpenLabs-CLI).
 
 [Explore the repository](https://github.com/Duckurity/openlabs) |
 [Report a broken lab](https://github.com/Duckurity/openlabs/issues)

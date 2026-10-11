@@ -88,14 +88,13 @@ Order matches the reviewed M2 starter package.
 | 9 | [#132 M2-09](https://github.com/duckurity/openlabs/issues/132) | M2-08 | CI and fault gates |
 | 10 | [#133 M2-10](https://github.com/duckurity/openlabs/issues/133) | M2-09 | Docs and M2 release evidence |
 
-## Known gaps (baseline)
+## Known gaps (at M2 release)
 
-- No `./openlabs` entry point yet.
-- CLI spec lacks M2 lab lifecycle commands until M2-01 lands.
-- Registry reserves `OL-0034`..`OL-0041` for lifecycle and environment keys; M2-03 adds explain metadata and detectors.
-- `.openlabs/` is not gitignored until M2-06.
-- Eight experimental labs declare explicit `container_name`; lifecycle mutation must reject them until lab fixes land.
-- Final Tier 1 Docker evidence requires hosted CI (M2-09).
+- Only `duck-cross` has a Tier 1 lifecycle guarantee; experimental labs remain list-only or blocked.
+- Eight experimental labs declare explicit `container_name`; lifecycle mutation rejects them until lab fixes land.
+- Tier 2 and Tier 3 hosts lack hosted runner lifecycle evidence at release.
+- Legacy `prove_reference_lab.py` still runs in CI beside CLI Tier 1 evidence until prove removal.
+- Hosted CI run URL on [M2 release evidence](M2-Release-Evidence) stays TBD until the maintainer records post-merge Actions output on [#133](https://github.com/duckurity/openlabs/issues/133).
 
 ## Non-goals (M2)
 

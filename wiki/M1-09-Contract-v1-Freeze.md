@@ -16,7 +16,7 @@ authoring and migration guidance and freezes `contract_version: 1` on `main`.
 | Schema | `contracts/lab.schema.json` |
 | Parser and model | `scripts/openlabs_contract.py` |
 | Diagnostics | `contracts/diagnostics.json` (`OL-####` ids) |
-| CLI specification | `contracts/cli-v1.md` (spec only; no shipped `openlabs` binary) |
+| CLI | `./openlabs` at repo root; spec in `contracts/cli-v1.md` |
 | CI gate | `python3 scripts/test_contract.py` in **Validate labs** |
 
 Decision detail lives in [M1 contract decisions](M1-Contract-Decisions). Open lab
@@ -59,10 +59,13 @@ reports. Do not bypass redaction when surfacing errors to players.
 
 ## CLI status
 
-`contracts/cli-v1.md` and `scripts/fixtures/cli_contract/` define a future
-`openlabs` CLI. The repository does **not** ship that command today. Use
-`scripts/validate.py`, `scripts/check.py`, and the other paths listed in
-`AGENTS.md` until a later milestone adds the CLI.
+M2 ships `./openlabs` from the repository root. Behavior and envelopes are
+defined in `contracts/cli-v1.md` with fixtures under
+`scripts/fixtures/cli_contract/`. Player guide: [OpenLabs CLI](OpenLabs-CLI).
+Release boundary: [M2 release evidence](M2-Release-Evidence).
+
+Use `scripts/validate.py`, `scripts/check.py`, and other scripts when you need
+script-level debugging without the CLI wrapper.
 
 ## CI evidence
 
