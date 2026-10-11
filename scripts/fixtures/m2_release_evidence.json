@@ -4,8 +4,8 @@
   "reference_lab": "labs/web/duck-cross",
   "reference_lab_slug": "duck-cross",
   "tier1_platform": "Linux x86_64 with Python 3.12, Docker Engine, Compose v2",
-  "hosted_ci_run_url": null,
-  "hosted_ci_run_note": "Set hosted_ci_run_url after merge; regenerate wiki/M2-Release-Evidence.md",
+  "hosted_ci_run_url": "https://github.com/duckurity/openlabs/actions/runs/37861671412",
+  "hosted_evidence_fixture": "scripts/fixtures/m2_tier1_hosted_evidence.json",
   "issues": [
     {
       "id": "M2-01",
@@ -82,7 +82,8 @@
     "Nineteen experimental labs lack full lifecycle support",
     "Tier 2 and Tier 3 hosts lack hosted runner lifecycle evidence at release",
     "Eight experimental labs declare container_name and block lifecycle mutation",
-    "Legacy prove_reference_lab.py runs beside CLI Tier 1 evidence until prove removal"
+    "Legacy prove_reference_lab.py runs beside CLI Tier 1 evidence until prove removal",
+    "issue bundle records invocation and evidence paths but does not replay prior command diagnostics automatically"
   ],
   "tier1_lifecycle_steps": [
     "lab setup",

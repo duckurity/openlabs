@@ -11,7 +11,8 @@ Reviewed on `2026-10-11`. Regenerate with `python3 scripts/m2_release_report.py 
 | CLI version | `0.2.0` |
 | Command envelope | `openlabs.command.v1` |
 | Lab contract | `1` |
-| Reviewed commit | `89eddc08b0c4` |
+| Reviewed commit | `8891d1b959ee` |
+| Release evidence commit | `d6ebe8116452` |
 
 ## Supported manifest
 
@@ -27,7 +28,10 @@ Reviewed on `2026-10-11`. Regenerate with `python3 scripts/m2_release_report.py 
 
 - Tier 1 platform: Linux x86_64 with Python 3.12, Docker Engine, Compose v2
 - Reference lab: `labs/web/duck-cross`
-- Hosted CI run: _TBD (set in scripts/fixtures/m2_release_evidence.json)_
+- Hosted CI run: [https://github.com/duckurity/openlabs/actions/runs/37861671412](https://github.com/duckurity/openlabs/actions/runs/37861671412) (success)
+- Tier 1 proof job: [Prove duck-cross L0-L6](https://github.com/duckurity/openlabs/actions/runs/37861671412/job/113598670443)
+- Release evidence commit: `d6ebe811645282d4a53341543887527c43146e5b`
+- Uploaded artifacts: `reference-lab-evidence`, `m2-tier1-lifecycle-evidence`
 
 CI job **Prove duck-cross L0-L6** runs:
 
@@ -36,7 +40,24 @@ CI job **Prove duck-cross L0-L6** runs:
 3. `python3 scripts/run_m2_tier1_lifecycle.py` (CLI lifecycle evidence)
 4. Secret scan on both JSON artifacts
 
-Tier 1 CLI lifecycle step order (includes reset and second start):
+### Tier 1 CLI lifecycle timings (hosted)
+
+| Step | Ok | Seconds |
+|:---|:---:|---:|
+| `lab_setup` | yes | 1.53 |
+| `lab_verify` | yes | 33.38 |
+| `lab_reset` | yes | 0.19 |
+| `lab_start` | yes | 0.89 |
+| `lab_status` | yes | 0.19 |
+| `lab_stop` | yes | 10.39 |
+
+### Reset and second start proof
+
+- `lab_reset` completed in **0.19s**
+- `lab_start` completed in **0.89s** (second start after verify reset cycle)
+- Cleanup ok: **True**
+
+Tier 1 CLI lifecycle command order:
 
 - `./openlabs --json --non-interactive lab setup duck-cross`
 - `./openlabs --json --non-interactive lab verify duck-cross`
@@ -44,8 +65,6 @@ Tier 1 CLI lifecycle step order (includes reset and second start):
 - `./openlabs --json --non-interactive lab start duck-cross`
 - `./openlabs --json --non-interactive lab status duck-cross`
 - `./openlabs --json --non-interactive lab stop duck-cross`
-
-Lifecycle timings appear per step in uploaded artifact `m2-tier1-lifecycle-evidence.json` (`seconds` on each step).
 
 ## Player and maintainer docs
 
@@ -61,6 +80,7 @@ Lifecycle timings appear per step in uploaded artifact `m2-tier1-lifecycle-evide
 - Tier 2 and Tier 3 hosts lack hosted runner lifecycle evidence at release
 - Eight experimental labs declare container_name and block lifecycle mutation
 - Legacy prove_reference_lab.py runs beside CLI Tier 1 evidence until prove removal
+- issue bundle records invocation and evidence paths but does not replay prior command diagnostics automatically
 
 ## Deferred work
 
