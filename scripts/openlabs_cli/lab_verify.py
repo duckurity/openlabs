@@ -10,6 +10,7 @@ from openlabs_cli.envelope import CliResult, Diagnostic
 from openlabs_cli.errors import UsageError
 from openlabs_cli.lab_discovery import LabSelectionError, ResolvedLab, resolve_lab
 from openlabs_cli.lab_verification import VerificationFailure, run_verification
+from openlabs_cli.platform_policy import guaranteed_lifecycle_block
 from openlabs_cli.verification import adapters
 
 LEVELS = tuple(f"L{i}" for i in range(7))
@@ -162,6 +163,10 @@ def handle_lab_verify(ctx: CliContext, args: list[str]) -> CliResult:
             ],
             human_lines=["supported verification is not available for this lab"],
         )
+
+    tier_block = guaranteed_lifecycle_block(ctx, action="verify", lab=slug)
+    if tier_block is not None:
+        return tier_block
 
     try:
         report = run_verification(

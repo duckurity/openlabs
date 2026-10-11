@@ -24,6 +24,7 @@ from openlabs_cli.lab_discovery import (
     resolve_lab,
 )
 from openlabs_cli.namespace import compose_project_name
+from openlabs_cli.platform_policy import guaranteed_lifecycle_block
 from openlabs_cli.port_policy import resolve_host_port
 from openlabs_cli.setup_log import new_run_id, relative_evidence, write_setup_log
 from openlabs_cli.state_store import (
@@ -190,6 +191,10 @@ def handle_lab_setup(ctx: CliContext, args: list[str]) -> CliResult:
             ],
             human_lines=["only supported labs can run lab setup"],
         )
+
+    tier_block = guaranteed_lifecycle_block(ctx, action="setup", lab=slug)
+    if tier_block is not None:
+        return tier_block
 
     project = compose_project_name(ctx.repo_root, slug)
     declared = entry.get("port") or derive_host_port(lab_dir) or 8377
