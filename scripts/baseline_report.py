@@ -162,6 +162,7 @@ def local_ci_commands() -> list[dict]:
             "ci_job": "Validate labs",
             "commands": [
                 "python3 scripts/validate.py",
+                "python3 scripts/test_m2.py",
                 "python3 scripts/test_contract.py",
                 "python3 scripts/test_validate_status.py",
                 "python3 scripts/test_status_aware_inventory.py",
@@ -179,7 +180,9 @@ def local_ci_commands() -> list[dict]:
         {
             "ci_job": "Prove duck-cross L0-L6",
             "commands": [
-                "python3 scripts/prove_reference_lab.py --json reference-lab-evidence.json"
+                "python3 scripts/prove_reference_lab.py --json reference-lab-evidence-raw.json",
+                "python3 scripts/evidence_artifact.py bound reference-lab-evidence-raw.json reference-lab-evidence.json",
+                "python3 scripts/run_m2_tier1_lifecycle.py --json m2-tier1-lifecycle-evidence.json",
             ],
         },
         {

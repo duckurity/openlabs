@@ -17,6 +17,7 @@ from cli_contract import validate_envelope  # noqa: E402
 from openlabs_cli.commands.lab import handle_lab  # noqa: E402
 from openlabs_cli.context import CliContext  # noqa: E402
 from openlabs_cli.runner import CommandResult  # noqa: E402
+from openlabs_cli.repo_config import config_path, write_config  # noqa: E402
 from openlabs_cli.state_store import build_state_payload, write_state  # noqa: E402
 
 
@@ -57,6 +58,19 @@ def _json(stdout: str, *, label: str) -> dict:
     return data
 
 
+def _seed_tier1() -> None:
+    write_config(REPO_ROOT, tier="tier1")
+
+
+def _clear_openlabs_local() -> None:
+    state_file = REPO_ROOT / ".openlabs/state/duck-cross.json"
+    if state_file.is_file():
+        state_file.unlink()
+    cfg = config_path(REPO_ROOT)
+    if cfg.is_file():
+        cfg.unlink()
+
+
 def _seed_state(tmp: Path, *, lifecycle: str = "stopped") -> None:
     write_state(
         tmp,
@@ -72,15 +86,19 @@ def _seed_state(tmp: Path, *, lifecycle: str = "stopped") -> None:
 
 
 def test_dry_run_lifecycle_commands_exit_zero() -> None:
-    for action in ("start", "status", "stop", "reset"):
-        code, out, _err = _run(["--json", "--dry-run", "lab", action, "duck-cross"])
-        assert code == 0, action
-        payload = _json(out, label=f"dry-run-{action}.json")
-        assert payload["dry_run"] is True
-        assert payload["data"]["action"] == action
-        if action in {"start", "stop", "reset"}:
-            assert payload["data"]["planned"]
-            assert payload["meta"]["reset_safe"] is True
+    _seed_tier1()
+    try:
+        for action in ("start", "status", "stop", "reset"):
+            code, out, _err = _run(["--json", "--dry-run", "lab", action, "duck-cross"])
+            assert code == 0, action
+            payload = _json(out, label=f"dry-run-{action}.json")
+            assert payload["dry_run"] is True
+            assert payload["data"]["action"] == action
+            if action in {"start", "stop", "reset"}:
+                assert payload["data"]["planned"]
+                assert payload["meta"]["reset_safe"] is True
+    finally:
+        _clear_openlabs_local()
 
 
 def test_start_uses_namespaced_compose_argv() -> None:
@@ -88,6 +106,7 @@ def test_start_uses_namespaced_compose_argv() -> None:
 
     runner = _RecordingRunner(ps_output="")
     ctx = CliContext(repo_root=REPO_ROOT, runner=runner)
+    _seed_tier1()
     _seed_state(REPO_ROOT, lifecycle="stopped")
     try:
         with patch("openlabs_cli.lab_lifecycle.wait_ready", return_value=True):
@@ -101,14 +120,13 @@ def test_start_uses_namespaced_compose_argv() -> None:
             assert "prune" not in call
             assert "system" not in call
     finally:
-        state_file = REPO_ROOT / ".openlabs/state/duck-cross.json"
-        if state_file.is_file():
-            state_file.unlink()
+        _clear_openlabs_local()
 
 
 def test_stop_idempotent_when_compose_absent() -> None:
     runner = _RecordingRunner(ps_output="")
     ctx = CliContext(repo_root=REPO_ROOT, runner=runner)
+    _seed_tier1()
     _seed_state(REPO_ROOT, lifecycle="ready")
     try:
         result = handle_lab(ctx, ["stop", "duck-cross"])
@@ -116,9 +134,7 @@ def test_stop_idempotent_when_compose_absent() -> None:
         assert result.data.get("no_op") is True
         assert not any("stop" in call for call in runner.calls)
     finally:
-        state_file = REPO_ROOT / ".openlabs/state/duck-cross.json"
-        if state_file.is_file():
-            state_file.unlink()
+        _clear_openlabs_local()
 
 
 def test_status_reports_drift_when_compose_stopped() -> None:

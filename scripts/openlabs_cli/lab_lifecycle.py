@@ -12,6 +12,7 @@ from openlabs_cli.errors import UsageError
 from openlabs_cli.lab_discovery import LabSelectionError, ResolvedLab, resolve_lab
 from openlabs_cli.lab_runtime import compose_running, run_compose, wait_ready
 from openlabs_cli.namespace import compose_project_name
+from openlabs_cli.platform_policy import guaranteed_lifecycle_block
 from openlabs_cli.state_store import (
     LabLockError,
     build_state_payload,
@@ -57,7 +58,7 @@ def _resolve(ctx: CliContext, selector: str) -> ResolvedLab | CliResult:
     return selection
 
 
-def _mutation_blockers(resolved: ResolvedLab, *, action: str) -> CliResult | None:
+def _mutation_blockers(ctx: CliContext, resolved: ResolvedLab, *, action: str) -> CliResult | None:
     entry = resolved.entry
     slug = entry["slug"]
     if entry.get("blockers") and "container_name" in entry["blockers"]:
@@ -88,6 +89,9 @@ def _mutation_blockers(resolved: ResolvedLab, *, action: str) -> CliResult | Non
             ],
             human_lines=["lab is not eligible for guaranteed lifecycle commands"],
         )
+    tier_block = guaranteed_lifecycle_block(ctx, action=action, lab=slug)
+    if tier_block is not None:
+        return tier_block
     return None
 
 
@@ -146,7 +150,7 @@ def handle_lab_start(ctx: CliContext, args: list[str]) -> CliResult:
     resolved = _resolve(ctx, args[0])
     if isinstance(resolved, CliResult):
         return resolved
-    blocked = _mutation_blockers(resolved, action="start")
+    blocked = _mutation_blockers(ctx, resolved, action="start")
     if blocked:
         return blocked
     slug = resolved.entry["slug"]
@@ -381,7 +385,7 @@ def handle_lab_stop(ctx: CliContext, args: list[str]) -> CliResult:
     resolved = _resolve(ctx, args[0])
     if isinstance(resolved, CliResult):
         return resolved
-    blocked = _mutation_blockers(resolved, action="stop")
+    blocked = _mutation_blockers(ctx, resolved, action="stop")
     if blocked:
         return blocked
     slug = resolved.entry["slug"]
@@ -492,7 +496,7 @@ def handle_lab_reset(ctx: CliContext, args: list[str]) -> CliResult:
     resolved = _resolve(ctx, selector)
     if isinstance(resolved, CliResult):
         return resolved
-    blocked = _mutation_blockers(resolved, action="reset")
+    blocked = _mutation_blockers(ctx, resolved, action="reset")
     if blocked:
         return blocked
     slug = resolved.entry["slug"]

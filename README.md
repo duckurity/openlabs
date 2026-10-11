@@ -33,7 +33,9 @@ Press play to hear the welcome.
 
 ## Get solving
 
-Three things stand between you and your first flag.
+Three things stand between you and your first flag. On Linux `x86_64`, use the
+[OpenLabs CLI wiki guide](https://github.com/Duckurity/openlabs/wiki/OpenLabs-CLI)
+for the supported `duck-cross` lifecycle, or start compose directly:
 
 ```bash
 git clone https://github.com/Duckurity/openlabs

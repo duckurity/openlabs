@@ -177,7 +177,7 @@
         "Re-run without --non-interactive",
         "Provide explicit flags documented in contracts/cli-v1.md"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -196,7 +196,7 @@
         "Check uname -m output",
         "Review wiki/M2-Lifecycle-Decisions support tiers"
       ],
-      "docs_anchor": "wiki/M2-Lifecycle-Decisions.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier3"
       ],
@@ -212,7 +212,7 @@
         "Check listeners on the requested port",
         "Inspect .openlabs/state for host_port when present"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -231,7 +231,7 @@
         "Search the compose file for container_name",
         "Review lab list blockers output"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -249,7 +249,7 @@
         "Run openlabs lab status",
         "Check .openlabs/logs for the partial run"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -269,7 +269,7 @@
         "Run openlabs lab list and read blockers",
         "Confirm lab status is supported"
       ],
-      "docs_anchor": "wiki/M2-Lifecycle-Decisions.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -287,7 +287,7 @@
         "Run docker --version",
         "Confirm docker is on PATH"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -305,7 +305,7 @@
         "Run docker info",
         "Confirm the daemon service is running"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -323,7 +323,7 @@
         "Run openlabs --help",
         "Compare argv with contracts/cli-v1.md"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -341,7 +341,7 @@
         "Re-run with --json",
         "Run openlabs issue bundle and inspect diagnostics"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -358,7 +358,7 @@
       "evidence": [
         "Check milestone status in wiki/M2-Lifecycle-Decisions.md"
       ],
-      "docs_anchor": "wiki/M2-Lifecycle-Decisions.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -376,7 +376,7 @@
         "Confirm AGENTS.md exists in the current tree",
         "Clone the openlabs repository"
       ],
-      "docs_anchor": "contracts/cli-v1.md",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": [
         "tier1",
         "tier2",
@@ -394,7 +394,7 @@
         "Run openlabs issue explain OL-#### with a valid id",
         "Search contracts/diagnostics.json"
       ],
-      "docs_anchor": "contracts/diagnostics.json",
+      "docs_anchor": "wiki/CLI-Troubleshooting.md",
       "platforms": ["tier1", "tier2", "tier3"],
       "safe_fix": "Use an id from contracts/diagnostics.json",
       "manual_fix": "Upgrade openlabs if the id comes from a newer milestone"

@@ -66,6 +66,11 @@ def test_bundle_dry_run_json() -> None:
     assert payload["dry_run"] is True
     assert payload["data"]["action"] == "bundle"
     assert "/home/" not in json.dumps(payload)
+    bundle = payload["data"]["bundle"]
+    assert bundle.get("invocation")
+    assert "issue" in bundle["invocation"]
+    assert bundle["docker"]["client"] is None or isinstance(bundle["docker"]["client"], str)
+    assert all(d["key"] != "lifecycle.cli.internal" for d in payload["diagnostics"])
 
 
 def test_bundle_writes_redacted_file() -> None:

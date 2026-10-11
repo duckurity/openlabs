@@ -116,6 +116,8 @@ def classify_tier(
         return "unsupported"
     normalized = machine.lower()
     arm = normalized in {"aarch64", "arm64", "armv8", "armv7l"}
+    if system == "Darwin" and arm:
+        return "tier3"
     if system == "Darwin" or wsl:
         return "tier2"
     if arm:
@@ -398,8 +400,9 @@ def run_environment_probe(
         checks = list(checks) + [
             CheckResult(
                 name="tier",
-                ok=True,
+                ok=False,
                 detail="tier3",
+                diagnostic_key="lifecycle.platform.unsupported_architecture",
                 guidance="Tier 3 hosts need per-lab evidence; guaranteed duck-cross lifecycle targets Tier 1 Linux x86_64.",
             )
         ]

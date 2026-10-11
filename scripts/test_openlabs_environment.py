@@ -84,6 +84,16 @@ def test_tier2_macos() -> None:
     assert report.tier == "tier2"
 
 
+def test_tier3_darwin_arm64() -> None:
+    report = run_environment_probe(
+        _ctx(),
+        overrides=ProbeOverrides(system="Darwin", machine="arm64", wsl=False, python_version=(3, 12, 0)),
+    )
+    assert report.tier == "tier3"
+    keys = [item.diagnostic_key for item in report.checks if item.diagnostic_key]
+    assert "lifecycle.platform.unsupported_architecture" in keys
+
+
 def test_tier3_arm64() -> None:
     report = run_environment_probe(
         _ctx(),
@@ -193,6 +203,7 @@ def main() -> int:
         test_tier1_linux_x86_64,
         test_tier2_wsl,
         test_tier2_macos,
+        test_tier3_darwin_arm64,
         test_tier3_arm64,
         test_missing_docker_client,
         test_daemon_unavailable_separate_from_client,

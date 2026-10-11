@@ -50,9 +50,10 @@ verifies a player's flag against the stored SHA-256 hash.
   `contracts/diagnostics.json`.
 - Do not add duplicate `parse_flat_yaml` or `parse_lab_yml` helpers outside
   `openlabs_contract.py`.
-- `contracts/cli-v1.md` describes a future CLI; do not document `openlabs` as
-  shipped. Point players and contributors at `validate.py` and `check.py`.
-- Freeze record: `wiki/M1-09-Contract-v1-Freeze.md`.
+- `./openlabs` ships from the repository root (M2). Prefer it for player and
+  maintainer lifecycle flows. Spec: `contracts/cli-v1.md`; guides: `wiki/OpenLabs-CLI.md`.
+- Keep `validate.py`, `check.py`, and other scripts for narrow debugging.
+- Freeze records: `wiki/M1-09-Contract-v1-Freeze.md`, `wiki/M2-Release-Evidence.md`.
 
 ## Voice rules for any text you write
 
@@ -77,6 +78,9 @@ verifies a player's flag against the stored SHA-256 hash.
 
 ```bash
 python3 scripts/validate.py              # structure + metadata
+python3 scripts/test_m2.py                 # non-Docker M2 CLI, lifecycle, and doc gates
+python3 scripts/test_m2_release_report.py  # M2 release evidence generator check
+python3 scripts/m2_release_report.py --check --wiki wiki/M2-Release-Evidence.md
 python3 scripts/test_contract.py         # contract conformance gate (M1-08)
 python3 scripts/test_openlabs_cli.py     # openlabs CLI core (M2-02)
 python3 scripts/test_openlabs_issue.py     # issue explain and bundle (M2-03)

@@ -78,6 +78,13 @@ jobs:
               - 'scripts/test_openlabs_lab_setup.py'
               - 'scripts/test_openlabs_lifecycle.py'
               - 'scripts/test_openlabs_reset_safety.py'
+              - 'scripts/test_openlabs_verify.py'
+              - 'scripts/test_m2.py'
+              - 'scripts/test_run_m2_tier1_lifecycle.py'
+              - 'scripts/evidence_artifact.py'
+              - 'scripts/run_m2_tier1_lifecycle.py'
+              - 'scripts/diagnostic_registry.py'
+              - 'openlabs'
               - 'contracts/cli-v1.md'
               - 'contracts/**'
               - 'scripts/test_validate*.py'
@@ -97,8 +104,12 @@ jobs:
               - 'scripts/check.py'
               - '.gitleaks.toml'
             reference:
-              - 'labs/web/duck-cross/**'
+              - 'openlabs'
+              - 'scripts/openlabs_cli/**'
+              - 'scripts/run_m2_tier1_lifecycle.py'
               - 'scripts/prove_reference_lab.py'
+              - 'scripts/diagnostic_registry.py'
+              - 'labs/web/duck-cross/**'
             content:
               - 'content/**'
               - 'contentbit.config.ts'
@@ -227,7 +238,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.run_reference == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -235,14 +246,61 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Prove reference lab lifecycle
-        run: python3 scripts/prove_reference_lab.py --json reference-lab-evidence.json
+      - name: Docker Compose sanity
+        run: docker compose version
+
+      - name: Prove reference lab lifecycle (legacy)
+        id: prove_legacy
+        continue-on-error: true
+        run: python3 scripts/prove_reference_lab.py --json reference-lab-evidence-raw.json
+
+      - name: Bound legacy reference evidence
+        if: always()
+        run: |
+          if [ ! -f reference-lab-evidence-raw.json ]; then
+            echo '{"lab":"duck-cross","steps":[],"detail":"legacy prove produced no raw evidence"}' > reference-lab-evidence-raw.json
+          fi
+          python3 scripts/evidence_artifact.py bound reference-lab-evidence-raw.json reference-lab-evidence.json
+
+      - name: Tier 1 openlabs lifecycle
+        id: tier1_lifecycle
+        if: always()
+        run: python3 scripts/run_m2_tier1_lifecycle.py --json m2-tier1-lifecycle-evidence.json
+
+      - name: Scan lifecycle artifacts for plaintext flags
+        if: always()
+        run: |
+          python3 scripts/evidence_artifact.py scan-secrets reference-lab-evidence.json
+          python3 scripts/evidence_artifact.py scan-secrets m2-tier1-lifecycle-evidence.json
+
+      - name: Aggregate Tier 1 lifecycle results
+        if: always()
+        run: |
+          set -euo pipefail
+          fail=0
+          if [ "${{ steps.prove_legacy.outcome }}" != "success" ]; then
+            echo "legacy prove_reference_lab failed" >&2
+            fail=1
+          fi
+          if [ "${{ steps.tier1_lifecycle.outcome }}" != "success" ]; then
+            echo "openlabs tier1 lifecycle failed" >&2
+            fail=1
+          fi
+          exit "$fail"
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: reference-lab-evidence
           path: reference-lab-evidence.json
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m2-tier1-lifecycle-evidence
+          path: m2-tier1-lifecycle-evidence.json
+          if-no-files-found: error
 
   security:
     name: Security scan

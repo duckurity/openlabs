@@ -64,10 +64,15 @@ provides to Actions on PRs.
 ## Evidence commands
 
 ```bash
+python3 scripts/test_m2.py
 python3 scripts/test_ci_routing_matrix.py
 bash scripts/lint_workflows.sh
 python3 scripts/baseline_report.py --check --wiki wiki/M0-Baseline-Evidence.md
 ```
+
+The **Prove duck-cross L0-L6** job uploads legacy prove evidence and a Tier 1
+`openlabs` lifecycle JSON. Both artifacts are redacted and size-bounded before
+upload.
 
 For the full M0 completion record and local equivalents to every CI job, see
 [M0 baseline evidence](M0-Baseline-Evidence) ([#72](https://github.com/duckurity/openlabs/issues/72)).
