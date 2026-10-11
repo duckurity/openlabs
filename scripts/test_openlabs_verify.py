@@ -17,6 +17,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 from cli_contract import validate_envelope  # noqa: E402
 from openlabs_cli.commands.lab import handle_lab  # noqa: E402
+from openlabs_cli.repo_config import config_path, write_config  # noqa: E402
 from openlabs_cli.context import CliContext  # noqa: E402
 from openlabs_cli.lab_discovery import resolve_lab  # noqa: E402
 from openlabs_cli.lab_verification import VerificationReport, run_verification  # noqa: E402
@@ -57,6 +58,7 @@ def test_unknown_verify_flag_rejected() -> None:
 
 
 def test_partial_level_stops_after_l3() -> None:
+    write_config(REPO_ROOT, tier="tier1")
     ctx = CliContext(repo_root=REPO_ROOT, runner=None)
     resolved = resolve_lab(REPO_ROOT, "duck-cross")
     assert not hasattr(resolved, "message")
@@ -75,6 +77,9 @@ def test_partial_level_stops_after_l3() -> None:
     levels = [step["level"] for step in result.data["levels"]]
     assert levels == ["L0", "L1", "L2", "L3"]
     assert "L4" not in levels
+    cfg = config_path(REPO_ROOT)
+    if cfg.is_file():
+        cfg.unlink()
 
 
 def test_experimental_lab_not_supported_verification() -> None:
@@ -104,6 +109,7 @@ def test_experimental_lab_not_supported_verification() -> None:
 def test_failure_output_has_no_plaintext_flag() -> None:
     from openlabs_cli.lab_verification import VerificationFailure
 
+    write_config(REPO_ROOT, tier="tier1")
     ctx = CliContext(repo_root=REPO_ROOT, runner=None)
     resolved = resolve_lab(REPO_ROOT, "duck-cross")
     report = VerificationReport(lab="duck-cross", project="p", port=8377)
@@ -118,6 +124,9 @@ def test_failure_output_has_no_plaintext_flag() -> None:
     for diag in result.diagnostics:
         blob += diag.message
     assert not FLAG_RE.search(blob)
+    cfg = config_path(REPO_ROOT)
+    if cfg.is_file():
+        cfg.unlink()
 
 
 def main() -> int:

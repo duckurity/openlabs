@@ -102,6 +102,20 @@ def test_setup_json_envelope() -> None:
     assert "tier" in payload["data"]
 
 
+def test_setup_without_docker_client_json() -> None:
+    """Hermetic gate: missing docker binary must not surface OL-0043."""
+    import shutil
+
+    if shutil.which("docker") is not None:
+        return
+    code, out, _err = _run(["--json", "setup"])
+    assert code == 1
+    payload = _validate_json(out, label="setup-no-docker.json")
+    keys = [item["key"] for item in payload["diagnostics"]]
+    assert "environment.docker.client_missing" in keys
+    assert "lifecycle.cli.internal" not in keys
+
+
 def test_setup_missing_docker_diagnostic() -> None:
     report = EnvironmentReport(
         checks=(
@@ -211,6 +225,7 @@ def main() -> int:
         test_help_json_envelope,
         test_unknown_command_json,
         test_setup_json_envelope,
+        test_setup_without_docker_client_json,
         test_setup_missing_docker_diagnostic,
         test_repo_layout_invalid,
         test_dry_run_flag_reaches_envelope,

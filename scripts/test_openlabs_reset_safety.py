@@ -15,6 +15,7 @@ from openlabs_cli.context import CliContext  # noqa: E402
 from openlabs_cli.lab_lifecycle import handle_lab_reset  # noqa: E402
 from openlabs_cli.lab_runtime import assert_safe_compose_argv  # noqa: E402
 from openlabs_cli.runner import CommandResult  # noqa: E402
+from openlabs_cli.repo_config import config_path, write_config  # noqa: E402
 from openlabs_cli.state_store import build_state_payload, write_state  # noqa: E402
 
 
@@ -46,9 +47,23 @@ def test_compose_subcommand_rejects_prune() -> None:
         raise AssertionError("expected ValueError for prune subcommand")
 
 
+def _seed_tier1() -> None:
+    write_config(REPO_ROOT, tier="tier1")
+
+
+def _clear_local() -> None:
+    state_file = REPO_ROOT / ".openlabs/state/duck-cross.json"
+    if state_file.is_file():
+        state_file.unlink()
+    cfg = config_path(REPO_ROOT)
+    if cfg.is_file():
+        cfg.unlink()
+
+
 def test_reset_never_targets_foreign_project() -> None:
     runner = _RecordingRunner(ps_output="container-id\n")
     ctx = CliContext(repo_root=REPO_ROOT, runner=runner)
+    _seed_tier1()
     write_state(
         REPO_ROOT,
         build_state_payload(
@@ -70,14 +85,13 @@ def test_reset_never_targets_foreign_project() -> None:
             assert project != foreign
             assert "prune" not in call
     finally:
-        state_file = REPO_ROOT / ".openlabs/state/duck-cross.json"
-        if state_file.is_file():
-            state_file.unlink()
+        _clear_local()
 
 
 def test_reset_no_op_does_not_invoke_compose_when_absent() -> None:
     runner = _RecordingRunner()
     ctx = CliContext(repo_root=REPO_ROOT, runner=runner)
+    _seed_tier1()
     write_state(
         REPO_ROOT,
         build_state_payload(
@@ -95,9 +109,56 @@ def test_reset_no_op_does_not_invoke_compose_when_absent() -> None:
         assert result.data.get("no_op") is True
         assert not any("down" in call for call in runner.calls)
     finally:
-        state_file = REPO_ROOT / ".openlabs/state/duck-cross.json"
-        if state_file.is_file():
-            state_file.unlink()
+        _clear_local()
+
+
+def test_reset_volumes_non_interactive_requires_yes() -> None:
+    runner = _RecordingRunner()
+    ctx = CliContext(repo_root=REPO_ROOT, runner=runner, non_interactive=True)
+    _seed_tier1()
+    write_state(
+        REPO_ROOT,
+        build_state_payload(
+            slug="duck-cross",
+            compose_project="openlabs-safe-duck-cross",
+            host_port=8377,
+            lifecycle="ready",
+            compose_file="labs/web/duck-cross/docker-compose.yml",
+            container_port=8377,
+        ),
+    )
+    try:
+        result = handle_lab_reset(ctx, ["duck-cross", "--volumes"])
+        assert not result.ok
+        assert result.diagnostics[0].key == "lifecycle.interaction.non_interactive_required"
+        assert not any("down" in call for call in runner.calls)
+    finally:
+        _clear_local()
+
+
+def test_reset_volumes_dry_run_lists_volumes() -> None:
+    runner = _RecordingRunner()
+    ctx = CliContext(repo_root=REPO_ROOT, runner=runner, dry_run=True)
+    _seed_tier1()
+    write_state(
+        REPO_ROOT,
+        build_state_payload(
+            slug="duck-cross",
+            compose_project="openlabs-safe-duck-cross",
+            host_port=8377,
+            lifecycle="ready",
+            compose_file="labs/web/duck-cross/docker-compose.yml",
+            container_port=8377,
+        ),
+    )
+    try:
+        result = handle_lab_reset(ctx, ["duck-cross", "--volumes"])
+        assert result.ok
+        planned = result.data.get("planned", [])
+        assert any("--volumes" in step for step in planned)
+        assert not runner.calls
+    finally:
+        _clear_local()
 
 
 def test_compose_argv_rejects_system_token() -> None:
@@ -114,6 +175,8 @@ def main() -> int:
         test_compose_subcommand_rejects_prune,
         test_reset_never_targets_foreign_project,
         test_reset_no_op_does_not_invoke_compose_when_absent,
+        test_reset_volumes_non_interactive_requires_yes,
+        test_reset_volumes_dry_run_lists_volumes,
         test_compose_argv_rejects_system_token,
     ]
     failures = 0

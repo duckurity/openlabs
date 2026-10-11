@@ -17,6 +17,7 @@ from cli_contract import validate_envelope  # noqa: E402
 from openlabs_cli.commands.lab import handle_lab  # noqa: E402
 from openlabs_cli.context import CliContext  # noqa: E402
 from openlabs_cli.lab_setup import handle_lab_setup  # noqa: E402
+from openlabs_cli.repo_config import config_path, write_config  # noqa: E402
 from openlabs_cli.runner import CommandResult  # noqa: E402
 
 
@@ -83,6 +84,21 @@ def test_container_name_blocked_before_docker() -> None:
     assert result.diagnostics[0].key == "lifecycle.compose.unsafe_container_name"
 
 
+def test_tier3_blocks_supported_setup() -> None:
+    write_config(REPO_ROOT, tier="tier3")
+    runner = _RecordingRunner()
+    ctx = CliContext(repo_root=REPO_ROOT, runner=runner)
+    try:
+        result = handle_lab_setup(ctx, ["duck-cross"])
+        assert result.exit_code == 1
+        assert not runner.calls
+        assert result.diagnostics[0].key == "lifecycle.platform.unsupported_architecture"
+    finally:
+        path = config_path(REPO_ROOT)
+        if path.is_file():
+            path.unlink()
+
+
 def test_experimental_blocked_before_docker() -> None:
     runner = _RecordingRunner()
     ctx = CliContext(repo_root=REPO_ROOT, runner=runner)
@@ -97,6 +113,7 @@ def main() -> int:
         test_dry_run_creates_no_openlabs_artifacts,
         test_dry_run_json_envelope_fields,
         test_container_name_blocked_before_docker,
+        test_tier3_blocks_supported_setup,
         test_experimental_blocked_before_docker,
     ]
     failures = 0
