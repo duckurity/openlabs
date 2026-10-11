@@ -104,6 +104,7 @@ def run_cli(argv: list[str], *, ctx: CliContext | None = None) -> int:
     active.dry_run = options.dry_run
     active.non_interactive = options.non_interactive
     active.port = options.port
+    active.argv = tuple(argv)
 
     def _on_signal(_signum: int, _frame: object) -> None:
         active.interrupted = True

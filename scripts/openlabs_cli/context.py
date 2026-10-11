@@ -18,4 +18,5 @@ class CliContext:
     non_interactive: bool = False
     port: int | None = None
     runner: CommandRunner | None = None
+    argv: tuple[str, ...] = ()
     interrupted: bool = field(default=False, repr=False)

@@ -19,6 +19,7 @@ from openlabs_cli.context import CliContext
 from openlabs_cli.envelope import CliResult, Diagnostic
 from openlabs_cli.errors import UsageError
 from openlabs_cli.platform_probe import platform_summary
+from openlabs_cli.state_store import load_state
 from openlabs_cli.version import CLI_VERSION, ENVELOPE_VERSION, LAB_CONTRACT_VERSION
 
 
@@ -70,8 +71,26 @@ def handle_explain(ctx: CliContext, args: list[str]) -> CliResult:
     )
 
 
+def _evidence_references(ctx: CliContext, *, lab: str | None) -> list[str]:
+    refs: list[str] = []
+    if not lab:
+        return refs
+    slug = lab.split("/")[-1]
+    state_path = ctx.repo_root / ".openlabs" / "state" / f"{slug}.json"
+    if state_path.is_file():
+        refs.append(state_path.relative_to(ctx.repo_root).as_posix())
+    log_dir = ctx.repo_root / ".openlabs" / "logs" / slug
+    if log_dir.is_dir():
+        refs.append(log_dir.relative_to(ctx.repo_root).as_posix() + "/")
+    state = load_state(ctx.repo_root, slug)
+    if state and state.get("evidence_path"):
+        refs.append(str(state["evidence_path"]))
+    return refs
+
+
 def build_bundle_payload(ctx: CliContext, *, lab: str | None) -> dict[str, Any]:
     repo_display = redact_sensitive(str(ctx.repo_root))
+    invocation = [redact_sensitive(part) for part in ctx.argv] if ctx.argv else []
     bundle: dict[str, Any] = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "repo_root": repo_display,
@@ -81,8 +100,13 @@ def build_bundle_payload(ctx: CliContext, *, lab: str | None) -> dict[str, Any]:
         "platform": platform_summary(),
         "docker": _docker_versions(ctx),
         "lab": redact_sensitive(lab) if lab else None,
+        "invocation": invocation,
+        "evidence_references": _evidence_references(ctx, lab=lab),
         "diagnostics": [],
-        "notes": "",
+        "notes": (
+            "Bundle captures invocation and repo-local evidence paths only; "
+            "prior command diagnostics are not persisted automatically in M2."
+        ),
     }
     return redact_mapping(bundle)
 
