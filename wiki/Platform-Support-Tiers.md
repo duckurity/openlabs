@@ -24,7 +24,7 @@ A clean Tier 1 player follows [OpenLabs CLI](OpenLabs-CLI) from clone to ready
 
 | Item | Policy |
 |:---|:---|
-| Hosts | WSL2, macOS with Docker Desktop |
+| Hosts | WSL2, macOS on Intel (`Darwin`/`x86_64`) with Docker Desktop |
 | CLI behavior | Detect tier, run diagnostics, document next steps |
 | Release guarantee | No release guarantee without hosted runner evidence on these platforms |
 | Missing evidence | No required CI matrix on WSL2 or macOS at M2 release |
@@ -37,7 +37,7 @@ published on the [M2 release evidence](M2-Release-Evidence) page.
 
 | Item | Policy |
 |:---|:---|
-| Hosts | Linux ARM64, Apple Silicon |
+| Hosts | Linux ARM64, Apple Silicon (`Darwin`/`arm64`) |
 | CLI behavior | Detect architecture early |
 | Lifecycle | Per-lab evidence required; otherwise expect `OL-0035` |
 | Missing evidence | No ARM64 lifecycle guarantee at M2 release |
