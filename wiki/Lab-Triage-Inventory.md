@@ -39,7 +39,7 @@ python3 scripts/score_lab.py --min 70 --json score-report.json
 | `labs/web/fieldops-360` | experimental | 97 | none | docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
 | `labs/web/firmdrama` | experimental | 100 | none | none | maintain | maintainers | none |
 | `labs/web/invoiceportal` | experimental | 78 | none | dockerfile: no USER directive (runs as root); docs: README missing ## Goal; docs: no challenge-sheet PDF beside the lab | maintain | maintainers | M0-05 follow-up: raise invoiceportal score hygiene (optional) |
-| `labs/web/last-reel` | experimental | 100 | none | none |  |  | none |
+| `labs/web/last-reel` | experimental | 100 | none | none | maintain | maintainers | none |
 | `labs/web/nexora-platform` | experimental | 97 | none | docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
 | `labs/web/shopvault` | experimental | 97 | none | docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
 | `labs/web/snapconnect` | experimental | 81 | none | dockerfile: no USER directive (runs as root); docs: no challenge-sheet PDF beside the lab | maintain | maintainers | M0-05 follow-up: snapconnect techniques and docs score pass |
