@@ -7,7 +7,7 @@
 
 **Last Reel · Evidence baseline · Updated 12 October 2026**
 
-> **Release decision:** Last Reel is ready for submission as an `experimental` lab. A clean `--no-cache` build, the 31-test application suite, the live solve, check, and reset chain, and the runtime isolation checks pass on the submitted revision. An independent playtest from the player README completed. Registration of this lab in three shared repository fixtures has been requested from the maintainers; see [repository integration](#repository-integration).
+> **Release decision:** Last Reel is ready for submission as an `experimental` lab. A clean `--no-cache` build, the 31-test application suite, the live solve, check, and reset chain, and the runtime isolation checks pass on the submitted revision. An independent playtest from the player README completed. The pull request registers this lab in three shared repository files in a separate commit for maintainer review; see [repository integration](#repository-integration).
 
 [Evidence ledger](#evidence-ledger) · [Coverage](#validation-coverage) · [Reproduction](#reproduction) · [Repository integration](#repository-integration) · [Release decision](#release-decision) · [Independent playtest](#independent-playtest-record)
 
@@ -23,8 +23,8 @@
 | 12 Oct 2026 | `scripts/validate.py --compose` | **Passed** | Structure, metadata, and Compose configuration. |
 | 12 Oct 2026 | `scripts/score_lab.py --min 100` | **Passed** | Static craft scoring with no reported errors; not runtime proof. |
 | 12 Oct 2026 | `scripts/make_lab_pdf.py --strict` | **Passed** | Lab sheet built from the player README, `lab.yml`, and Compose. |
-| 12 Oct 2026 | Generated catalog, site, triage, M0, and M2 outputs | **Regenerated on Linux** | Repository generators run with hermetic site sync. Catalog, site, M0, and M2 freshness checks pass. The triage check reports that the shared registry has no entry for this lab; see [repository integration](#repository-integration). |
-| 12 Oct 2026 | Pull-request CI jobs on Linux | **Passed except shared registration** | The Python steps of the Validate, Security, and Content jobs ran on Python 3.12 against the exact submitted files with LF line endings. All pass except the discovery count, triage registry, and creator fixture checks listed in [repository integration](#repository-integration). With those three entries applied in a disposable copy, every step passed except the site page's creator link, which the generator fills from the first commit and the creator fixture. gitleaks, Trivy, Contentbit, and the all-lab PDF build run on hosted CI. |
+| 12 Oct 2026 | Generated catalog, site, triage, M0, and M2 outputs | **Regenerated on Linux** | Repository generators run with hermetic site sync. Catalog, site, triage, M0, and M2 freshness checks pass. |
+| 12 Oct 2026 | Pull-request CI jobs on Linux | **Passed** | The Python steps of the Validate, Security, and Content jobs ran on Python 3.12 against the submitted commits with LF line endings. gitleaks, Trivy, Contentbit, and the all-lab PDF build run on hosted CI. |
 | 12 Oct 2026 | Documentation links | **All local links and anchors pass** | Seven maintainer documents and the player README. |
 | 12 Oct 2026 | Desktop browser review | **Passed, limited** | Home, search, empty search, detail, and missing-record pages at `1024`, `1280`, and `1440` CSS pixels without horizontal overflow. Hover, focus, and reduced-motion states were checked through Chromium state emulation, not native input. |
 | October 2026 | Independent playtest | **Passed** | Clean deployment, unaided solve, and reset from the player README. Reviewer identity and host details were not supplied for this record. |
@@ -86,7 +86,7 @@ Last Reel is the first lab added since three shared repository gates were introd
 | Triage registry | `scripts/fixtures/lab_triage_registry.json` | A triage decision for `labs/web/last-reel` |
 | Creator fixture | `scripts/fixtures/lab_creator_github.json` | `"labs/web/last-reel": "ziadelboshy"` |
 
-The generated site page takes its creator link from the lab's first commit and the creator fixture, so it is regenerated after the submission commit. These files belong to the repository maintainers, and registration has been requested from them. This lab does not hand-edit shared tests or fixtures; all generated catalog, site, and wiki outputs come from the repository generators.
+The pull request carries these three entries in a separate commit, so maintainers can review, adjust, or replace them independently of the lab. The same commit holds the outputs regenerated from them: the triage inventory page and the site page's creator link, which the generator takes from the lab's first commit and the creator fixture. No other shared test, fixture, or generator changes; all other catalog, site, and wiki outputs come from the repository generators.
 
 ## Release decision
 
@@ -99,7 +99,7 @@ The generated site page takes its creator link from the lab's first commit and t
 | Repository validators | Passed | `validate.py --compose`, score threshold `100`, strict PDF |
 | Documentation | Passed | Seven maintainer documents aligned with the implementation; links pass |
 | Independent playtest | Passed | Reviewer details not supplied |
-| Shared gate registration | Requested from maintainers | See [repository integration](#repository-integration) |
+| Shared gate registration | In a separate commit for maintainer review | See [repository integration](#repository-integration) |
 | Hosted CI and maintainer review | On the pull request | Runs against the submitted commit |
 
 ## Independent playtest procedure
