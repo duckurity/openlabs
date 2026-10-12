@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not searched %}
+<section class="hero">
+  <div><p class="eyebrow">THE PUBLIC COLLECTION · VOLUME 01</p><h1>Some stories deserve<br>a second screening.</h1><p class="intro">Explore restored films from our collection. Each record preserves a story that might otherwise have been lost.</p></div>
+  <div class="reel-art" aria-hidden="true"><div class="reel"><i></i><i></i><i></i><i></i><i></i><b>LR</b></div><span>RESTORE. PRESERVE. REPLAY.</span></div>
+</section>
+{% endif %}
+<section class="catalogue" aria-labelledby="catalogue-heading">
+  <div class="section-heading"><div>{% if searched %}<h1 class="results-title" id="catalogue-heading">Search the collection</h1>{% else %}<h2 id="catalogue-heading">The collection</h2>{% endif %}<p class="collection-caption">Public archive records. No viewing files are hosted here.</p></div><a class="text-link" href="{{ url_for('index') }}">View all films →</a></div>
+  <form action="{{ url_for('search') }}" method="get" class="search-form" role="search">
+    <label for="q">Search by film title</label><div class="search-controls"><input id="q" name="q" type="search" value="{{ query }}" placeholder="Find a film in the archive…" maxlength="512" autocomplete="off"><button type="submit">Search archive <span aria-hidden="true">→</span></button></div>
+  </form>
+  {% if error %}<div class="notice" role="alert"><h3>{{ error }}</h3><p>Try another title or return to the public catalogue.</p></div>
+  {% elif not films %}<div class="notice"><h3>No films found</h3><p>Try a different title or browse the collection.</p></div>
+  {% else %}<p class="result-count">{{ films|length }} {% if films|length == 1 %}record{% else %}records{% endif %}{% if searched and query %} returned{% endif %}</p>
+  <div class="film-grid">{% for film in films %}
+    <article class="film-card" data-film-card="true">
+      {% set public_record = film.id is integer and film.id > 0 %}
+      {% if public_record %}
+      <a class="film-record-link" href="{% if searched %}{{ url_for('details', film_id=film.id, q=query) }}{% else %}{{ url_for('details', film_id=film.id) }}{% endif %}" aria-labelledby="film-title-{{ loop.index }}">
+      {% endif %}
+      <div class="film-cover cover-{{ loop.index0 % 4 }}" aria-hidden="true"><span class="cover-number">{{ '%02d'|format(loop.index) }}</span><div class="cover-lines"></div><span class="cover-title">{{ film.title }}</span><span class="cover-year">{{ film.year }}</span></div>
+      <div class="card-content"><p class="film-meta">{{ film.genre }} <span aria-hidden="true">/</span> {{ film.year }}</p><h3 id="film-title-{{ loop.index }}">{{ film.title }}</h3><p class="synopsis">{{ film.synopsis }}</p>{% if public_record %}<span class="record-action">View archive record <span aria-hidden="true">→</span></span>{% endif %}</div>
+      {% if public_record %}</a>{% endif %}
+    </article>
+  {% endfor %}</div>{% endif %}
+</section>
+<aside class="archive-note"><span class="note-number" aria-hidden="true">NOTE 001</span><div><h2>Not every reel is ready for the screen.</h2><p>New restorations remain outside the public collection until their release-clearance review is complete. Catalogue records and release records are maintained separately.</p></div></aside>
+{% endblock %}

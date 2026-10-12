@@ -1,0 +1,101 @@
+# Operations runbook
+
+**Last Reel · Local operator edition · Updated 12 October 2026**
+
+> Run this lab only as a local, disposable training service. The supported host binding is `127.0.0.1:8080`. Do not publish the vulnerable application to a LAN or public endpoint.
+
+## Service topology
+
+| Service | Responsibility | Exposure and writable state |
+|---|---|---|
+| `last-reel` | Flask, Gunicorn, seed generation, SQLite database | Internal `backend` network only; writes only to `/run/last-reel` tmpfs |
+| `last-reel-ingress` | Bounded standard-library TCP forwarding | Sole host binding: `127.0.0.1:8080`; no writable mount |
+
+Compose creates an internal backend network and a frontend network for ingress publication. The app is attached only to the backend. There are no named volumes, host mounts, or Docker socket mounts.
+
+Both containers use UID/GID `10001`, read-only root filesystems, dropped capabilities, `no-new-privileges`, and Linux `amd64` images. The app is limited to 256 MiB memory, one CPU, and 64 PIDs. Ingress is limited to 64 MiB, 0.5 CPU, and 32 PIDs. Container logs are bounded by Compose. These limits reduce exposure; they are not a general-purpose sandbox guarantee.
+
+## Host prerequisites
+
+- Docker Desktop with Linux containers or Docker Engine with Docker Compose `v2.17.0` or later. The reset helper uses `up --wait-timeout`, which earlier releases lack.
+- Python `3.10` or later on the host for digest synchronization and reset helpers. The local checker also uses the host Python runtime. No extra Python packages are required.
+- An HTTP client or browser, and an unused host port `8080`.
+- Internet access for the first image build to resolve the pinned base image and download the hash-pinned Python wheels. Once built, normal runtime uses local images and makes no application network calls.
+- Host architecture may differ; Compose requests `linux/amd64`.
+
+If your shell uses `python3`, substitute it for `python` in the commands below. Run them from the `last-reel` lab root.
+
+## First build and start
+
+```text
+docker compose up -d --build --wait
+python scripts/sync_flag_hash.py
+docker compose ps
+```
+
+Wait for both services to report healthy. Open `http://127.0.0.1:8080/`. The synchronizer reads only the runtime generation ID and SHA-256 digest, updates `flag_hash` in the local `lab.yml`, rereads the digest to detect a concurrent reset, and never prints or retrieves the plaintext flag.
+
+Treat the synchronized `lab.yml` as local instance state. Do not add a runtime flag to it or commit a local instance digest as if it were a release decision.
+
+## Health and diagnostics
+
+The health endpoint is `http://127.0.0.1:8080/health`. It should return:
+
+```json
+{"service":"last-reel","status":"ok"}
+```
+
+Inspect status and, when needed, bounded service logs:
+
+```text
+docker compose ps
+docker compose logs --tail 100 last-reel last-reel-ingress
+```
+
+The application does not return SQL statements, tracebacks, or filesystem paths in ordinary search errors. Do not copy any runtime clearance note or flag into diagnostic logs.
+
+## Reset and cleanup
+
+Reset the current instance and refresh its checker digest:
+
+```text
+python reset.py
+```
+
+The helper takes an operator lock and verifies that existing Compose containers and networks belong to this checkout before acting. It stops ingress, force-recreates the app from existing images with pulls and builds disabled, checks that a running generation and digest rotated, updates the digest-only `flag_hash`, recreates ingress, and verifies loopback health. A reset failure stops ingress. Inspect the project-specific status and logs before retrying. Do not remove unrelated Docker resources.
+
+Stop and remove this Compose project's containers and networks with:
+
+```text
+docker compose down
+```
+
+No named volume is used. The database, flag, and digest live in the app container's tmpfs and disappear when it is recreated or removed. `docker compose down` does not delete built images. Do not use broad prune commands for cleanup.
+
+## Validation and maintenance
+
+The application source contains a `test` Docker build target. A clean first build may need network access to resolve dependencies:
+
+```text
+docker build --target test -t last-reel:test .
+docker run --rm --network none --read-only --user 10001:10001 --cap-drop ALL --security-opt no-new-privileges --memory 256m --memory-swap 256m --cpus 1 --pids-limit 64 --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700 last-reel:test
+```
+
+The test target runs the Python standard-library `unittest` suite. This test command does not replace a clean release build, live reset/solve, repository integration tests, independent review, or hosted CI. See the dated [validation report](validation-report.mdx).
+
+Changes to routes, search behavior, state generation, reset, Compose, or the ingress require updating the relevant tests and [design](challenge-design.mdx), [security](security-report.mdx), and [validation](validation-report.mdx) records. Regenerate the challenge PDF only through the repository generator.
+
+## Troubleshooting
+
+| Symptom | Check | Safe response |
+|---|---|---|
+| Port allocation error | Local use of `8080` and `docker compose ps` | Stop the conflicting local service. Keep the binding loopback-only; do not expose the app directly. |
+| Build cannot resolve base image or wheels | Internet access and Docker build output | First build requires registry and package-index access. Do not describe a cached runtime as a clean build. |
+| Service remains unhealthy | `docker compose ps` and project-specific logs | Read the bounded logs. Correct the cause, then use `docker compose up -d --build --wait` only if source or image layers need rebuilding. |
+| Reset reports ownership collision | Project names, labels, and working directory | Stop. Do not remove or adopt a same-named resource until its owner is established. |
+| Reset fails or health check fails | Project status and logs | Ingress is stopped by the failure path. Preserve state, resolve the local cause, then retry the scoped reset. |
+| A saved flag is rejected | Whether reset or container recreation occurred and whether `lab.yml` matches this instance | Synchronize the current digest after startup. A reset intentionally invalidates old values. |
+
+## Operational prohibitions
+
+Do not add host mounts, attach a Docker socket, enable privileged mode, publish the app service, add outbound application dependencies, store runtime flags in persistent volumes, or remove the read-only/network/resource controls without a separately reviewed design change.

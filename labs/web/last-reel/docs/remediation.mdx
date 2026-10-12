@@ -1,0 +1,62 @@
+# Remediation guide
+
+**Last Reel · Secure-state guidance · Updated 12 October 2026**
+
+> The vulnerable behavior is intentional in the training build. Apply this guidance only to a separate secure comparison branch. Parameterization removes the challenge path.
+
+## Finding and root cause
+
+The sole intended weakness is CWE-89 in the anonymous `GET /search?q=...` path (`app/db.py`, `search`). The title term is concatenated into SQL source inside a `LIKE` predicate. A quote can change the parse tree, allowing a player-controlled `UNION` to read rows beyond the public catalogue filter, including the separate release-clearance note.
+
+SQLite, the read-only database, and the presence of a search field are not the root cause. The root cause is interpreting data as SQL syntax.
+
+## Primary remediation
+
+Keep SQL text constant and bind the search value as a parameter:
+
+```python
+query = """
+    SELECT id, title, year, synopsis, genre
+    FROM films
+    WHERE is_public = 1 AND title LIKE ?
+    ORDER BY id
+    LIMIT ?
+"""
+rows = connection.execute(query, (f"%{term}%", 24))
+```
+
+If product requirements treat `%` and `_` as literal title characters, escape those characters and the escape character, then declare an explicit `LIKE ... ESCAPE` character. Parameter binding prevents SQL syntax injection; it does not by itself change wildcard semantics.
+
+Do not rely on quote escaping, keyword blacklists, query normalization, or a WAF as the primary fix. Do not attempt to repair this training endpoint by hiding the clearance record from normal catalogue code while leaving the vulnerable SQL construction in place.
+
+## Defense in depth
+
+Retain the controls that limit impact, while treating them as secondary safeguards:
+
+- Open the database in read-only mode and enable `query_only`.
+- Disable extension loading and use a restrictive authorizer for tables, functions, and operations.
+- Bound query bytes, SQL complexity, runtime, rows, cells, and total result bytes.
+- Use parameterized queries for every operation other than the explicitly approved challenge path.
+- Run the application as an unprivileged user with a read-only root filesystem and a narrowly scoped tmpfs.
+- Keep the application on an internal network and publish only loopback ingress.
+- Return generic search errors. Do not expose SQL text, database exceptions, stack traces, or filesystem paths.
+
+## Remediation regression matrix
+
+| Test | Secure-state expectation |
+|---|---|
+| Ordinary title search | Matching public records remain available |
+| Quotes, Unicode, `%`, and `_` | Input is treated as data; wildcard behavior matches documented product policy |
+| `UNION`, comment, and schema metadata payloads | No schema or non-public record is returned |
+| Clearance table query | No clearance note or flag is reachable through public search |
+| Multi-statement and write payloads | Rejected; database remains byte-for-byte unchanged |
+| Unknown, duplicate, oversized, and NUL query input | Rejected with generic response and no leaked SQL or path |
+| Detail routes | Parameterized public record lookup remains available; private IDs remain unavailable |
+| Static paths and error responses | No source, database, environment, digest, or maintainer document is served |
+| Container configuration | Non-root, read-only, internal app network and loopback-only publication remain in force |
+
+The current challenge tests intentionally assert the opposite for the intended `UNION` path. In a secure comparison branch, replace those challenge assertions rather than weakening containment tests. Add direct secure-state assertions that the clearance record cannot be selected.
+
+## Response if this were a real archive
+
+Preserve relevant request and error evidence under the organization's incident process. Review all dynamic SQL call sites, determine whether sensitive records were accessed, and rotate exposed secrets if any exist. Deploy the parameterized repair, verify it with the regression matrix, and monitor normal search behavior. Do not include runtime flags, customer records, or credentials in an incident report.

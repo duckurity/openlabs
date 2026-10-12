@@ -1,0 +1,130 @@
+<p align="center">
+  <strong>Created by Ziad Osama El-Boshy</strong><br />
+  <sub>Challenge author and creator</sub>
+</p>
+
+# Validation report
+
+**Last Reel · Evidence baseline · Updated 12 October 2026**
+
+> **Release decision:** Last Reel is ready for submission as an `experimental` lab. A clean `--no-cache` build, the 31-test application suite, the live solve, check, and reset chain, and the runtime isolation checks pass on the submitted revision. An independent playtest from the player README completed. Registration of this lab in three shared repository fixtures has been requested from the maintainers; see [repository integration](#repository-integration).
+
+[Evidence ledger](#evidence-ledger) · [Coverage](#validation-coverage) · [Reproduction](#reproduction) · [Repository integration](#repository-integration) · [Release decision](#release-decision) · [Independent playtest](#independent-playtest-record)
+
+## Evidence ledger
+
+| Date | Check | Result | Evidence limit |
+|---|---|---|---|
+| 12 Oct 2026 | Clean standard build | **Passed in `19.1` s** | All Last Reel images, containers, networks, the base image tag, and Last Reel build-cache records were removed first. `docker compose build --no-cache` ran every Dockerfile step with no cached step and downloaded the 8 hash-pinned wheels from PyPI. The `test` target then built in `6.1` s. Base-image layer blobs came from the local Docker content store; a host without them also downloads the pinned base image. Timings are from one Windows 11 laptop running Docker Desktop. |
+| 12 Oct 2026 | Packaged application suite | **31 passed** | Run inside the freshly built `test` image with no network, a read-only root, user `10001:10001`, and all capabilities dropped. |
+| 12 Oct 2026 | Live solve, check, and reset | **Passed** | Fresh images started with `--no-build --pull never`; both services were healthy after `14.3` s. The evaluator solver returned a flag of the expected shape and the checker accepted it. A wrong value was rejected. Reset took `21.2` s and rotated the flag: the old value was rejected and a new solve was accepted. No flag appeared in container logs. Only exit codes were recorded. |
+| 12 Oct 2026 | Runtime isolation | **Passed** | Both containers ran as `10001:10001` with read-only roots, all capabilities dropped, no privileged mode, and no mounts. Only ingress published a port, on `127.0.0.1:8080`. The backend network was internal and the app had no outbound connectivity. Private film and maintainer-document routes returned `404`; a malformed search returned `400`. |
+| 12 Oct 2026 | Solver and frontend regression | **Fixed and covered** | The accessible `<h3 id=...>` card headings had broken the evaluator's title parser while a hand-written fixture stayed green. The parser now accepts heading attributes. Two tests parse real rendered `/search` output and run a full in-process solve; both failed before the fix. |
+| 12 Oct 2026 | `scripts/validate.py --compose` | **Passed** | Structure, metadata, and Compose configuration. |
+| 12 Oct 2026 | `scripts/score_lab.py --min 100` | **Passed** | Static craft scoring with no reported errors; not runtime proof. |
+| 12 Oct 2026 | `scripts/make_lab_pdf.py --strict` | **Passed** | Lab sheet built from the player README, `lab.yml`, and Compose. |
+| 12 Oct 2026 | Generated catalog, site, triage, M0, and M2 outputs | **Regenerated on Linux** | Repository generators run with hermetic site sync. Catalog, site, M0, and M2 freshness checks pass. The triage check reports that the shared registry has no entry for this lab; see [repository integration](#repository-integration). |
+| 12 Oct 2026 | Pull-request CI jobs on Linux | **Passed except shared registration** | The Python steps of the Validate, Security, and Content jobs ran on Python 3.12 against the exact submitted files with LF line endings. All pass except the discovery count, triage registry, and creator fixture checks listed in [repository integration](#repository-integration). With those three entries applied in a disposable copy, every step passed except the site page's creator link, which the generator fills from the first commit and the creator fixture. gitleaks, Trivy, Contentbit, and the all-lab PDF build run on hosted CI. |
+| 12 Oct 2026 | Documentation links | **All local links and anchors pass** | Seven maintainer documents and the player README. |
+| 12 Oct 2026 | Desktop browser review | **Passed, limited** | Home, search, empty search, detail, and missing-record pages at `1024`, `1280`, and `1440` CSS pixels without horizontal overflow. Hover, focus, and reduced-motion states were checked through Chromium state emulation, not native input. |
+| October 2026 | Independent playtest | **Passed** | Clean deployment, unaided solve, and reset from the player README. Reviewer identity and host details were not supplied for this record. |
+
+## Validation coverage
+
+The 31 tests cover:
+
+- public catalogue and detail behavior;
+- the intended SQL injection;
+- input limits and error redaction;
+- headers, health, and non-public paths;
+- SQLite authorizer and resource limits;
+- seed and digest behavior and operator metadata updates;
+- evaluator URL validation and solver parsing of real rendered output;
+- frontend navigation, copy, accessible names, interaction styles, contrast tokens, and reduced motion.
+
+| Scope | Coverage limit |
+|---|---|
+| Application tests | Bounded evidence for the intended path and selected negative cases; not proof against every unintended behavior |
+| Runtime isolation | Checked controls on one Docker Desktop host; not proof of kernel or Docker Engine isolation |
+| Accessibility | Sampled contrast: placeholder `5.50:1`, focus `5.07:1`, input boundary `3.46:1`. Not a full WCAG review; no screen-reader or cross-browser pass |
+| Supply chain | Base image pinned by digest and wheels pinned by hash; no image vulnerability scan is recorded in this report |
+| Timings | One host; build time depends on network speed and local base-image layers |
+
+## Reproduction
+
+From the repository root:
+
+```text
+python3 scripts/validate.py --compose
+python3 scripts/score_lab.py labs/web/last-reel --min 100
+python3 scripts/make_lab_pdf.py labs/web/last-reel --strict
+```
+
+From the lab directory:
+
+```text
+docker compose build --no-cache
+docker build --target test -t last-reel:test .
+docker run --rm --network none --read-only --user 10001:10001 --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700 last-reel:test
+docker compose up -d --wait
+python3 scripts/sync_flag_hash.py
+python3 solver/solve.py --base-url http://127.0.0.1:8080
+python3 ../../../scripts/check.py .
+python3 reset.py
+docker compose down
+```
+
+The first build needs internet access for the pinned base image and Python wheels. Startup, reset, and play need no network. The solver prints the current runtime flag; run it only in a private evaluator terminal and do not save its output. The manual path is in the [official solution](official-solution.mdx).
+
+## Repository integration
+
+Last Reel is the first lab added since three shared repository gates were introduced:
+
+| Gate | Shared file | Entry this lab needs |
+|---|---|---|
+| Lab discovery test | `scripts/test_openlabs_lab_discovery.py` | Experimental count `19` becomes `20` |
+| Triage registry | `scripts/fixtures/lab_triage_registry.json` | A triage decision for `labs/web/last-reel` |
+| Creator fixture | `scripts/fixtures/lab_creator_github.json` | `"labs/web/last-reel": "ziadelboshy"` |
+
+The generated site page takes its creator link from the lab's first commit and the creator fixture, so it is regenerated after the submission commit. These files belong to the repository maintainers, and registration has been requested from them. This lab does not hand-edit shared tests or fixtures; all generated catalog, site, and wiki outputs come from the repository generators.
+
+## Release decision
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Clean build | Passed | `--no-cache` build in `19.1` s |
+| Application suite | Passed | 31 tests in the restricted `test` image |
+| Intended solve, checker, and reset | Passed | Live run on fresh images |
+| Runtime controls and flag secrecy | Passed | Isolation checks; no flag in container logs; `lab.yml` holds only a digest |
+| Repository validators | Passed | `validate.py --compose`, score threshold `100`, strict PDF |
+| Documentation | Passed | Seven maintainer documents aligned with the implementation; links pass |
+| Independent playtest | Passed | Reviewer details not supplied |
+| Shared gate registration | Requested from maintainers | See [repository integration](#repository-integration) |
+| Hosted CI and maintainer review | On the pull request | Runs against the submitted commit |
+
+## Independent playtest procedure
+
+The reviewer receives a fresh checkout and uses only the [player README](../README.md). Do not supply the payload, table names, or solution hints.
+
+| Step | Reviewer action | Success condition |
+|---:|---|---|
+| 1 | Build and start the lab from the README | `http://127.0.0.1:8080/health` responds and the catalogue loads |
+| 2 | Synchronize the checker digest | `scripts/sync_flag_hash.py` completes |
+| 3 | Solve through the web interface or an HTTP client | The checker accepts the captured flag |
+| 4 | Reset and recheck | The old flag is rejected after `reset.py` |
+| 5 | Record observations | No ambiguity, unintended shortcut, or missing README step |
+
+## Independent playtest record
+
+| Field | Record |
+|---|---|
+| Reviewer | Completed; identity not supplied |
+| Review date | October 2026 |
+| Clean deployment from README | Passed |
+| Unaided solve | Passed |
+| Reset and stale-flag rejection | Passed |
+| Ambiguities or unintended paths | None reported |
+
+## Evidence handling
+
+Keep runtime flags, clearance notes, and database contents out of saved logs, screenshots, and reports. For a material future change, record a fresh clean build, the application suite, a live solve and reset, and a new playtest where practical. The challenge intentionally retains the bounded read-only SQL injection described in the [security report](security-report.mdx).

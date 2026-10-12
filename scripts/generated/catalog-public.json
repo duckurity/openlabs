@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 20,
+  "catalogued_count": 21,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -90,6 +90,14 @@
       "track": "web"
     },
     {
+      "description": "A film restoration archive with a restricted release-clearance record.",
+      "difficulty": "easy",
+      "name": "last-reel",
+      "path": "labs/web/last-reel",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
       "description": "Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, OAST, internal reconnaissance, and DNS rebinding to bypass hostname validation and reach internal infrastructure.",
       "difficulty": "medium",
       "name": "nexora-platform",
@@ -154,10 +162,10 @@
       "track": "web"
     }
   ],
-  "experimental_count": 19,
+  "experimental_count": 20,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 25,
+    "directory_count": 26,
     "uncatalogued_count": 5,
     "uncatalogued_paths": [
       "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",

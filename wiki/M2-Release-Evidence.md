@@ -11,14 +11,14 @@ Reviewed on `2026-10-11`. Regenerate with `python3 scripts/m2_release_report.py 
 | CLI version | `0.2.0` |
 | Command envelope | `openlabs.command.v1` |
 | Lab contract | `1` |
-| Reviewed commit | `8891d1b959ee` |
+| Reviewed commit | `b82c96e84fc1` |
 | Release evidence commit | `d6ebe8116452` |
 
 ## Supported manifest
 
 - Supported: **1**
-- Experimental: **19**
-- Catalogued: **20**
+- Experimental: **20**
+- Catalogued: **21**
 
 | Path | Name | Reference |
 |:---|:---|:---|

@@ -1,0 +1,13 @@
+# Built-in frontend avoids an extra syntax-image download in offline builds.
+FROM python:3.13.16-slim-bookworm@sha256:f040863673aea2570c3ff6a5c3fb4c673a016cbc5375005ad145915922b6b78a
+LABEL org.opencontainers.image.title="Last Reel ingress" org.opencontainers.image.licenses="Apache-2.0" org.openlabs.lab="last-reel"
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /opt/last-reel
+COPY ingress_proxy.py ./
+RUN rm -rf /usr/local/lib/python3.13/site-packages/pip* /usr/local/lib/python3.13/ensurepip
+USER 10001:10001
+EXPOSE 8000
+STOPSIGNAL SIGTERM
+HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=12 \
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=2)"]
+CMD ["python", "-B", "ingress_proxy.py"]
