@@ -1,5 +1,8 @@
 *
 !Dockerfile
+# Ingress assets: BuildKit reads Dockerfile.ingress.dockerignore, the classic builder reads only this file.
+!Dockerfile.ingress
+!ingress_proxy.py
 !requirements.txt
 !entrypoint.sh
 !gunicorn.conf.py

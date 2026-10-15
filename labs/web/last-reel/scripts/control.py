@@ -147,5 +147,8 @@ def start_or_reset(*, reset: bool) -> dict[str, str]:
             verify_endpoint()
             return state
         except (Exception, KeyboardInterrupt):
-            compose("stop", "--timeout", "5", "last-reel-ingress")
+            try:
+                compose("stop", "--timeout", "5", "last-reel-ingress")
+            except Exception:
+                pass  # Best-effort cleanup; the original failure is the useful one.
             raise

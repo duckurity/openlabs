@@ -62,7 +62,7 @@ Reset the current instance and refresh its checker digest:
 python reset.py
 ```
 
-The helper takes an operator lock and verifies that existing Compose containers and networks belong to this checkout before acting. It stops ingress, force-recreates the app from existing images with pulls and builds disabled, checks that a running generation and digest rotated, updates the digest-only `flag_hash`, recreates ingress, and verifies loopback health. A reset failure stops ingress. Inspect the project-specific status and logs before retrying. Do not remove unrelated Docker resources.
+The helper takes an operator lock and verifies that existing Compose containers and networks belong to this checkout before acting. It stops ingress, force-recreates the app from existing images with pulls and builds disabled, checks that a running generation and digest rotated, updates the digest-only `flag_hash`, recreates ingress, and verifies loopback health. A reset failure stops ingress on a best-effort basis and reports the original error, even if that cleanup also fails. Inspect the project-specific status and logs before retrying. Do not remove unrelated Docker resources.
 
 Stop and remove this Compose project's containers and networks with:
 

@@ -5,9 +5,9 @@
 
 # Validation report
 
-**Last Reel · Evidence baseline · Updated 12 October 2026**
+**Last Reel · Evidence baseline · Updated 15 October 2026**
 
-> **Release decision:** Last Reel is ready for submission as an `experimental` lab. A clean `--no-cache` build, the 31-test application suite, the live solve, check, and reset chain, and the runtime isolation checks pass on the submitted revision. An independent playtest from the player README completed. The pull request registers this lab in three shared repository files in a separate commit for maintainer review; see [repository integration](#repository-integration).
+> **Release decision:** Last Reel is ready for submission as an `experimental` lab. A clean `--no-cache` build with both the BuildKit and classic Docker builders, the 32-test application suite, the live solve, check, and reset chain, and the runtime isolation checks pass on the submitted revision. An independent playtest from the player README completed. The pull request registers this lab in three shared repository files in a separate commit for maintainer review; see [repository integration](#repository-integration).
 
 [Evidence ledger](#evidence-ledger) · [Coverage](#validation-coverage) · [Reproduction](#reproduction) · [Repository integration](#repository-integration) · [Release decision](#release-decision) · [Independent playtest](#independent-playtest-record)
 
@@ -15,6 +15,8 @@
 
 | Date | Check | Result | Evidence limit |
 |---|---|---|---|
+| 15 Oct 2026 | Classic-builder player path | **Passed in `32.2` s** | Maintainer review found that the classic builder (Docker without buildx) ignores `Dockerfile.ingress.dockerignore`, so the root `.dockerignore` excluded `ingress_proxy.py` and the ingress build failed. Reproduced with `DOCKER_BUILDKIT=0`, then fixed by allowing the ingress files in the root `.dockerignore`. A `--no-cache` classic build of both images passed, both services were healthy after `14.0` s, and the live solve, check, wrong-flag rejection, reset, stale-flag rejection, and re-solve passed with no flag in container logs. The BuildKit build still passes, and each image contains only its own files. |
+| 15 Oct 2026 | Packaged application suite | **32 passed** | Adds a regression test: when a reset fails and the cleanup stop also fails, the operator still sees the original error. The test failed before the `scripts/control.py` fix. Run in the freshly built restricted `test` image. |
 | 12 Oct 2026 | Clean standard build | **Passed in `19.1` s** | All Last Reel images, containers, networks, the base image tag, and Last Reel build-cache records were removed first. `docker compose build --no-cache` ran every Dockerfile step with no cached step and downloaded the 8 hash-pinned wheels from PyPI. The `test` target then built in `6.1` s. Base-image layer blobs came from the local Docker content store; a host without them also downloads the pinned base image. Timings are from one Windows 11 laptop running Docker Desktop. |
 | 12 Oct 2026 | Packaged application suite | **31 passed** | Run inside the freshly built `test` image with no network, a read-only root, user `10001:10001`, and all capabilities dropped. |
 | 12 Oct 2026 | Live solve, check, and reset | **Passed** | Fresh images started with `--no-build --pull never`; both services were healthy after `14.3` s. The evaluator solver returned a flag of the expected shape and the checker accepted it. A wrong value was rejected. Reset took `21.2` s and rotated the flag: the old value was rejected and a new solve was accepted. No flag appeared in container logs. Only exit codes were recorded. |
@@ -31,14 +33,14 @@
 
 ## Validation coverage
 
-The 31 tests cover:
+The 32 tests cover:
 
 - public catalogue and detail behavior;
 - the intended SQL injection;
 - input limits and error redaction;
 - headers, health, and non-public paths;
 - SQLite authorizer and resource limits;
-- seed and digest behavior and operator metadata updates;
+- seed and digest behavior, operator metadata updates, and reset error reporting when cleanup also fails;
 - evaluator URL validation and solver parsing of real rendered output;
 - frontend navigation, copy, accessible names, interaction styles, contrast tokens, and reduced motion.
 
@@ -86,14 +88,14 @@ Last Reel is the first lab added since three shared repository gates were introd
 | Triage registry | `scripts/fixtures/lab_triage_registry.json` | A triage decision for `labs/web/last-reel` |
 | Creator fixture | `scripts/fixtures/lab_creator_github.json` | `"labs/web/last-reel": "ziadelboshy"` |
 
-The pull request carries these three entries in a separate commit, so maintainers can review, adjust, or replace them independently of the lab. The same commit holds the outputs regenerated from them: the triage inventory page and the site page's creator link, which the generator takes from the lab's first commit and the creator fixture. No other shared test, fixture, or generator changes; all other catalog, site, and wiki outputs come from the repository generators.
+The pull request carries these three entries in a separate commit, so maintainers can review, adjust, or replace them independently of the lab. The same commit holds the outputs regenerated from them: the triage inventory page and the site page's creator link, which the generator takes from the lab's first commit and the creator fixture. No other shared test, fixture, or generator changes; all other catalog, site, and wiki outputs come from the repository generators. At the maintainer's request, a separate commit also makes `scripts/m2_release_report.py` take the experimental-lab count on the M2 release evidence page from the catalog instead of fixed fixture text.
 
 ## Release decision
 
 | Gate | Status | Evidence |
 |---|---|---|
-| Clean build | Passed | `--no-cache` build in `19.1` s |
-| Application suite | Passed | 31 tests in the restricted `test` image |
+| Clean build | Passed | `--no-cache` build in `19.1` s (BuildKit) and `32.2` s (classic builder) |
+| Application suite | Passed | 32 tests in the restricted `test` image |
 | Intended solve, checker, and reset | Passed | Live run on fresh images |
 | Runtime controls and flag secrecy | Passed | Isolation checks; no flag in container logs; `lab.yml` holds only a digest |
 | Repository validators | Passed | `validate.py --compose`, score threshold `100`, strict PDF |
