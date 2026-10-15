@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}{{ film.title }} | Last Reel Archive{% endblock %}
+{% block content %}
+<section class="detail"><a class="text-link" href="{% if back_query is not none %}{{ url_for('search', q=back_query) }}{% else %}{{ url_for('index') }}{% endif %}">← {% if back_query is not none %}Back to search results{% else %}Back to the collection{% endif %}</a><p class="eyebrow">PUBLIC ARCHIVE RECORD / {{ '%03d'|format(film.id) }}</p><h1>{{ film.title }}</h1><p class="film-meta">{{ film.genre }} / {{ film.year }}</p><p class="detail-synopsis">{{ film.synopsis }}</p><dl><div><dt>Collection</dt><dd>Restored cinema</dd></div><div><dt>Access</dt><dd>Public catalogue</dd></div><div><dt>Record status</dt><dd>Published</dd></div></dl><p class="subtle">This catalogue describes fictional films. No viewing files are hosted here.</p></section>
+{% endblock %}

@@ -2,7 +2,7 @@
 
 Completion record for milestone **M2 - One-command lab lifecycle** and [#133 M2-10](https://github.com/duckurity/openlabs/issues/133).
 
-Reviewed on `2026-10-11`. Regenerate with `python3 scripts/m2_release_report.py --write-wiki wiki/M2-Release-Evidence.md`.
+Reviewed on `2026-10-12`. Regenerate with `python3 scripts/m2_release_report.py --write-wiki wiki/M2-Release-Evidence.md`.
 
 ## Release markers
 
@@ -11,14 +11,14 @@ Reviewed on `2026-10-11`. Regenerate with `python3 scripts/m2_release_report.py 
 | CLI version | `0.2.0` |
 | Command envelope | `openlabs.command.v1` |
 | Lab contract | `1` |
-| Reviewed commit | `8891d1b959ee` |
+| Reviewed commit | `776edb214a4d` |
 | Release evidence commit | `d6ebe8116452` |
 
 ## Supported manifest
 
 - Supported: **1**
-- Experimental: **19**
-- Catalogued: **20**
+- Experimental: **20**
+- Catalogued: **21**
 
 | Path | Name | Reference |
 |:---|:---|:---|
@@ -76,7 +76,7 @@ Tier 1 CLI lifecycle command order:
 ## Known limitations
 
 - Only duck-cross has a Tier 1 lifecycle guarantee
-- Nineteen experimental labs lack full lifecycle support
+- 20 experimental labs lack full lifecycle support
 - Tier 2 and Tier 3 hosts lack hosted runner lifecycle evidence at release
 - Eight experimental labs declare container_name and block lifecycle mutation
 - Legacy prove_reference_lab.py runs beside CLI Tier 1 evidence until prove removal

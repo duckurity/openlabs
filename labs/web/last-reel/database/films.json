@@ -1,0 +1,11 @@
+[
+  {"id": 1, "title": "Platform Nine", "year": 1978, "synopsis": "A night porter waits for a train missing from every timetable.", "genre": "Mystery", "is_public": 1},
+  {"id": 2, "title": "Salt on the Window", "year": 1984, "synopsis": "Two sisters reopen their family's cinema in a quiet coastal town.", "genre": "Drama", "is_public": 1},
+  {"id": 3, "title": "The Brass Orchestra", "year": 1969, "synopsis": "An amateur band sets out for its first performance beyond the village.", "genre": "Comedy", "is_public": 1},
+  {"id": 4, "title": "Letters from the Harbour", "year": 1991, "synopsis": "A returned letter leads a postal worker through a city's changing waterfront.", "genre": "Drama", "is_public": 1},
+  {"id": 5, "title": "A Small Eclipse", "year": 1976, "synopsis": "Schoolchildren prepare for an eclipse while their teacher keeps a promise.", "genre": "Adventure", "is_public": 1},
+  {"id": 6, "title": "The Second Projection", "year": 1987, "synopsis": "A projectionist discovers that a damaged reel contains a different ending.", "genre": "Mystery", "is_public": 1},
+  {"id": 7, "title": "Market at Dawn", "year": 1963, "synopsis": "A day's trade follows three families through the old central market.", "genre": "Documentary", "is_public": 1},
+  {"id": 8, "title": "After the Applause", "year": 1995, "synopsis": "A retired performer returns to the theatre where her career began.", "genre": "Drama", "is_public": 1},
+  {"id": 9, "title": "Last Reel", "year": 1982, "synopsis": "An unreleased restoration awaiting a final release-clearance review.", "genre": "Drama", "is_public": 0}
+]

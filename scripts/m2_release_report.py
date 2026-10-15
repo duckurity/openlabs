@@ -228,6 +228,8 @@ def render_wiki(report: dict) -> str:
         ]
     )
     for item in fixture["known_limitations"]:
+        # Counts that change whenever a lab lands come from the catalog, not the fixture.
+        item = item.replace("{experimental_count}", str(cat["experimental_count"]))
         lines.append(f"- {item}")
 
     lines.extend(["", "## Deferred work", ""])
