@@ -1,6 +1,6 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
-strawberry-graphql[fastapi]==0.235.0
+strawberry-graphql[fastapi]==0.327.2
 pydantic==2.9.2
 sqlalchemy==2.0.34
 passlib[bcrypt]==1.7.4
