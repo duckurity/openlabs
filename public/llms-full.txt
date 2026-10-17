@@ -157,7 +157,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -775,6 +775,52 @@ docker compose up --build -d
 Practise in this lab:
 - [Server-side request forgery (SSRF)](/technique/ssrf)
 
+## Parcelpoint
+
+Source: https://openlabs.duckurity.com/labs/parcelpoint
+
+ParcelPoint manages a fictional network of smart lockers for customers and couriers. A dispatch review has paused the release of one held parcel.
+## Brief
+ParcelPoint is a **medium Web/API** lab. A browser console and a documented JSON API sit in front of the locker network. Your goal is to recover the checkpoint flag, then the final release flag for the held parcel.
+The scenario, people, addresses, parcels, and records are fictional. Use only the supplied local lab instance.
+## Setup
+Prerequisites:
+- Docker Desktop using Linux containers, or Docker Engine on Linux, with Docker Compose `v2.17.0` or later.
+- Python 3.10 or later on the host for hash synchronization, reset, and the local checker; no additional Python packages are required.
+- A browser or an HTTP client, and an available local port `8080`.
+- The first build requires internet access to download the pinned base image and Python packages. The running lab needs no external service.
+Run the commands from this lab directory. Substitute `python3` for `python` if needed, for example on Linux and macOS.
+```text
+docker compose up -d --build --wait
+python scripts/sync_flag_hash.py
+```
+Open the UI at `http://127.0.0.1:8080`.
+Read the [player guide](/play) for the lab workflow.
+The only published host port is `127.0.0.1:8080`. The application and its SQLite database are not published directly.
+To reset the instance and refresh both checker digests:
+```text
+python reset.py
+```
+The reset rotates accounts, sessions, reset codes, and both flags. Any flag captured before the reset is no longer valid. The reset does not pull images or rebuild.
+To stop the lab and remove its containers and temporary state:
+```text
+docker compose down
+```
+Starting again creates a fresh instance; run `python scripts/sync_flag_hash.py` again after a fresh start.
+## Goal
+Find the checkpoint flag first, then the final release flag. Both use the form `duck{...}`. Check each captured flag from this directory:
+```text
+python ../../../scripts/check.py .
+```
+The checker prompts for a flag, prints `checkpoint solved` or `solved`, and does not print the submitted value. It stores and compares only the SHA-256 digests in `lab.yml`.
+## Notes
+- This lab is intentionally vulnerable. Do not apply the technique to systems you do not own or have permission to test.
+- Treat the lab as a black box: only the web UI and API at `127.0.0.1:8080` are in scope. The lab directory also holds the source code and maintainer documentation, including the official solution; reading them spoils the challenge.
+- The host, Docker, database, images, and reset controls belong to the operator and are not challenge assets. In hosted delivery, only the assigned HTTP(S) endpoint is in scope.
+## Techniques
+Practise in this lab:
+- [Password reset target confusion](/technique/password-reset-target-confusion)
+
 ## Shopvault
 
 Source: https://openlabs.duckurity.com/labs/shopvault
@@ -1376,6 +1422,32 @@ No. The server must reject or ignore the field. A client can edit a request outs
 Use your own authorized test object, preserve a normal request, add one low-impact candidate property, and verify the stored result. Do not send broad property lists.
 ### Can PATCH be secure?
 Yes. PATCH is safe when the server allowlists paths and applies authorization and validation to every supported property.
+
+## Password reset target confusion
+
+Source: https://openlabs.duckurity.com/technique/password-reset-target-confusion
+
+## Overview
+A password reset code must authorize recovery of the account that requested it. Target confusion happens when a flow verifies a code but then accepts a different account identifier for the password update. The code and target are not bound to the same identity.
+This is an account-recovery authorization failure. It can let someone who controls one account's mailbox change another account's password. The reset code can be strong, short-lived, and single-use while the flow remains vulnerable if its verified owner is ignored.
+## Examples
+A safe test uses two synthetic accounts in an authorized lab. Request a recovery code for the first account. Inspect whether confirmation derives the account from the verified recovery record or trusts a second client-supplied email or user ID. Verify that the response cannot change credentials for the other account.
+A vulnerable implementation may validate a code against the authenticated requester, then update the account selected by a separate request field. The essential defect is the missing identity binding, not a weak code format.
+Test the whole lifecycle. Check expiry, single use, concurrent confirmation, session invalidation, and errors for unknown accounts. Do not test this against accounts or systems you do not own or have permission to assess.
+## Prevention
+Bind the reset transaction to one immutable account identifier when the code is issued. After successful verification, derive the password-update target from that server-side record. Do not accept a second client-controlled target identity.
+Store only a hash of a high-entropy code. Give it a short expiry and consume it atomically once. Send it through a verified recovery channel, avoid account-enumerating responses, and revoke existing sessions after a password change. Log recovery events without recording passwords, codes, or session tokens.
+## Related labs
+- [ParcelPoint](/labs/parcelpoint) exercises reset-target identity binding in a fictional courier API.
+- [Authentication bypass](/technique/auth-bypass) explains the broader authentication-failure family.
+- Browse all [labs](/labs) and read [how to play](/play) before starting.
+## FAQ
+### Does a random reset code prevent this flaw?
+No. A random code helps prevent guessing. The server still needs to bind that code to the one account it may recover.
+### Is a reset code a session token?
+It is a short-lived credential for one recovery action. Scope it to that action and account. Do not treat it as permission to select arbitrary users.
+### How should a test demonstrate the boundary?
+Use two disposable accounts. Confirm that the code issued for one account cannot change the other account's password, then verify that the intended account can still recover access.
 
 ## SQL injection
 
