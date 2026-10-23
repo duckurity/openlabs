@@ -157,7 +157,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -263,6 +263,20 @@ See [how to play](/play) for the usual solve loop.
 ## Techniques
 Practise in this lab:
 - [Server-side request forgery (SSRF)](/technique/ssrf)
+
+## Dns exfil
+
+Source: https://openlabs.duckurity.com/labs/dns-exfil
+
+## Brief
+A compromised host leaked data through DNS queries. The capture is in `app/dns_exfil.pcap`.
+## Setup
+Run `docker compose up -d` and open `http://localhost:8080/dns_exfil.pcap`.
+## Goal
+Analyze the capture and recover the exfiltrated flag. Verify your solve with `python3 scripts/check.py labs/network/dns-exfil`.
+## Techniques
+Practise in this lab:
+- [DNS abuse and exfiltration](/technique/dns)
 
 ## Duck cross
 
@@ -1181,6 +1195,16 @@ Browse all [labs](/labs) when it is solved.
 Same family of flaw — unsanitized input reaching an interpreter — but the interpreter here is the OS shell, not a database engine.
 **Do I need special tooling?**
 A browser or `curl` is enough to start. Read [how to play](/play) for the loop.
+
+## DNS abuse and exfiltration
+
+Source: https://openlabs.duckurity.com/technique/dns
+
+## Overview
+DNS is the phonebook of the Internet. It translates domain names to IP addresses. Attackers abuse it for command and control or data exfiltration because DNS traffic is frequently allowed through firewalls.
+## Examples
+See the [dns-exfil](/labs/dns-exfil) lab, where a compromised host leaks data through DNS queries.
+## Related labs
 
 ## Broken object-level authorization (IDOR)
 
