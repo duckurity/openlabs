@@ -1,4 +1,29 @@
-# DNS (Domain Name System)
+---
+title: DNS abuse and exfiltration
+description: Learn how attackers abuse DNS for command and control and covert data exfiltration, and how to spot it in packet captures.
+type: technique
+key: technique-dns
+slug: technique/dns
+intent: Learn what DNS abuse looks like and which labs exercise it.
+keywords:
+  primary: DNS exfiltration practice lab
+  secondary:
+    - dns tunneling
+    - network forensics lab
+linksTo:
+  - labs/dns-exfil
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
 
-DNS is the phonebook of the Internet. It translates human-readable domain names to IP addresses. 
-Attackers often abuse DNS for command and control (C2) or data exfiltration because DNS traffic is frequently allowed through firewalls.
+## Overview
+
+DNS is the phonebook of the Internet. It translates domain names to IP addresses. Attackers abuse it for command and control or data exfiltration because DNS traffic is frequently allowed through firewalls.
+
+## Examples
+
+See the [dns-exfil](/labs/dns-exfil) lab, where a compromised host leaks data through DNS queries.
+
+## Related labs

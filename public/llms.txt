@@ -10,6 +10,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Aegis ctf](https://openlabs.duckurity.com/labs/aegis-ctf): Chained API trust vulnerabilities across REST, GraphQL, and gRPC.
 - [Cafe house rules](https://openlabs.duckurity.com/labs/cafe-house-rules): A cafe rules site with a report bot and a guarded back-room route.
 - [Cloudvault](https://openlabs.duckurity.com/labs/cloudvault): A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.
+- [Dns exfil](https://openlabs.duckurity.com/labs/dns-exfil): Analyze a PCAP to find data exfiltrated over DNS queries.
 - [Duck cross](https://openlabs.duckurity.com/labs/duck-cross): A reports portal with a missing object-level authorization check.
 - [Duck nest](https://openlabs.duckurity.com/labs/duck-nest): An internal project workspace for staff and interns.
 - [Duckexchange](https://openlabs.duckurity.com/labs/duckexchange): A tenant document API with a gRPC transcoding authorization bypass.
@@ -37,6 +38,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [API version enumeration](https://openlabs.duckurity.com/technique/api-version-enumeration): Learn how to map versioned API surfaces and spot legacy endpoints that no longer meet the current security pol
 - [Authentication bypass](https://openlabs.duckurity.com/technique/auth-bypass): The server trusts a client-supplied field instead of verifying identity against a real credential check.
 - [Command injection](https://openlabs.duckurity.com/technique/command-injection): User input reaches a shell command unsanitized, letting you run commands alongside the intended one.
+- [DNS abuse and exfiltration](https://openlabs.duckurity.com/technique/dns): Learn how attackers abuse DNS for command and control and covert data exfiltration, and how to spot it in pack
 - [Broken object-level authorization (IDOR)](https://openlabs.duckurity.com/technique/idor): Learn how missing per-object checks expose records that an authenticated user should not be able to read or ch
 - [Mass assignment](https://openlabs.duckurity.com/technique/mass-assignment): Learn how automatic request binding can let a client change protected object properties.
 - [SQL injection](https://openlabs.duckurity.com/technique/sqli): Learn how unsanitized query input can change database logic and expose records outside normal access rules.

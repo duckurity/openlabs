@@ -1,0 +1,44 @@
+---
+title: Dns exfil
+description: Analyze a PCAP to find data exfiltrated over DNS queries.
+track: network
+difficulty: easy
+port: "8080"
+type: lab
+key: lab-dns-exfil
+slug: labs/dns-exfil
+intent: Solve an easy network lab in Docker.
+keywords:
+  primary: Dns exfil network security lab docker
+  secondary:
+    - easy network practice
+    - openlabs dns-exfil
+verified: true
+score: 100
+score_grade: A
+status: experimental
+linksTo:
+  - technique/dns
+author_name: "h15629526027"
+author_url: "https://github.com/h15629526027"
+author_avatar: "https://github.com/h15629526027.png"
+author_date: "2026-10-23"
+ogImage: /og/labs-dns-exfil.png
+---
+
+{/* Generated from labs/network/dns-exfil/lab.yml and README.md. Do not edit by hand. Run scripts/sync_site_content.py. */}
+
+## Brief
+A compromised host leaked data through DNS queries. The capture is in `app/dns_exfil.pcap`.
+
+## Setup
+Run `docker compose up -d` and open `http://localhost:8080/dns_exfil.pcap`.
+
+## Goal
+Analyze the capture and recover the exfiltrated flag. Verify your solve with `python3 scripts/check.py labs/network/dns-exfil`.
+## Techniques
+
+Practise in this lab:
+
+- [DNS abuse and exfiltration](/technique/dns)
+
