@@ -86,7 +86,7 @@ def test_list_json_baseline_counts() -> None:
     assert code == 0
     payload = _json(out, label="list.json")
     assert payload["data"]["action"] == "list"
-    assert payload["data"]["counts"] == {"supported": 1, "experimental": 19}
+    assert payload["data"]["counts"] == {"supported": 1, "experimental": 20}
     supported = payload["data"]["supported"]
     assert len(supported) == 1
     assert supported[0]["slug"] == "duck-cross"
@@ -101,7 +101,7 @@ def test_list_human_sections() -> None:
     assert code == 0
     assert err == ""
     assert "supported (1):" in out
-    assert "experimental (19):" in out
+    assert "experimental (20):" in out
     assert "duck-cross" in out
 
 
