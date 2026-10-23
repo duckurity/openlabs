@@ -1,0 +1,15 @@
+name: "DNS Exfiltration"
+author: "CTF Author"
+category: "Network"
+description: "We captured traffic from a compromised host. Analyze the DNS queries to find the exfiltrated flag."
+value: 200
+type: "standard"
+flags:
+  - "FLAG{dns_3xf1ltr4t10n_1s_fun}"
+tags:
+  - "network"
+  - "forensics"
+  - "dns"
+  - "base32"
+files:
+  - "dist/dns_exfil.pcap"
