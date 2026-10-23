@@ -1,8 +1,7 @@
 /**
  * Challenge creator card for the right sidebar. Links the author's
- * GitHub profile with avatar when the sync resolved a username,
- * otherwise the lab's commit history. Shows the PR merger as a
- * second verification row when known and different.
+ * GitHub profile with avatar when sync resolved a username. Shows the
+ * PR merger as a second verification row when known and different.
  */
 
 interface Person {

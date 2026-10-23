@@ -1,0 +1,16 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": true,
+  "data": {
+    "action": "start",
+    "lab": "duck-cross",
+    "project": "openlabs-a1b2c3-duck-cross",
+    "lifecycle": "stopped",
+    "planned": ["docker compose up -d"]
+  },
+  "diagnostics": [],
+  "meta": {"reset_safe": true}
+}

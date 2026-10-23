@@ -1,0 +1,17 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "issue",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": false,
+  "data": {
+    "action": "explain",
+    "id": "OL-0004",
+    "cause": "lab.yml declares a field outside the v1 contract",
+    "evidence": ["Open lab.yml and remove or rename unknown top-level keys"],
+    "safe_action": "Run openlabs lab validate on the lab path",
+    "manual_action": "Compare fields with contracts/lab.schema.json and wiki/M1-Contract-Decisions"
+  },
+  "diagnostics": [],
+  "meta": {"redacted": false}
+}

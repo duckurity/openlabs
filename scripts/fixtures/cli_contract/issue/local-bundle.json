@@ -1,0 +1,27 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "issue",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": false,
+  "data": {
+    "action": "bundle",
+    "bundle": {
+      "generated_at": "2026-09-29T18:00:00Z",
+      "repo_root": "<path>",
+      "lab": "labs/web/duck-cross",
+      "diagnostics": [
+        {
+          "id": "OL-0001",
+          "key": "contract.parse.missing_file",
+          "message": "[OL-0001] missing lab.yml at <path>"
+        }
+      ],
+      "notes": "Player saw compose failure after reset."
+    }
+  },
+  "diagnostics": [],
+  "meta": {
+    "redacted": true
+  }
+}

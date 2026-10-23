@@ -1,6 +1,8 @@
+contract_version: 1
 name: duckvault-web-ctf
 track: web
 difficulty: easy
 description: A document management API with a broken object-level authorization check.
 flag_hash: cfc1d1a2be4d09619505b6a8bf724d1cbd197dc49a46d70fac9f95710398eae0
+status: experimental
 techniques: [idor]

@@ -1,0 +1,5 @@
+.git
+.reference-grpc
+tenant_exchange/_build
+tenant_exchange/deps
+tenant_exchange/.elixir_ls

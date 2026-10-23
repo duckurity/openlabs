@@ -1,0 +1,20 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": false,
+  "exit_code": 1,
+  "dry_run": false,
+  "data": {
+    "action": "setup",
+    "lab": "unsafe-compose-lab",
+    "compose_file": "labs/web/example/docker-compose.yml"
+  },
+  "diagnostics": [
+    {
+      "id": "OL-0037",
+      "key": "lifecycle.compose.unsafe_container_name",
+      "message": "[OL-0037] compose declares container_name; lifecycle mutation blocked"
+    }
+  ],
+  "meta": {"redacted": false}
+}

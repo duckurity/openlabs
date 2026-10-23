@@ -1,0 +1,61 @@
+{
+  "milestone": "M0",
+  "parent_issue": 72,
+  "reference_supported_lab": "labs/web/duck-cross",
+  "issues": [
+    {
+      "id": "M0-01",
+      "number": 64,
+      "title": "Restore execution of the labs workflow",
+      "evidence": "`.github/workflows/labs.yml` runs on pull requests; issue closed."
+    },
+    {
+      "id": "M0-02",
+      "number": 65,
+      "title": "Establish the canonical lab catalog and two-status policy",
+      "evidence": "`wiki/Lab-Catalog-Status.md`; `lab.yml` `status` field enforced in `validate.py`."
+    },
+    {
+      "id": "M0-03",
+      "number": 66,
+      "title": "Prove the first supported reference lab through L0-L6",
+      "evidence": "`scripts/prove_reference_lab.py`; CI job **Prove duck-cross L0-L6**."
+    },
+    {
+      "id": "M0-04",
+      "number": 67,
+      "title": "Make validation and CI aware of lab status",
+      "evidence": "`scripts/lab_inventory.py`; `python3 scripts/test_validate_status.py`."
+    },
+    {
+      "id": "M0-05",
+      "number": 68,
+      "title": "Triage every incomplete or invalid lab directory",
+      "evidence": "`wiki/Lab-Triage-Inventory.md`; `scripts/lab_triage_inventory.py --check`."
+    },
+    {
+      "id": "M0-06",
+      "number": 69,
+      "title": "Generate consistent catalog counts and listings",
+      "evidence": "`scripts/sync_catalog_public.py --check`; public README catalog block."
+    },
+    {
+      "id": "M0-07",
+      "number": 70,
+      "title": "Repair contributor issue intake",
+      "evidence": "`scripts/validate_issue_forms.py`; `.github/ISSUE_TEMPLATE/`."
+    },
+    {
+      "id": "M0-08",
+      "number": 71,
+      "title": "Make baseline CI efficient and safe to require",
+      "evidence": "`wiki/Baseline-CI.md`; aggregate check **CI required**."
+    },
+    {
+      "id": "M0-09",
+      "number": 72,
+      "title": "Publish baseline evidence and enable repository protections",
+      "evidence": "`wiki/M0-Baseline-Evidence.md`; this report and manual protection record."
+    }
+  ]
+}

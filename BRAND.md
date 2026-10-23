@@ -13,12 +13,12 @@ Four colors carry the brand. Ember is the only saturated one.
 | Ink | `#1E1E1E` | text, icons on light surfaces |
 | Warm | `#F4F2F1` | light surfaces, cards |
 | Canvas | `#1C1916` | dark surfaces, badge backgrounds |
-| Ember | `#FF3616` | accents, the live-lab count, active states |
+| Ember | `#FF3616` | accents, supported catalog count on badges, active states |
 
 Dark and light variants of every badge exist. They switch with the viewer
 prefers-color-scheme using a `<picture>` element. Light variants use Ink
 text on Warm fields. Dark variants use Warm text on Canvas fields. Ember
-appears only on the lab-count badge.
+appears only on the supported and experimental lab-count badges.
 
 ## Type
 
@@ -30,7 +30,8 @@ badges are the only place the face is drawn.
 
 ## Badges and chips
 
-`.github/assets/badges/` holds 18 SVGs. The generator draws flat-square,
+`.github/assets/badges/` holds 20 SVGs (six identity badges plus four
+difficulty chips, each in dark and light). The generator draws flat-square,
 sharp-cornered, shadowless badges with the brand colors and Funnel Display
 labels. A badge carries an identity label, such as `docker` or `Apache-2.0`.
 A chip carries a difficulty: `easy`, `medium`, `hard`, `insane`.
@@ -53,10 +54,11 @@ The hash is the first 8 characters of the file's SHA-256. A change to the
 asset changes the hash, which changes the URL, which bypasses the cache.
 
 Never hand-edit `?v=` values. Run `scripts/sync_wiki.py bump`. It rewrites
-the parameter in the README and every `wiki/*.md` that references an asset,
-and it normalizes the live-lab count in the README heading. The command is
-idempotent. A second run with nothing to change prints
-`asset versions up to date`.
+the parameter in the README and every `wiki/*.md` that references an asset.
+Public catalog counts and lab tables come from `lab.yml` metadata. Regenerate
+them with `python3 scripts/sync_catalog_public.py --write` before you bump
+assets. The bump command is idempotent. A second run with nothing to change
+prints `asset versions up to date`.
 
 ## Challenge sheet
 
@@ -93,6 +95,7 @@ Scripts automate the brand:
 
 ```bash
 python3 scripts/make_badges.py           # regenerate badges and chips
+python3 scripts/sync_catalog_public.py --write  # README, wiki, site index, JSON
 python3 scripts/make_lab_pdf.py --all --strict   # rebuild every lab sheet
 python3 scripts/sync_wiki.py bump        # hash-stamp asset refs (?v=)
 python3 scripts/sync_wiki.py wiki        # publish wiki/ to the wiki repo

@@ -1,0 +1,11 @@
+{
+  "contract_version": 1,
+  "name": "firmdrama",
+  "track": "web",
+  "difficulty": "hard",
+  "description": "Multi-stage lab with checkpoint hash.",
+  "flag_hash": "2b11b738aa3919d2fd2a29648e6b92b658f83ac2aecd7b9616fe85714b4cf345",
+  "status": "experimental",
+  "techniques": ["idor", "mass-assignment", "api-version-enumeration", "ssti"],
+  "checkpoint_flag_hash": "82ace6a3138535b90c5dd07eec511219bfba9508c5bc957b4017b51e2249740b"
+}

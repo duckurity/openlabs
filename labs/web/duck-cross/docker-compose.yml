@@ -1,6 +1,8 @@
+name: openlabs-duck-cross
+
 services:
   web:
     build: .
     ports:
-      - "8377:8377"
+      - "127.0.0.1:8377:8377"
     restart: "no"

@@ -9,11 +9,11 @@ MYSQL_PASSWORD=${FIRMDRAMA_DB_PASSWORD:-firmdrama-local-only}
 mkdir -p "$(dirname "$MYSQL_SOCKET")" "$MYSQL_DATA_DIR" /var/log/mysql
 
 if [ ! -d "$MYSQL_DATA_DIR/mysql" ]; then
-    mysqld --initialize-insecure --user=firmdrama --datadir="$MYSQL_DATA_DIR"
+    mysqld --initialize-insecure --mysqlx=OFF --user=firmdrama --datadir="$MYSQL_DATA_DIR"
 fi
 
 MYSQL_PID_FILE=${FIRMDRAMA_MYSQL_PID_FILE:-/run/mysqld/firmdrama-mysql.pid}
-mysqld --user=firmdrama --datadir="$MYSQL_DATA_DIR" --socket="$MYSQL_SOCKET" --pid-file="$MYSQL_PID_FILE" --bind-address=127.0.0.1 &
+mysqld --user=firmdrama --datadir="$MYSQL_DATA_DIR" --socket="$MYSQL_SOCKET" --pid-file="$MYSQL_PID_FILE" --bind-address=127.0.0.1 --mysqlx=OFF &
 MYSQL_PID=$!
 
 cleanup() {

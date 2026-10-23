@@ -1,0 +1,29 @@
+{
+  "comment": "Labels referenced by issue forms must exist on duckurity/openlabs.",
+  "labels": [
+    "bug",
+    "component:lab",
+    "dependencies",
+    "documentation",
+    "duplicate",
+    "enhancement",
+    "github_actions",
+    "good first issue",
+    "help wanted",
+    "invalid",
+    "javascript",
+    "needs-triage",
+    "priority:blocker",
+    "priority:high",
+    "priority:normal",
+    "python",
+    "question",
+    "vector:contract",
+    "vector:documentation",
+    "vector:governance",
+    "vector:quality",
+    "vector:reliability",
+    "wontfix"
+  ],
+  "forbidden_contact_url_substrings": ["/discussions"]
+}

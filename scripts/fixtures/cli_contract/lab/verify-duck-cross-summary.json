@@ -1,0 +1,17 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": false,
+  "data": {
+    "action": "verify",
+    "lab": "duck-cross",
+    "levels": [
+      {"level": "L0", "ok": true, "seconds": 0.1, "detail": "metadata valid"},
+      {"level": "L3", "ok": true, "seconds": 2.0, "detail": "service ready at documented URL"}
+    ]
+  },
+  "diagnostics": [],
+  "meta": {"redacted": false}
+}

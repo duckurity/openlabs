@@ -5,7 +5,7 @@ at `labs/_template/`. Validation skips the template and checks your copy.
 
 ```
 labs/<track>/<lab>/
-├── lab.yml              # name, track, difficulty, description, flag_hash
+├── lab.yml              # name, track, difficulty, description, flag_hash, status
 ├── README.md            # player brief: story, setup, goal
 ├── docker-compose.yml   # service definition
 ├── Dockerfile           # pinned base image
@@ -25,8 +25,11 @@ Flat YAML, one `key: value` per line. Every field is required.
 | `difficulty` | one of `easy`, `medium`, `hard`, `insane` |
 | `description` | one line, shown in the lab index |
 | `flag_hash` | SHA-256 of the full flag string, 64 lowercase hex |
+| `status` | `experimental` or `supported`; see [[Lab catalog status](Lab-Catalog-Status)] |
 
 </div>
+
+Uncatalogued directories (no `lab.yml`) are not public catalog entries.
 
 ## The brief
 
@@ -65,6 +68,7 @@ It checks structure, metadata, and flag hygiene. Add `--compose` to also run
 - `name` matches the directory
 - `track` and `difficulty` are valid
 - `flag_hash` is 64 lowercase hex
+- `status` is `experimental` or `supported`
 - no plaintext flag appears where it should not
 
 A lab that passes validation is a lab that can merge.

@@ -1,0 +1,5 @@
+name: missing-status
+track: web
+difficulty: easy
+description: Fixture lab without status during migration.
+flag_hash: 0000000000000000000000000000000000000000000000000000000000000000

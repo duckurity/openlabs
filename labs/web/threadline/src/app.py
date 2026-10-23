@@ -325,7 +325,7 @@ def apply_coupon():
 
 
 def resolve_flag() -> str:
-    return os.environ.get("FLAG", "duck{flag_not_configured}")
+    return os.environ.get("FLAG") or "flag_not_configured"
 
 
 FLAG = resolve_flag()

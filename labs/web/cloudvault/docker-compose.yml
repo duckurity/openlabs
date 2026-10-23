@@ -3,6 +3,7 @@ services:
     build:
       context: ./app
       dockerfile: api/Dockerfile
+    restart: "no"
     ports:
       - "8080:8080"
     environment:
@@ -25,6 +26,7 @@ services:
     build:
       context: ./app
       dockerfile: worker/Dockerfile
+    restart: "no"
     environment:
       WORKER_SHARED_SECRET: "cloudvault-lab-worker-secret-do-not-reuse-outside-this-lab"
     networks:
@@ -34,6 +36,7 @@ services:
     build:
       context: ./app
       dockerfile: metadata/Dockerfile
+    restart: "no"
     networks:
       - internal-net
 
@@ -41,6 +44,7 @@ services:
     build:
       context: ./app
       dockerfile: sample-library/Dockerfile
+    restart: "no"
     networks:
       - internal-net
 
@@ -48,6 +52,7 @@ services:
     build:
       context: ./app
       dockerfile: internal-vault-api/Dockerfile
+    restart: "no"
     environment:
       VAULT_SESSION_SECRET: "cloudvault-lab-worker-secret-do-not-reuse-outside-this-lab"
     networks:

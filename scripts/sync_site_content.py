@@ -22,8 +22,9 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate import check_lab
+from openlabs_contract import format_validate_error, legacy_string_map, load_lab_metadata
 from score_lab import score_lab
+from validate import check_lab
 
 ROOT = Path(__file__).resolve().parent.parent
 LABS = ROOT / "labs"
@@ -37,14 +38,16 @@ PORT_RE = re.compile(r"localhost:(\d{2,5})")
 COMPOSE_PORT_RE = re.compile(r'"(\d{2,5}):\d{2,5}"')
 
 
-def parse_lab_yml(path: Path) -> dict[str, str]:
-    data: dict[str, str] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        data[key.strip()] = value.strip()
-    return data
+def load_lab_meta(path: Path) -> dict[str, str]:
+    result = load_lab_metadata(path)
+    if result.record is None:
+        message = (
+            format_validate_error(result.diagnostics[0])
+            if result.diagnostics
+            else "invalid lab.yml"
+        )
+        raise ValueError(message)
+    return legacy_string_map(result.record)
 
 
 def read_port(track: str, name: str, readme: str) -> str:
@@ -152,11 +155,23 @@ def github_cache_save(cache: dict) -> None:
     GITHUB_CACHE.write_text(json.dumps(cache, indent=2), encoding="utf-8")
 
 
+def sync_hermetic() -> bool:
+    import os
+
+    return os.environ.get("OPENLABS_SYNC_HERMETIC", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+
+
 def github_api(path: str) -> object | None:
     """GET a GitHub API path. Returns None offline, unauthenticated-limited,
     or on any failure — callers always fall back to local git data."""
     import os
 
+    if sync_hermetic():
+        return None
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "openlabs-sync",
@@ -178,6 +193,40 @@ def login_from_email(email: str) -> str:
     if email.endswith("@users.noreply.github.com"):
         return email.split("@")[0].split("+")[-1]
     return ""
+
+
+GITHUB_LOGIN_RE = re.compile(
+    r"^[a-zA-Z0-9](?:[a-zA-Z0-9.-]{0,37}[a-zA-Z0-9])?$"
+)
+
+CREATOR_LOGINS_PATH = (
+    Path(__file__).resolve().parent / "fixtures" / "lab_creator_github.json"
+)
+
+GITHUB_PROFILE_URL_RE = re.compile(
+    r"^https://github\.com/[a-zA-Z0-9](?:[a-zA-Z0-9.-]{0,37}[a-zA-Z0-9])?$"
+)
+
+
+def load_creator_login_overrides() -> dict[str, str]:
+    try:
+        data = json.loads(CREATOR_LOGINS_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    labs = data.get("labs")
+    if not isinstance(labs, dict):
+        return {}
+    return {str(key): str(value) for key, value in labs.items() if value}
+
+
+def github_login_from_git_name(name: str) -> str:
+    """Guess a GitHub login from a git author name when API lookup is unavailable."""
+    candidate = name.strip()
+    if not candidate or " " in candidate or "@" in candidate or "--" in candidate:
+        return ""
+    if not GITHUB_LOGIN_RE.fullmatch(candidate):
+        return ""
+    return candidate
 
 
 def commit_login(owner_repo: str, sha: str, cache: dict) -> str:
@@ -225,12 +274,35 @@ def introducing_pr(owner_repo: str, lab_rel: str, cache: dict) -> dict:
         if not isinstance(files, list):
             continue
         if any(str(f.get("filename", "")).startswith(lab_rel + "/") for f in files):
+            author = (pr.get("user") or {}).get("login", "")
             merger = (pr.get("merged_by") or {}).get("login", "")
-            result = {"number": number, "merger": merger}
+            result = {"number": number, "merger": merger, "author": author}
             break
     if result:
         cache[key] = {**result, "ts": time.time()}
     return result
+
+
+def resolve_creator_login(
+    *,
+    sha: str,
+    email: str,
+    name: str,
+    lab_rel: str,
+    owner_repo: str,
+    cache: dict,
+    overrides: dict[str, str],
+) -> str:
+    override = overrides.get(lab_rel, "").strip()
+    if override:
+        return override
+    login = login_from_email(email.strip()) or commit_login(owner_repo, sha.strip(), cache)
+    if not login:
+        login = github_login_from_git_name(name)
+    if not login:
+        pr = introducing_pr(owner_repo, lab_rel, cache)
+        login = str(pr.get("author", "")).strip()
+    return login
 
 
 def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
@@ -243,10 +315,12 @@ def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     """
     owner_repo = repo_slug()
     cache = github_cache_load()
+    history_path = lab_dir / "lab.yml"
+    git_path = str(history_path if history_path.is_file() else lab_dir)
     try:
         out = subprocess.run(
             ["git", "log", "--reverse", "--no-merges", "--format=%H|%an|%ae|%ad",
-             "--date=short", "--", str(lab_dir)],
+             "--date=short", "--", git_path],
             capture_output=True,
             text=True,
             cwd=ROOT,
@@ -260,18 +334,25 @@ def github_people(lab_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     name, _, email_date = rest.partition("|")
     email, _, date = email_date.partition("|")
     lab_rel = lab_dir.relative_to(ROOT).as_posix()
+    overrides = load_creator_login_overrides()
 
-    creator: dict[str, str] = {"author_name": name.strip()}
+    login = resolve_creator_login(
+        sha=sha,
+        email=email,
+        name=name.strip(),
+        lab_rel=lab_rel,
+        owner_repo=owner_repo,
+        cache=cache,
+        overrides=overrides,
+    )
+
+    creator: dict[str, str] = {}
     if date.strip():
         creator["author_date"] = date.strip()
-    login = login_from_email(email.strip()) or commit_login(owner_repo, sha.strip(), cache)
     if login:
+        creator["author_name"] = login
         creator["author_url"] = f"https://github.com/{login}"
         creator["author_avatar"] = f"https://github.com/{login}.png"
-    else:
-        creator["author_url"] = (
-            f"https://github.com/{owner_repo}/commits/main/{lab_rel}"
-        )
 
     verifier: dict[str, str] = {}
     pr = introducing_pr(owner_repo, lab_rel, cache)
@@ -318,6 +399,9 @@ def render_mdx(
         f"score: {score['score']}",
         f"score_grade: {score['grade']}",
     ]
+    status = meta.get("status", "").strip()
+    if status:
+        extra.append(f"status: {status}")
     if techniques:
         extra.append("linksTo:")
         extra.extend(f"  - technique/{slug}" for slug, _ in techniques)
@@ -363,7 +447,7 @@ def sync() -> list[str]:
         if "_template" in lab_yml.parts:
             continue
         track = lab_yml.parent.parent.name
-        meta = parse_lab_yml(lab_yml)
+        meta = load_lab_meta(lab_yml)
         readme_path = lab_yml.parent / "README.md"
         readme = (
             rewrite_lab_images(

@@ -1,3 +1,4 @@
+contract_version: 1
 name: firmdrama
 track: web
 difficulty: hard
@@ -6,6 +7,7 @@ description: A law firm's meeting-room portal with chained API authorization fla
 # Initialize once with scripts/sync_flag_hash.py after startup; reset.py refreshes both hashes.
 # Compare either captured flag with ../../../scripts/check.py .; it reads hashes only.
 flag_hash: 2b11b738aa3919d2fd2a29648e6b92b658f83ac2aecd7b9616fe85714b4cf345
+status: experimental
 # Intermediate checkpoint; flag_hash above remains the final completion hash.
 checkpoint_flag_hash: 82ace6a3138535b90c5dd07eec511219bfba9508c5bc957b4017b51e2249740b
 techniques: [idor, mass-assignment, api-version-enumeration, ssti]

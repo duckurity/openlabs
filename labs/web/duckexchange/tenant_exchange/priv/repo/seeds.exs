@@ -1,0 +1,1 @@
+TenantExchange.Seeds.insert!()
