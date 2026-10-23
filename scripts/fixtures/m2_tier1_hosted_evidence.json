@@ -1,0 +1,27 @@
+{
+  "release_commit": "d6ebe811645282d4a53341543887527c43146e5b",
+  "hosted_ci_run_url": "https://github.com/duckurity/openlabs/actions/runs/37861671412",
+  "tier1_ci_job_url": "https://github.com/duckurity/openlabs/actions/runs/37861671412/job/113598670443",
+  "tier1_ci_job_name": "Prove duck-cross L0-L6",
+  "ci_conclusion": "success",
+  "artifact_names": [
+    "reference-lab-evidence",
+    "m2-tier1-lifecycle-evidence"
+  ],
+  "lifecycle_steps": [
+    {"name": "lab_setup", "ok": true, "seconds": 1.53},
+    {"name": "lab_verify", "ok": true, "seconds": 33.38},
+    {"name": "lab_reset", "ok": true, "seconds": 0.19},
+    {"name": "lab_start", "ok": true, "seconds": 0.89},
+    {"name": "lab_status", "ok": true, "seconds": 0.19},
+    {"name": "lab_stop", "ok": true, "seconds": 10.39}
+  ],
+  "reset_and_second_start": {
+    "reset_step": "lab_reset",
+    "second_start_step": "lab_start",
+    "reset_seconds": 0.19,
+    "second_start_seconds": 0.89,
+    "sequence_after_verify": true
+  },
+  "cleanup_ok": true
+}

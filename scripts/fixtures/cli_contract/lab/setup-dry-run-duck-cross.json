@@ -1,0 +1,21 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": true,
+  "data": {
+    "action": "setup",
+    "lab": "duck-cross",
+    "path": "labs/web/duck-cross",
+    "project": "openlabs-a1b2c3-duck-cross",
+    "host_port": 8377,
+    "planned": [
+      "write .openlabs/state/duck-cross.json",
+      "docker compose -f labs/web/duck-cross/docker-compose.yml -p openlabs-a1b2c3-duck-cross build",
+      "docker compose -f labs/web/duck-cross/docker-compose.yml -p openlabs-a1b2c3-duck-cross up -d"
+    ]
+  },
+  "diagnostics": [],
+  "meta": {"redacted": false, "reset_safe": true}
+}

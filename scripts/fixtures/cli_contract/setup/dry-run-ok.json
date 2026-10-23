@@ -1,0 +1,21 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "setup",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": true,
+  "data": {
+    "action": "run",
+    "checks": [
+      {"name": "docker", "ok": true},
+      {"name": "compose", "ok": true}
+    ],
+    "missing": []
+  },
+  "diagnostics": [],
+  "meta": {
+    "duration_ms": 12,
+    "redacted": false,
+    "reset_safe": true
+  }
+}

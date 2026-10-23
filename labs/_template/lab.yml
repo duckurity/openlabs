@@ -1,7 +1,13 @@
+contract_version: 1
 name: lab-name
 track: web
 difficulty: easy
 description: One line shown in the lab index.
 flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
-# techniques exercised, as a bracket list of content/technique slugs.
+status: experimental
+techniques: []
+# Optional v1 fields (see contracts/lab.schema.json):
+# checkpoint_flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+# port: 8080
+# Add slugs that have pages under content/technique/, for example:
 # techniques: [idor]

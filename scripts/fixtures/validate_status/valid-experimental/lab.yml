@@ -1,0 +1,6 @@
+name: valid-experimental
+track: web
+difficulty: easy
+description: Fixture lab with experimental status.
+flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+status: experimental

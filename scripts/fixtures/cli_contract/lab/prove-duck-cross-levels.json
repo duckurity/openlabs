@@ -1,0 +1,26 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": false,
+  "data": {
+    "action": "prove",
+    "lab": "labs/web/duck-cross",
+    "levels": [
+      {"level": "L0", "ok": true, "seconds": 0.01, "detail": "metadata and required files valid"},
+      {"level": "L1", "ok": true, "seconds": 0.26, "detail": "compose renders with player port"},
+      {"level": "L2", "ok": true, "seconds": 0.25, "detail": "image build succeeded"},
+      {"level": "L3", "ok": true, "seconds": 1.84, "detail": "ready at http://127.0.0.1:8377"},
+      {"level": "L4", "ok": true, "seconds": 0.01, "detail": "entry page and public report API ok"},
+      {"level": "L5", "ok": true, "seconds": 0.01, "detail": "intended IDOR path verifies with check.py"},
+      {"level": "L6", "ok": true, "seconds": 10.99, "detail": "compose down removed namespaced resources"}
+    ]
+  },
+  "diagnostics": [],
+  "meta": {
+    "duration_ms": 14200,
+    "redacted": false,
+    "reset_safe": true
+  }
+}

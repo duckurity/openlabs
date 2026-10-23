@@ -1,6 +1,8 @@
+contract_version: 1
 name: duckvault
 track: web
 difficulty: medium
 description: A records portal leaks an internal reference through broken access control and weak authorization.
 techniques: [idor]
 flag_hash: 9ed081a0cf9445de7cd9dd88ca4c7f024cf7297ac9ba7438d56f5a04f911408f
+status: experimental

@@ -1,0 +1,9 @@
+name: fixture-lab
+track: web
+difficulty: easy
+description: Unknown metadata key.
+contract_version: 1
+flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+status: experimental
+techniques: [idor]
+unknown_key: true

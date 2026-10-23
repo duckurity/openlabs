@@ -1,0 +1,8 @@
+ name: indented
+track: web
+difficulty: easy
+description: Indented key is invalid.
+contract_version: 1
+flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+status: experimental
+techniques: []

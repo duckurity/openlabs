@@ -193,7 +193,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         )}
 
         {isLab && (
-          <dl className="border-border mt-6 grid grid-cols-2 gap-px border bg-transparent font-mono text-sm sm:grid-cols-5">
+          <dl className="border-border mt-6 grid grid-cols-2 gap-px border bg-transparent font-mono text-sm sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-5">
             {track && (
               <div className="bg-card px-3 py-2">
                 <dt className="readout">
@@ -235,6 +235,21 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 </dt>
                 <dd className={`tnum ${scoreTone}`}>
                   {score}{scoreGrade ? ` ${scoreGrade}` : ''}
+                </dd>
+              </div>
+            )}
+            {creator.name && creator.url && (
+              <div className="bg-card px-3 py-2 xl:hidden">
+                <dt className="readout">Author</dt>
+                <dd className="truncate">
+                  <a
+                    href={creator.url}
+                    target="_blank"
+                    rel={creator.avatar ? 'noopener noreferrer me' : 'noopener noreferrer'}
+                    className="focus-ring hover:text-primary outline-none"
+                  >
+                    {creator.name}
+                  </a>
                 </dd>
               </div>
             )}

@@ -1,0 +1,50 @@
+services:
+  proxy:
+    image: nginx:1.27-alpine
+    ports:
+      - "${CHALLENGE_PORT:-4000}:4000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./public_docs:/srv/docs:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  app:
+    build: .
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: tenantexchange_dev
+      POSTGRES_USER: tenantexchange
+      POSTGRES_PASSWORD: tenantexchange
+      LOOKUP_DB_USER: tenant_exchange_lookup
+      LOOKUP_DB_PASSWORD: "lookup_reader_7f9c4e2b91d6a8c3"
+      SECRET_KEY_BASE: "tenantexchangetenantexchangetenantexchangetenantexchangetenantexchangetenantexchange1234"
+      FLAG_FILE: /run/secrets/challenge_flag
+    secrets:
+      - challenge_flag
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tenantexchange_dev
+      POSTGRES_USER: tenantexchange
+      POSTGRES_PASSWORD: tenantexchange
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tenantexchange -d tenantexchange_dev"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - tenantexchange_pg:/var/lib/postgresql/data
+
+volumes:
+  tenantexchange_pg:
+
+secrets:
+  challenge_flag:
+    file: ./app/flag.txt

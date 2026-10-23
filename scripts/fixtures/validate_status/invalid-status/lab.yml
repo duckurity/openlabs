@@ -1,0 +1,6 @@
+name: invalid-status
+track: web
+difficulty: easy
+description: Fixture lab with disallowed status value.
+flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+status: live

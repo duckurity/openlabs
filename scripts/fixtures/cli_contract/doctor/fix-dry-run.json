@@ -1,0 +1,17 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "doctor",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": true,
+  "data": {
+    "action": "run",
+    "fix": true,
+    "planned_fixes": [
+      "write .openlabs/config.json with repo_root marker",
+      "refresh catalog drift cache under .openlabs/"
+    ]
+  },
+  "diagnostics": [],
+  "meta": {"redacted": false, "reset_safe": true}
+}

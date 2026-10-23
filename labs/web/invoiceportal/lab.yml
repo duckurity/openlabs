@@ -1,6 +1,8 @@
+contract_version: 1
 name: invoiceportal
 description: InvoicePortal is a SaaS platform for managing company invoices.
 track: web
 difficulty: medium
 flag_hash: 11c2759bf1bdc5044044cc833601f1a966dffc08c080db2b916334498d75f8ab
+status: experimental
 techniques: [idor]

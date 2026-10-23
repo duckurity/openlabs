@@ -1,0 +1,102 @@
+{
+  "milestone": "M2",
+  "parent_issue": 133,
+  "reference_lab": "labs/web/duck-cross",
+  "reference_lab_slug": "duck-cross",
+  "tier1_platform": "Linux x86_64 with Python 3.12, Docker Engine, Compose v2",
+  "hosted_ci_run_url": "https://github.com/duckurity/openlabs/actions/runs/37861671412",
+  "hosted_evidence_fixture": "scripts/fixtures/m2_tier1_hosted_evidence.json",
+  "issues": [
+    {
+      "id": "M2-01",
+      "number": 124,
+      "title": "CLI v1 contract delta and golden fixtures",
+      "evidence": "contracts/cli-v1.md; scripts/fixtures/cli_contract/"
+    },
+    {
+      "id": "M2-02",
+      "number": 125,
+      "title": "Executable core and JSON envelope",
+      "evidence": "./openlabs; scripts/openlabs_cli/"
+    },
+    {
+      "id": "M2-03",
+      "number": 126,
+      "title": "Runtime diagnostics, explain, bundle",
+      "evidence": "contracts/diagnostics.json OL-0034+; issue explain/bundle"
+    },
+    {
+      "id": "M2-04",
+      "number": 127,
+      "title": "Catalog discovery and lab list",
+      "evidence": "openlabs lab list"
+    },
+    {
+      "id": "M2-05",
+      "number": 128,
+      "title": "Preflight, repo setup, doctor",
+      "evidence": "openlabs setup; openlabs doctor"
+    },
+    {
+      "id": "M2-06",
+      "number": 129,
+      "title": "State, ports, namespacing, lab setup",
+      "evidence": ".openlabs/ state; lab setup transaction"
+    },
+    {
+      "id": "M2-07",
+      "number": 130,
+      "title": "Start, status, stop, reset",
+      "evidence": "lab start/status/stop/reset commands"
+    },
+    {
+      "id": "M2-08",
+      "number": 131,
+      "title": "Verify and shared duck-cross proof",
+      "evidence": "lab verify; prove_reference_lab.py"
+    },
+    {
+      "id": "M2-09",
+      "number": 132,
+      "title": "CI and fault gates",
+      "evidence": "labs.yml reference-lab dual evidence; test_m2.py"
+    },
+    {
+      "id": "M2-10",
+      "number": 133,
+      "title": "Docs and M2 release evidence",
+      "evidence": "wiki/OpenLabs-CLI.md; wiki/M2-Release-Evidence.md"
+    }
+  ],
+  "deferred_work": [
+    "PyPI or standalone package publish",
+    "M3 AI-assisted tooling",
+    "M4 assignment automation",
+    "Automatic OS package installation",
+    "Podman parity with Docker Engine",
+    "Promoting experimental labs to supported without evidence",
+    "Native Windows outside WSL2"
+  ],
+  "known_limitations": [
+    "Only duck-cross has a Tier 1 lifecycle guarantee",
+    "Nineteen experimental labs lack full lifecycle support",
+    "Tier 2 and Tier 3 hosts lack hosted runner lifecycle evidence at release",
+    "Eight experimental labs declare container_name and block lifecycle mutation",
+    "Legacy prove_reference_lab.py runs beside CLI Tier 1 evidence until prove removal",
+    "issue bundle records invocation and evidence paths but does not replay prior command diagnostics automatically"
+  ],
+  "tier1_lifecycle_steps": [
+    "lab setup",
+    "lab verify",
+    "lab reset",
+    "lab start",
+    "lab status",
+    "lab stop"
+  ],
+  "approval": {
+    "reviewer": null,
+    "date": null,
+    "outcome": null,
+    "notes": "Senior maintainer signs M2 release boundary on issue #133 before close"
+  }
+}

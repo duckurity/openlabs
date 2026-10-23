@@ -25,3 +25,5 @@ Escalate from unauthenticated to the manager role and read the manager-only repo
 ```bash
 python3 ../../../scripts/check.py .
 ```
+
+See [how to play](/play) for the usual solve loop.

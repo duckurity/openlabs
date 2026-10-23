@@ -1,0 +1,21 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": false,
+  "exit_code": 1,
+  "dry_run": false,
+  "data": {
+    "action": "status",
+    "lab": "duck-cross",
+    "lifecycle": "building",
+    "interrupted_command": "lab setup"
+  },
+  "diagnostics": [
+    {
+      "id": "OL-0038",
+      "key": "lifecycle.state.interrupted",
+      "message": "[OL-0038] previous lab setup stopped mid-build; run lab status then lab reset or lab setup"
+    }
+  ],
+  "meta": {"redacted": false}
+}

@@ -1,0 +1,16 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "setup",
+  "ok": false,
+  "exit_code": 1,
+  "dry_run": false,
+  "data": {"action": "run", "prompt": "create .openlabs/config.json"},
+  "diagnostics": [
+    {
+      "id": "OL-0034",
+      "key": "lifecycle.interaction.non_interactive_required",
+      "message": "[OL-0034] confirmation required; re-run without --non-interactive"
+    }
+  ],
+  "meta": {"non_interactive": true, "redacted": false}
+}

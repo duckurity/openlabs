@@ -8,7 +8,10 @@ what CI checks, and the rules a lab must follow to be merged.
 - Author a lab
 - Fix or improve an existing lab
 - Improve documentation
-- Report a broken lab through the issue forms
+- Report a broken lab through the [lab bug issue form](https://github.com/duckurity/openlabs/issues/new?template=lab-bug.yml)
+
+See [SUPPORT.md](SUPPORT.md) for other intake paths. Do not use public issues
+for security reports; use [private vulnerability reporting](https://github.com/duckurity/openlabs/security/advisories/new).
 
 ## Before you start
 
@@ -19,7 +22,25 @@ what CI checks, and the rules a lab must follow to be merged.
 
    ```bash
    python3 scripts/validate.py
+   python3 scripts/test_contract.py
    ```
+
+## Contract conformance
+
+Lab metadata uses **contract v1** (`contract_version: 1`). Machine-readable
+definitions live under `contracts/`. Run the CI gate locally:
+
+```bash
+python3 scripts/test_contract.py
+```
+
+Validator output may include `OL-####` ids from `contracts/diagnostics.json`.
+Look up the id or symbolic key in that file. Diagnostic text is redacted for
+flags, secrets, and home paths before it appears in logs.
+
+The `openlabs` CLI in `contracts/cli-v1.md` is a specification only. The
+repository does not ship that command yet. Use `scripts/validate.py` and
+`scripts/check.py` instead.
 
 ## Lab metadata
 
@@ -27,11 +48,23 @@ what CI checks, and the rules a lab must follow to be merged.
 
 | Key | Rules |
 |---|---|
+| `contract_version` | integer `1` (required on `main` after M1-06) |
 | `name` | must match the directory name, lowercase, hyphens |
 | `track` | one of `web`, `binary`, `crypto`, `network`, `osint` |
 | `difficulty` | one of `easy`, `medium`, `hard`, `insane` |
 | `description` | one line, shown in the lab index |
 | `flag_hash` | SHA-256 of the full flag string, 64 lowercase hex |
+| `status` | `experimental` or `supported` |
+| `techniques` | bracket list of technique slugs, or `[]`; each slug needs `content/technique/<slug>.mdx` |
+| `checkpoint_flag_hash` | optional; same 64 lowercase hex pattern as `flag_hash` |
+| `port` | optional integer `1`–`65535`; site sync usually derives port from README or compose |
+
+Unknown top-level keys are rejected. Match `contracts/lab.schema.json` and
+`wiki/M1-Contract-Decisions.md`.
+
+See [M1-09 contract v1 freeze](wiki/M1-09-Contract-v1-Freeze.md) and
+[M1-06 open lab PR migration](wiki/M1-06-Open-Lab-PR-Migration.md) if your branch
+predates `contract_version: 1` on `main`.
 
 Compute the hash from the exact flag string, braces included:
 
@@ -99,10 +132,23 @@ type(scope): description
 Types: `feat`, `fix`, `docs`, `chore`, `ci`, `refactor`, `perf`, `test`,
 `style`, `build`, `revert`. Example: `feat(web): add duck-cross lab`.
 
+## Workflow files
+
+When you change files under `.github/workflows/`, run:
+
+```bash
+bash scripts/lint_workflows.sh
+```
+
+Install `actionlint` v1.7.7 from
+https://github.com/rhysd/actionlint/releases/tag/v1.7.7 and verify the
+linux_amd64 tarball against `actionlint_1.7.7_checksums.txt` from the same
+release. The script does not download or install tools for you.
+
 ## Pull requests
 
 1. One lab per pull request.
-2. Run `python3 scripts/validate.py` locally; it must pass.
+2. Run `python3 scripts/validate.py` and `python3 scripts/test_contract.py` locally; both must pass.
 3. Use the pull request template checklist.
 4. CI runs the same validator. All checks must pass before review.
 

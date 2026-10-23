@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/duckurity/openlabs/blob/main/contracts/lab.schema.json",
+  "title": "OpenLabs lab metadata v1",
+  "description": "Structural contract for catalogued lab metadata after YAML is parsed into a typed record. Repository-context rules (directory name, technique pages) are documented in contracts/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "name",
+    "track",
+    "difficulty",
+    "description",
+    "flag_hash",
+    "status",
+    "techniques"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "OpenLabs metadata contract version."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Lab slug; must match the labs/<track>/<name> directory name."
+    },
+    "track": {
+      "type": "string",
+      "enum": ["web", "binary", "crypto", "network", "osint"]
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["easy", "medium", "hard", "insane"]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One-line summary for catalog and site indexes."
+    },
+    "flag_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 of the full flag string, lowercase hex."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["experimental", "supported"],
+      "description": "Catalog support tier; supported requires separate L0-L6 evidence."
+    },
+    "techniques": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "uniqueItems": true,
+      "description": "Technique slugs; each must have content/technique/<slug>.mdx (checked outside this schema)."
+    },
+    "checkpoint_flag_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Optional intermediate flag hash for multi-stage labs."
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "description": "Optional documented host port when not inferred from README or compose."
+    }
+  }
+}

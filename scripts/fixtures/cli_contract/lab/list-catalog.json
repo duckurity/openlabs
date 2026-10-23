@@ -1,0 +1,39 @@
+{
+  "version": "openlabs.command.v1",
+  "command": "lab",
+  "ok": true,
+  "exit_code": 0,
+  "dry_run": false,
+  "data": {
+    "action": "list",
+    "counts": {"supported": 1, "experimental": 19},
+    "supported": [
+      {
+        "slug": "duck-cross",
+        "path": "labs/web/duck-cross",
+        "track": "web",
+        "difficulty": "easy",
+        "status": "supported",
+        "port": 8377,
+        "compose_file": "docker-compose.yml",
+        "lifecycle_eligible": true,
+        "blockers": []
+      }
+    ],
+    "experimental": [
+      {
+        "slug": "example-lab",
+        "path": "labs/web/example-lab",
+        "track": "web",
+        "difficulty": "medium",
+        "status": "experimental",
+        "port": null,
+        "compose_file": "docker-compose.yml",
+        "lifecycle_eligible": false,
+        "blockers": ["container_name"]
+      }
+    ]
+  },
+  "diagnostics": [],
+  "meta": {"redacted": false}
+}

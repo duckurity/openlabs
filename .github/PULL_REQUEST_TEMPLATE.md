@@ -5,6 +5,10 @@
 ## Checklist
 
 - [ ] `python3 scripts/validate.py` passes locally
+- [ ] `python3 scripts/test_contract.py` passes when you touch `lab.yml`, `contracts/**`, or contract scripts
+- [ ] `python3 scripts/test_m2.py` passes when you touch `openlabs`, `scripts/openlabs_cli/**`, lifecycle runners, or `contracts/diagnostics.json`
+- [ ] Reference-lab changes keep bounded redacted CI artifacts; no plaintext flags in logs or artifacts
+- [ ] `lab.yml` includes `contract_version: 1`, required v1 keys, and `techniques` (may be `[]`); no unknown keys
 - [ ] The lab starts from a clean clone with `docker compose up -d`
 - [ ] The flag matches `^duck\{[a-z0-9_]{16,40}\}$` and `flag_hash` matches `printf '%s' '<flag>' | sha256sum`
 - [ ] No plaintext flag in `lab.yml`, in the lab `README.md`, or outside the lab directory

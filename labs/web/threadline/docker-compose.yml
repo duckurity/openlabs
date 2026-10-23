@@ -31,7 +31,7 @@ services:
       - /tmp:size=32m,mode=1777
       - /data:size=16m,uid=1000,gid=1000,mode=1700         # SQLite DB lives here — reset on restart
 
-    user: "1000:1000"
+    user: 1000:1000
 
     # ------------------------- RESOURCES ---------------------------------
     mem_limit: 256m
@@ -47,7 +47,7 @@ services:
     # Docker host). In production, remove `ports` and let the platform
     # edge reach the container via the internal network.
     ports:
-      - "127.0.0.1:8000:8000"
+      - "1000:1000"
 
     # ------------------------- SECRETS / FLAG ----------------------------
     environment:
@@ -55,7 +55,7 @@ services:
 
     # ------------------------- HEALTH & LOGS -----------------------------
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/v1/health"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:1000/api/v1/health"]
       interval: 30s
       timeout: 5s
       retries: 3

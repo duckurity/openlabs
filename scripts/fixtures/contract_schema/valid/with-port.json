@@ -1,0 +1,11 @@
+{
+  "contract_version": 1,
+  "name": "switf01-hit3",
+  "track": "web",
+  "difficulty": "hard",
+  "description": "Optional port field.",
+  "flag_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "status": "experimental",
+  "techniques": ["idor"],
+  "port": 3000
+}

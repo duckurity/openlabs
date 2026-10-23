@@ -1,0 +1,10 @@
+{
+  "contract_version": 1,
+  "name": "minimal-lab",
+  "track": "web",
+  "difficulty": "medium",
+  "description": "Techniques list may be empty.",
+  "flag_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "status": "experimental",
+  "techniques": []
+}
