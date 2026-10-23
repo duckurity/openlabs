@@ -1205,6 +1205,7 @@ DNS is the phonebook of the Internet. It translates domain names to IP addresses
 ## Examples
 See the [dns-exfil](/labs/dns-exfil) lab, where a compromised host leaks data through DNS queries.
 ## Related labs
+- [dns-exfil](/labs/dns-exfil): recover a flag hidden in DNS queries inside a packet capture.
 
 ## Broken object-level authorization (IDOR)
 
