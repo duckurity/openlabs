@@ -1,18 +1,10 @@
-# DNS Exfiltration Challenge
+# DNS Exfiltration EASY · network
 
-**Category:** Network Forensics
-**Difficulty:** Easy
+## Brief
+A compromised host leaked data through DNS queries. The capture is in `app/dns_exfil.pcap`.
 
-## Description
-We captured traffic from a compromised host on our network. The attacker appears to be leaking data via DNS queries. Analyze the provided packet capture (`dns_exfil.pcap`) and recover the exfiltrated flag.
+## Setup
+Run `docker compose up -d` and open `http://localhost:8080/dns_exfil.pcap`.
 
-**Flag Format:** `duck{...}`
-
-## Hints
-1. Look at the DNS queries in the capture.
-2. Some queries stand out from normal browsing traffic.
-3. The subdomain labels are encoded. The order of the queries is important.
-
-## Verification
-You can verify your flag using the platform's checker:
-`python3 ../../../scripts/check.py .`
+## Goal
+Analyze the capture and recover the exfiltrated flag. Verify your solve with `python3 scripts/check.py labs/network/dns-exfil`.
