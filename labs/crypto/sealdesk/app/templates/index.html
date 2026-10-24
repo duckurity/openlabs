@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>SealDesk · Harbor Office Records</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script defer src="{{ url_for('static', filename='workbench.js') }}"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="SealDesk home">SealDesk</a>
+    <span class="product-context">Document relay</span>
+    <span class="service-state"><span class="state-dot" aria-hidden="true"></span>Local instance</span>
+  </header>
+
+  <main id="main" class="workspace" tabindex="-1">
+    <section class="page-heading" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">Release file</h1>
+      </div>
+      <p class="page-reference">Case {{ case.case_id }}</p>
+    </section>
+
+    <div class="work-grid">
+      <section class="case-sheet" aria-labelledby="case-title">
+        <div class="sheet-topline">
+          <span class="sheet-type">Delivery record</span>
+          <span class="sheet-status"><span class="state-dot" aria-hidden="true"></span>Awaiting review</span>
+        </div>
+        <h2 id="case-title">{{ case.document_title }}</h2>
+        <p class="sheet-intro">A sealed copy is ready for the named recipient after its delivery record is checked.</p>
+
+        <dl class="case-fields">
+          <div><dt>Case reference</dt><dd>{{ case.case_id }}</dd></div>
+          <div><dt>Document ID</dt><dd class="mono">{{ case.document_id }}</dd></div>
+          <div><dt>From</dt><dd>{{ case.sender }}</dd></div>
+          <div><dt>Prepared for</dt><dd>{{ case.recipient }}</dd></div>
+          <div><dt>Issued</dt><dd>{{ case.issued_on }}</dd></div>
+        </dl>
+
+        <p class="case-note">{{ case.note }}</p>
+
+        <div class="receipt-heading">
+          <h3>Attached receipt</h3>
+          <span>JSON · {{ case.receipt.version }}</span>
+        </div>
+        <label class="visually-hidden" for="receipt-json">Receipt JSON</label>
+        <textarea id="receipt-json" class="receipt-editor mono" spellcheck="false" autocapitalize="off" aria-describedby="receipt-help">{{ case.receipt | tojson(indent=2) }}</textarea>
+        <p id="receipt-help" class="field-help">The delivered file contains the original receipt. You can edit a copy for review.</p>
+        <p class="synthetic-note">Fictional case material for a local training exercise.</p>
+      </section>
+
+      <aside class="action-desk" aria-label="Document actions">
+        <section class="task-section" aria-labelledby="check-heading">
+          <h2 id="check-heading">Check receipt</h2>
+          <p class="task-copy">Submit the attached receipt to verify its delivery status.</p>
+          <form id="check-form" novalidate>
+            <button class="button button-primary" type="submit">Check receipt</button>
+          </form>
+          <p id="check-result" class="result-line" role="status" aria-live="polite" aria-atomic="true"></p>
+        </section>
+
+        <section class="task-section open-section" aria-labelledby="open-heading">
+          <h2 id="open-heading">Open document</h2>
+          <p class="task-copy">Enter the access code for this case to open the signed copy.</p>
+          <form id="open-form" novalidate>
+            <label for="document-id">Document ID</label>
+            <input id="document-id" name="document_id" value="{{ case.document_id }}" autocomplete="off" required>
+            <label for="access-code">Access code</label>
+            <input id="access-code" name="access_code" class="mono" type="text" inputmode="text" autocapitalize="off" autocomplete="off" spellcheck="false" required>
+            <button class="button button-primary" type="submit">Open document</button>
+          </form>
+          <p id="open-result" class="result-line" role="status" aria-live="polite" aria-atomic="true"></p>
+          <section id="document-output" class="document-output" aria-live="polite" aria-label="Opened document" hidden>
+            <h3 id="document-title"></h3>
+            <p id="document-text"></p>
+          </section>
+          <output id="flag-output" class="flag-output mono" aria-label="Document flag" hidden></output>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer-note">
+    <span>SealDesk · Local records desk</span>
+    <span>Use only the supplied training instance.</span>
+  </footer>
+</body>
+</html>
