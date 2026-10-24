@@ -1,6 +1,5 @@
 name: marketnest
 track: web
-category: web
 difficulty: hard
 description: A B2B platform with SpEL injection via CSV price formulas leading to RCE through a hidden binary.
 flag_hash: c29f8a983ee0c0d7d5a94aba8eddf736dcbb6f82e48c9e72270e9168d007578a
