@@ -1,0 +1,164 @@
+---
+title: Reversing client-side obfuscation (XOR, Base64, byte-masking)
+description: Learn to recognize and reverse the common layered-obfuscation techniques used to hide secrets inside a binary, and why they only delay recovery rather than prevent it.
+type: technique
+key: technique-client-side-obfuscation-xor-base64-masking
+slug: technique/client-side-obfuscation-xor-base64-masking
+intent: Learn to recognize and reverse common binary obfuscation layers and which labs exercise this.
+keywords:
+  primary: binary obfuscation reversing practice lab
+  secondary:
+    - XOR Base64 byte masking explained
+    - obfuscation is not encryption
+linksTo:
+  - labs/dual-check
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+A huge share of "protected" strings and secrets found inside compiled
+binaries are hidden behind a small stack of simple, reversible
+transforms — most commonly some mix of byte-masking (XOR with a fixed
+value), Base64 encoding, and repeating-key XOR. None of these are
+cryptography: they have no real secret key an attacker lacks, since the
+"key" (if any) ships in the same binary as the data it protects.
+
+## Why these layers exist (and why they're weak)
+
+Each layer defeats a specific *casual* inspection method, not a
+determined one:
+
+- **Byte-masking / single-byte XOR** defeats a plain `strings` scan,
+  since the masked bytes won't render as readable text.
+- **Base64** makes the underlying bytes look like meaningless text
+  rather than raw binary, which can throw off a skim but decodes with
+  one standard library call.
+- **Repeating-key XOR** looks superficially like real encryption but has
+  none of its properties when the key is short, fixed, and stored right
+  there in the binary.
+
+Stacked together, these layers raise the *time* needed to recover the
+original value from "instant" (plain text) to "a few minutes of
+reading and scripting" — they do not raise it to "infeasible."
+
+## Examples
+
+### Single-byte mask
+
+A string is stored with every byte XOR'd against one fixed value (often
+`0x01` or similar). Unmasking is a one-line loop; the result commonly
+turns out to be more encoded data (see below) rather than the final
+plaintext.
+
+### Base64-wrapped binary data
+
+Once unmasked, a value often turns out to be Base64 text — decoding it
+(any standard library's Base64 decoder) reveals the next layer
+underneath, typically further XOR'd bytes rather than plaintext yet.
+
+### Repeating-key XOR
+
+The innermost layer is frequently a multi-byte repeating-key XOR: each
+byte of the data is XOR'd against the corresponding byte of a short,
+fixed key (cycling the key as needed). The key itself is almost always
+sitting in the same binary, readable directly as raw bytes at a fixed
+address — finding and reading it out is usually the whole task.
+
+### Independent constants per secret
+
+A binary might reuse the exact same technique for more than one hidden
+value (for example, two different passwords), each with its own
+independent mask/key constants. Recognising the pattern once makes the
+second instance much faster to reverse, since only the constants differ,
+not the method.
+
+## How to recognise it in a lab
+
+- A `strings` scan of the binary shows no readable secret, password, or
+  flag — but the binary's behavior (an "incorrect password" message, a
+  successful unlock) implies one exists somewhere.
+- Reading the relevant function in a decompiler shows a short loop XOR-ing
+  bytes against a constant, and/or a call into a Base64 decode routine.
+- The "key" or "mask" value used is itself a constant embedded nearby in
+  the same binary, not derived from anything external (user input,
+  network data, the system clock) — a strong signal that recovering it
+  is just a matter of reading the right bytes.
+
+## Common mistakes and false assumptions
+
+### "It's encoded, so it must be secure"
+
+Encoding (Base64) and masking (XOR) are not encryption. Neither has a
+secret an attacker lacks: the "key" for XOR ships right there in the
+binary, and Base64 has no key at all. Reversing either is mechanical,
+not probabilistic.
+
+### "Multiple layers add up to real security"
+
+Stacking several weak, reversible layers multiplies the *time* to
+reverse by roughly the number of layers, not the *difficulty* in any
+cryptographic sense — each layer is independently trivial once
+recognised, and recognising the pattern (mask → Base64 → XOR, in some
+order) is itself quick once you've seen it on one value.
+
+### "A repeating-key XOR with a long-ish key is basically a one-time pad"
+
+A one-time pad requires a key that is truly random, used exactly once,
+and never stored anywhere the attacker can read it. A fixed, reused,
+binary-embedded XOR key satisfies none of those properties.
+
+## Impact
+
+Any secret recovered this way — a license key, a credential, a flag — is
+fully compromised the moment someone takes the time to read the relevant
+function and the constants it uses; there is no meaningful "partial"
+protection from stacking more of these layers.
+
+## How developers prevent relying on this
+
+- Don't treat obfuscation as a security boundary for anything that
+  actually needs to stay secret — if the data and the "key" both ship in
+  the same artifact, nothing is actually protected against a motivated,
+  patient reader.
+- If a value genuinely must not be recoverable by the end user, it
+  can't live in a client-side artifact the end user fully controls at
+  all — the check needs to move server-side (see the related technique
+  on AES key derivation from split secrets, for why even "real" crypto
+  doesn't change this once the key is derivable client-side).
+- Reserve light obfuscation for genuinely low-stakes cases (avoiding a
+  trivial `strings` leak of something non-sensitive), and be explicit
+  that it is a deterrent, not a control.
+
+## Related labs
+
+The `dual-check` lab in this catalog uses exactly this layered pattern —
+byte-masking, Base64, and repeating-key XOR — to hide two passwords
+inside `game.exe`, each independently recoverable by reading the
+relevant function and the embedded key bytes.
+
+## FAQ
+
+### How is this different from "real" obfuscation tools used in production software?
+
+Commercial obfuscators/packers (control-flow flattening, virtualization,
+string encryption with per-build keys, anti-tamper checksums) raise the
+reversing effort substantially higher than a hand-rolled XOR/Base64
+stack, but the underlying limit is the same: if the program must be able
+to use the secret at runtime on a device the attacker controls, the
+secret is ultimately recoverable given enough effort.
+
+### Is Base64 ever a meaningful security layer on its own?
+
+No — it has no key and is fully public knowledge; it only changes how
+the data looks, not what an attacker needs to reverse it.
+
+### What should I keep in a lab writeup?
+
+The exact sequence of layers you identified (mask, encoding, XOR — and
+in what order), the constant(s) you extracted and where you found them,
+and the final recovered value — this makes the writeup itself a useful
+reference for the next similar pattern.

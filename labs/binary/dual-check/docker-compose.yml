@@ -1,0 +1,34 @@
+version: "3.9"
+
+# Distribution-only helper for dual-check.
+#
+# This lab has no server-side component and nothing in the intended solve
+# path touches this container — the player runs bin/game.exe and
+# bin/checker.exe directly (natively on Windows, or under Wine on
+# Linux/macOS). See README.md, "Delivery model (artifact-only
+# exception)".
+#
+# This service exists only so the catalog's general docker-compose.yml /
+# validate.py requirement has something to validate for an artifact-only
+# binary lab: it serves this folder's two binaries and the maintainer docs
+# over plain HTTP, for convenience, and is never required to solve the
+# challenge.
+#
+# Base image pinned to the same digest used by the sibling binary-track
+# lab's (nexawallet) distribution helper — author-confirmed via
+# `docker pull python:3.12-alpine` + `docker inspect` on their own
+# machine, since this authoring environment has no network access to
+# Docker Hub to resolve one itself.
+services:
+  dualcheck-dist:
+    image: python:3.12-alpine@sha256:1b668429b3511ab407d8e00648891631b0b1a4d7e15e3ca70f38ab5b91ad4ab4
+    container_name: dualcheck-dist
+    working_dir: /dist
+    volumes:
+      - ./bin/game.exe:/dist/game.exe:ro
+      - ./bin/checker.exe:/dist/checker.exe:ro
+      - ./docs:/dist/docs:ro
+    ports:
+      - "8091:8091"
+    command: ["python3", "-m", "http.server", "8091"]
+    restart: unless-stopped

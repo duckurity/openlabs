@@ -177,9 +177,35 @@ def normalize_inline_html(text: str, line_number: int) -> str:
     return "`".join(parts)
 
 
+LONG_RUN_RE = re.compile(r"[0-9A-Za-z]{13,}")
+LONG_RUN_CHUNK = 8
+
+
+
+_LONG_RUN_BREAK_MARK = "\x00"
+
+
+def _mark_long_run(match: re.Match[str]) -> str:
+    """Mark break points inside a long alnum run, before LaTeX escaping.
+
+    Chunking has to happen on the raw text: once escape_latex_inline has
+    turned a single backslash or caret into a multi-letter command name
+    (\\textbackslash, \\textasciicircum, ...), that command's own letters
+    are indistinguishable from a long hex run and get this same treatment,
+    splitting the control sequence itself. A sentinel byte is invisible to
+    LATEX_SPECIALS (it maps unknown characters through unchanged), so it
+    survives escaping and is swapped for the real \\allowbreak{} afterwards.
+    """
+    run = match.group(0)
+    chunks = [run[i:i + LONG_RUN_CHUNK] for i in range(0, len(run), LONG_RUN_CHUNK)]
+    return _LONG_RUN_BREAK_MARK.join(chunks)
+
+
 def render_inline_code(text: str) -> str:
     """Render inline code verbatim while allowing a line break at separators."""
-    escaped = escape_latex_inline(text)
+    marked = LONG_RUN_RE.sub(_mark_long_run, text)
+    escaped = escape_latex_inline(marked)
+    escaped = escaped.replace(_LONG_RUN_BREAK_MARK, r"\allowbreak{}")
     escaped = escaped.replace("/", r"/\allowbreak{}")
     escaped = escaped.replace("-", r"-\allowbreak{}")
     escaped = escaped.replace(r"\_", r"\_\allowbreak{}")

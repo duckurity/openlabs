@@ -386,7 +386,14 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.run_pdf == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # apt-get install texlive-latex-extra pulls several hundred MB from
+    # azure.archive.ubuntu.com; under mirror pressure the download alone
+    # can run past 15 minutes with no intermediate log output (apt only
+    # prints its "Fetched ..." summary once the whole batch lands), which
+    # showed up as the job getting silently cancelled at the timeout
+    # rather than failing with a real apt error. 30 minutes gives the
+    # install real headroom without masking a genuine hang indefinitely.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -395,6 +402,13 @@ jobs:
           python-version: "3.12"
 
       - name: Install PDF toolchain
+        env:
+          # Without this, a debconf prompt pulled in by the texlive
+          # packages (console-setup/tzdata-style keyboard or locale
+          # questions) can block apt-get install with no TTY to answer
+          # it, hanging the step until the job's 15-minute timeout
+          # cancels it instead of failing fast with a real error.
+          DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \

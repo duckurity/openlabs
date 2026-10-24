@@ -157,7 +157,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -263,6 +263,134 @@ See [how to play](/play) for the usual solve loop.
 ## Techniques
 Practise in this lab:
 - [Server-side request forgery (SSRF)](/technique/ssrf)
+
+## Dual check
+
+Source: https://openlabs.duckurity.com/labs/dual-check
+
+**Participant:** yousef elsayed
+**Domain:** Reverse Engineering (static, binary track)
+**Difficulty:** Medium
+**Proposed catalog slug:** `labs/binary/dual-check/` (see `lab.yml`)
+**flag:** `duck{...}` — format and hash recorded in `lab.yml`, plaintext only
+inside `src/` build files (see `src/BUILD_INSTRUCTIONS.md`), never in this
+README or `lab.yml`.
+## Brief
+Two independent Windows PE binaries, game.exe and checker.exe, bound by a shared secret. Recover an obfuscated password from game.exe, then read checker.exe's decompiled code to reimplement a chained byte transform and derive the AES-128 key that decrypts the embedded flag.
+## Setup
+No install step. Run the binaries directly:
+```bash
+wine bin/game.exe      # or run natively on Windows
+wine bin/checker.exe
+```
+No server-side component and no network dependency — this is an artifact-only BYOD lab. See "Delivery model (artifact-only exception)" below for why docker-compose.yml exists anyway.
+## Goal
+Recover both passwords and the derived AES key through static analysis (a decompiler such as Ghidra), then run checker.exe to decrypt and print the flag. Verify with:
+```bash
+python3 check.py "duck{...}"
+```
+## What this is
+A custom-built, two-binary reverse engineering crackme (`game.exe` + `checker.exe`), designed and built from scratch for this task, then solved end-to-end to validate it and produce the evidence below.
+## Delivery model (artifact-only exception)
+This lab has **no HTTP service the solve depends on**. The player is
+handed two Windows PE executables (`bin/game.exe`, `bin/checker.exe`) and
+runs them directly — natively on Windows, or under Wine on Linux/macOS.
+No server-side state exists: all checking happens inside the binaries
+themselves (`checker.exe`'s own password-hash and flag-decryption
+logic), plus the player-facing `check.py` at the lab root, which only
+checks a candidate flag against this directory's `lab.yml` — it does not
+run or replace the binaries.
+`docker-compose.yml` and `lab.yml`'s `port: 8091` exist only to
+satisfy the catalog's general `docker-compose.yml`/`validate.py`
+requirement — they run a distribution-only HTTP server for the two
+binaries and the docs, and nothing in the intended solve path ever
+touches that service.
+**Reset / state model:** not applicable. Neither binary has any persistent
+or server-side state, and neither password nor the flag rotates per
+playthrough — every player who solves it correctly gets the same, fixed
+flag. There is nothing to reset between attempts; running the binaries
+again is itself the reset.
+**Platform:** Windows PE only, by design — both binaries are compiled
+with MinGW/TDM-GCC targeting Windows, and `game.c` uses Windows-only APIs
+(`<windows.h>`) for console behavior. No Linux ELF build is provided, so
+no headless-checker CI step applies here; see `src/BUILD_INSTRUCTIONS.md`
+for the exact build command if a maintainer wants to rebuild from source.
+## Repo layout
+```
+.
+│
+├── bin/                        ← the compiled, playable challenge files
+│   ├── game.exe
+│   └── checker.exe
+│
+├── docker-compose.yml          ← distribution-only helper (see "Delivery model")
+├── lab.yml                     ← catalog metadata (track, difficulty, flag_hash, techniques)
+├── check.py                    ← player-facing flag checker (reads lab.yml, no deps)
+│
+├── docs/                        ← all written evidence/report + maintainer docs
+│   ├── README.md
+│   ├── player-briefing.mdx     ← player-facing description (no spoilers)
+│   ├── challenge-design.mdx
+│   ├── official-solution.mdx   ← full spoiler solve, including the narrated,
+│   │                               screenshot-illustrated walkthrough
+│   ├── security-report.mdx
+│   ├── remediation.mdx
+│   ├── validation-report.mdx
+│   └── images/                 ← screenshots referenced from official-solution.mdx
+│
+└── src/                         ← full source code (private repo only — never ship to participants)
+    ├── BUILD_INSTRUCTIONS.md   ← how to compile game.exe / checker.exe from source
+    ├── game.c
+    ├── checker.c
+    ├── aes.c / aes.h
+    ├── base64.c / base64.h
+    ├── sha256.c / sha256.h
+    ├── test_sha256.c            ← dev-only: validates the SHA-256 implementation
+    └── gen_checker_v3.c         ← dev-only: generates the embedded constants in checker.c
+```
+## Where to start
+| If you want to... | Go to |
+|---|---|
+| Understand what the challenge is testing | `docs/challenge-design.mdx` ("Skills exercised") |
+| See the player-facing description (no spoilers) | `docs/player-briefing.mdx` |
+| Reproduce the full solve, step by step, with screenshots | `docs/official-solution.mdx` ("Full narrated walkthrough") |
+| Understand the security root cause being demonstrated | `docs/security-report.mdx` |
+| See mitigation recommendations for real-world systems | `docs/remediation.mdx` |
+| Rebuild the binaries from source | `src/BUILD_INSTRUCTIONS.md` |
+| Check a candidate flag | `check.py "duck{...}"` |
+| See catalog metadata (track, difficulty, flag hash) | `lab.yml` |
+| See what's verified vs. still pending | `docs/validation-report.mdx` |
+## Design summary
+- `game.exe` and `checker.exe` are independent binaries — `checker.exe` never reads anything from `game.exe` at runtime.
+- `game.exe`: recover an obfuscated password (multi-byte XOR + Base64 + byte-masking) → pass a knowledge quiz about that analysis → win a mini-game → receive a second, independently-obfuscated password.
+- `checker.exe`: requires (1) that second password, verified only via a stored SHA-256 hash, and (2) a 16-byte value that is **not stored anywhere in the binary** — it must be computed by reading and replicating a custom chained transform found in the decompiled code. Only when both are correct does the program derive the final AES-128 key, decrypt the embedded flag, and print it.
+- Neither binary leaks the flag, the flag's format, or either password to a plain `strings` scan.
+## Evidence status
+- [x] Challenge designed and built (C, compiled with MinGW/TDM-GCC)
+- [x] Full solve performed and verified (Ghidra static analysis + Python/CyberChef reproduction)
+- [x] Flag confirmed reproducible via two independent paths (running `checker.exe`, and manual offline decryption)
+- [x] `strings` scan confirms no leakage of flag/passwords on either binary
+- [x] Full walkthrough, objective/skills, player briefing, root-cause and mitigation documentation completed
+      (all consolidated under `docs/` — see `docs/README.md`)
+- [x] Flag regenerated to be fully random and catalog-format-compliant (`^duck\{[a-z0-9_]{16,40}\}$`); `lab.yml`
+      created with its SHA-256 `flag_hash`
+- [x] `checker.c`'s embedded flag ciphertext updated to match — password, hex-value algorithm, and `game.exe`
+      are all byte-for-byte unchanged, so the documented walkthrough solve path still applies exactly as written
+- [x] Chain logic re-verified end-to-end on a Linux-compiled test build of the patched `checker.c` (same
+      documented password + hex value → new flag; wrong password and wrong hex value both still correctly rejected)
+- [x] **`checker.exe` rebuilt from the updated `checker.c`** on a Windows machine with MinGW/TDM-GCC and pushed —
+      independently re-confirmed by extracting the current `FLAG_IV`/`FLAG_CIPHERTEXT` byte arrays from
+      `src/checker.c` and finding those exact bytes embedded in the committed `bin/checker.exe` at the expected
+      offsets (see `docs/validation-report.mdx`'s evidence ledger). A live interactive re-solve of this exact
+      binary is still recommended but is no longer a blocker.
+- [x] `check.py` added at the lab root; verifies a candidate flag against `lab.yml`'s `flag_hash`, no
+      dependencies beyond the standard library
+## Techniques
+Practise in this lab:
+- [Static binary analysis with a decompiler](/technique/static-binary-analysis-ghidra)
+- [Reimplementing a chained byte transform from decompiled code](/technique/chained-byte-transform-reversing)
+- [Reversing client-side obfuscation (XOR, Base64, byte-masking)](/technique/client-side-obfuscation-xor-base64-masking)
+- [AES key derivation from client-controlled split secrets](/technique/aes-key-derivation-from-split-secrets)
 
 ## Duck cross
 
@@ -1070,6 +1198,125 @@ Source: https://openlabs.duckurity.com/technique
 Vulnerability classes, defined once. Each technique links every lab that exercises it.
 Start with [broken object-level authorization](/technique/idor). See also [authentication bypass](/technique/auth-bypass), [SSRF](/technique/ssrf), and [command injection](/technique/command-injection). Browse all [labs](/labs) when it is solved.
 
+## AES key derivation from client-controlled split secrets
+
+Source: https://openlabs.duckurity.com/technique/aes-key-derivation-from-split-secrets
+
+## Overview
+AES is real, well-reviewed cryptography — but encrypting data with it
+only protects that data if the key stays secret from whoever has the
+ciphertext. When a program derives its own AES key, at runtime, from
+values the same program also obtains from (or computes using) the
+client it's running on, the key is not actually secret from an attacker
+who controls that client. This technique covers recognising that pattern
+and reproducing the key derivation to decrypt the protected data
+yourself.
+## Why "the data is AES-encrypted" doesn't end the analysis
+Finding AES in a binary (recognisable S-boxes, round constants, or a
+named library) can look like a dead end — "it's encrypted, so it's
+secure." The actual question is always: where does the key come from,
+and who can obtain it? If the key is:
+- hardcoded directly in the binary → trivially extractable, no
+  different from any other embedded constant;
+- derived from values the binary itself already reveals or computes
+  (a password you recover, a value you compute via another technique) →
+  equally extractable, just with one extra derivation step;
+- derived from something genuinely outside the attacker's reach (a
+  server-side secret, a hardware-backed key store) → actually protected.
+Only the last case is real protection. The first two just add a
+derivation step before the same underlying problem (a client-readable
+key) applies.
+## Examples
+### Key folding from a password
+A common pattern: fold an arbitrary-length password string into a
+fixed-size key (for example, 16 bytes for AES-128) by XOR-ing and
+rotating each character into a position based on its index. This is
+reversible and fully reproducible once the password itself is known —
+folding adds no secrecy, only a fixed transform.
+### Combining two recovered values
+A program might derive its final key as one recovered/computed value
+XOR'd (or otherwise combined) with a second recovered/computed value —
+intended to simulate "needing two pieces of information." Cryptographically,
+XOR-combining two known values is as fully determined as either value
+alone; once both inputs are known, the combination is a one-line
+computation, not an additional barrier.
+### Fixed IV and ciphertext shipped alongside the key material
+For CBC-mode decryption you also need the initialization vector (IV) and
+the ciphertext itself — both of which, in a purely client-side design,
+ship in the same binary as everything needed to derive the key. Once you
+have key, IV, and ciphertext, decryption is a single standard-library
+call in any language, or a point-and-click operation in a tool like
+CyberChef's "AES Decrypt."
+## How to recognise it in a lab
+- The binary contains recognisable AES constants/routines (or a note
+  that it does) alongside a key-derivation function that takes one or
+  more values you can either read directly or compute via a separate
+  technique.
+- The IV and ciphertext are both present as static data in the binary —
+  not fetched from a network or derived from anything you can't see.
+- The "protected" result (a flag, a license payload) is meant to be
+  readable by the legitimate end user after a successful check, meaning
+  the program itself must be able to fully derive the key and decrypt at
+  runtime, on the user's own machine.
+## Common mistakes and false assumptions
+### "It's AES, so it's unbreakable"
+AES itself (the cipher) is not what's being attacked here — the key
+derivation is. No amount of cipher strength protects data once the
+attacker can independently derive, or already has, the exact key used
+to encrypt it.
+### "Needing two separate values to derive the key adds real security"
+It adds *effort* (you need to recover both values, possibly via
+different techniques), but once both are known, combining them is
+exactly as deterministic as using either value alone — there's no
+additional cryptographic hardness from the combination step itself.
+### "I need to break the key derivation function, not the cipher"
+This framing is usually right in practice — but worth stating
+explicitly, since it's easy to waste time trying to "attack" AES itself
+in this kind of challenge, when the actual target is almost always the
+(much weaker) logic that produces the key AES is given.
+## Impact
+Any encrypted payload protected only by a client-derivable key offers no
+real confidentiality against an attacker willing to do the derivation —
+the cipher's strength is irrelevant once the key itself is recoverable.
+## How developers prevent relying on this
+- Never derive an encryption key, at runtime, entirely from values that
+  are themselves present in or computable from the same client-side
+  artifact — if the program can derive the key, so can anyone running
+  the program offline.
+- If data genuinely needs to stay confidential from the end user running
+  the program, the key (or the decryption itself) needs to live
+  somewhere the user's own copy of the program cannot reach — typically
+  a server-side service, or hardware-backed key storage the application
+  can use but not directly read.
+- Treat "we encrypted it" as a statement about implementation, not a
+  substitute for actually answering "who holds the key, and can the
+  person we're protecting this from ever obtain it?"
+## Related labs
+`checker.exe` in the `dual-check` lab derives its final AES-128 key at
+runtime as `fold(password) XOR hexvalue` — both inputs are things the
+player recovers through other techniques in this lab (a password
+obtained via client-side-obfuscation reversing, and a hex value via
+chained-transform reversing) — and both the IV and the ciphertext ship
+as static data in the binary, so once the key is derived, decrypting the
+embedded flag is a single AES-128-CBC call.
+## FAQ
+### Does this mean AES itself is somehow "weak" here?
+No — AES-128-CBC is used correctly and is not the weak point. The
+weakness is entirely in how the key is obtained: from values a
+client-side attacker can fully recover, rather than from something kept
+genuinely out of their reach.
+### How would I know if a real system has this problem?
+The same question that applies throughout this challenge: can the
+program, running fully on a device you control, derive and use the key
+itself? If yes, you can derive it too, no matter how the key is
+constructed from there.
+### What should I keep in a lab writeup?
+Each input value's origin (which technique you used to recover or
+compute it), the exact derivation step used to combine them into the
+final key, and the IV/ciphertext you decrypted with it — this traces the
+full chain from "nothing" to "plaintext flag" in a way a reviewer can
+re-run.
+
 ## API version enumeration
 
 Source: https://openlabs.duckurity.com/technique/api-version-enumeration
@@ -1163,6 +1410,226 @@ Browse all [labs](/labs) when it is solved.
 No. Access control (like IDOR) is about authorization after you're already authenticated. Auth bypass is about getting authenticated (or treated as authenticated) without a valid credential.
 **Do I need special tooling?**
 A GraphQL client or `curl` is enough. Read [how to play](/play) for the loop.
+
+## Reimplementing a chained byte transform from decompiled code
+
+Source: https://openlabs.duckurity.com/technique/chained-byte-transform-reversing
+
+## Overview
+Not every value a crackme or licensing check needs is sitting in the
+binary as a readable constant. Sometimes the check requires a value that
+must be *computed* by an algorithm the binary contains — and the
+algorithm itself is "chained": each output byte depends on the result of
+the previous byte, similar in spirit to how CBC block-cipher mode chains
+each block's encryption into the next. This means the value cannot be
+derived byte-by-byte independently or out of order; the full sequence
+must be reproduced faithfully, start to finish.
+## Why this is a distinct skill from reading a constant
+Reading a stored key or password out of a binary is a lookup. A chained
+transform is different: there is no single value to copy — you have to
+read a function (expressed as decompiled pseudo-C, or raw disassembly),
+understand exactly what it does to each byte and in what order, and
+rewrite that same logic in a language you can actually run and iterate
+in (commonly Python), byte for byte. Any small deviation — wrong
+rotation amount, wrong operand order, using the wrong "previous" value —
+produces a completely different, silently wrong result, since byte-level
+transforms give no partial-credit feedback.
+## Examples
+### A feedback loop over a fixed-size buffer
+A typical shape: iterate over N input bytes (from one or more fixed
+arrays embedded in the binary), and for each one, combine it with the
+previous iteration's output (not the previous iteration's *input*) using
+some mix of XOR, bit rotation, and addition, seeded by a fixed initial
+value for the very first byte.
+### Reading rotation and arithmetic correctly
+Decompiled pseudo-C often renders bit rotations as a specific idiom
+(shift-left OR'd with shift-right by the complementary amount) rather
+than a named "rotate" function — recognising this idiom, and getting the
+rotation amount and direction exactly right, is usually where a
+reimplementation first goes wrong if rushed.
+### Verifying a reimplementation
+Because the transform is deterministic, the fastest way to confirm a
+reimplementation is correct is to compare its output against any known
+checkpoint — for example, if the program itself ever prints or uses an
+intermediate or final value you can observe, your script's output for
+the same inputs should match it exactly.
+## How to recognise it in a lab
+- A check requires a value the player is never shown or given anywhere
+  — no prompt reveals it, no file contains it in plaintext — meaning it
+  must be computed, not looked up.
+- The relevant decompiled function takes one or more fixed-size byte
+  arrays as input and produces a fixed-size output, with a loop whose
+  body references the previous iteration's result (not just the current
+  index's input).
+- The function's structure resembles a well-known chaining pattern (CBC
+  mode, a simple stream cipher, a custom "checksum"-like routine) even
+  if it isn't a real, named cryptographic primitive.
+## Common mistakes and false assumptions
+### "I can compute each byte independently since I have all the inputs"
+If the transform is genuinely chained, each byte's computation depends
+on the previous byte's *output*, not just on the fixed input arrays —
+skipping ahead or parallelizing the computation produces wrong results
+from the second byte onward.
+### "Any reasonable Python translation will work"
+Operator precedence, signed-vs-unsigned byte arithmetic, and rotation
+direction are easy to get subtly wrong when translating from pseudo-C.
+Masking intermediate values to a single byte (`& 0xFF`) at every step,
+and double-checking rotation direction against the decompiler's actual
+shift instructions, avoids results that are "close" but wrong.
+### "The decompiler's variable names tell me what each value means"
+Decompiler-assigned names (`local_9`, `param_1`) carry no semantic
+meaning — they're placeholders. Understanding what a variable represents
+comes from reading how it's used (is it the loop's running "previous"
+value? an index into a fixed array?), not from its name.
+## Impact
+A chained transform like this is usually the single strongest barrier
+in a client-side crackme, precisely because it can't be shortcut by
+simply reading a stored value — but once correctly reimplemented, it's
+exactly as deterministic and reproducible as everything else in the
+binary, with no remaining ambiguity.
+## How developers prevent relying on this as real security
+A custom, undocumented chained transform is still just an algorithm
+fully present in client-controlled code — unlike real cryptography, it
+has had no public scrutiny, and unlike a server-side check, it is fully
+readable by anyone with a decompiler. It raises the specific effort
+needed (reading and faithfully reimplementing the algorithm) without
+changing the fundamental limit: anything the client can compute, an
+attacker reading the client's code can also compute.
+## Related labs
+`checker.exe` in the `dual-check` lab requires exactly this: a 16-byte
+value computed by a chained transform (`compute_check_value`) that is
+never stored anywhere in the binary, requiring the player to read the
+function from the decompiler and reproduce it faithfully in Python
+before `checker.exe` will accept it.
+## FAQ
+### How is this different from the XOR/Base64 obfuscation technique?
+That technique is about recovering a value that already exists,
+hidden behind reversible encoding. This technique is about computing a
+value that was never stored at all — the binary only contains the
+*recipe*, not the result.
+### Is there a faster way than manually reimplementing the function?
+For a genuinely chained, order-dependent transform, no — by design it
+can't be shortcut without either running the actual code (dynamically)
+or faithfully reproducing its logic (statically). Reimplementation is
+the intended path when dynamic analysis is out of scope or undesired.
+### What should I keep in a lab writeup?
+The decompiled source of the function (as read, before translation),
+your reimplementation, and the exact output it produced — this lets a
+reviewer verify your reimplementation matches the original logic rather
+than just trusting that the final value happened to work.
+
+## Reversing client-side obfuscation (XOR, Base64, byte-masking)
+
+Source: https://openlabs.duckurity.com/technique/client-side-obfuscation-xor-base64-masking
+
+## Overview
+A huge share of "protected" strings and secrets found inside compiled
+binaries are hidden behind a small stack of simple, reversible
+transforms — most commonly some mix of byte-masking (XOR with a fixed
+value), Base64 encoding, and repeating-key XOR. None of these are
+cryptography: they have no real secret key an attacker lacks, since the
+"key" (if any) ships in the same binary as the data it protects.
+## Why these layers exist (and why they're weak)
+Each layer defeats a specific *casual* inspection method, not a
+determined one:
+- **Byte-masking / single-byte XOR** defeats a plain `strings` scan,
+  since the masked bytes won't render as readable text.
+- **Base64** makes the underlying bytes look like meaningless text
+  rather than raw binary, which can throw off a skim but decodes with
+  one standard library call.
+- **Repeating-key XOR** looks superficially like real encryption but has
+  none of its properties when the key is short, fixed, and stored right
+  there in the binary.
+Stacked together, these layers raise the *time* needed to recover the
+original value from "instant" (plain text) to "a few minutes of
+reading and scripting" — they do not raise it to "infeasible."
+## Examples
+### Single-byte mask
+A string is stored with every byte XOR'd against one fixed value (often
+`0x01` or similar). Unmasking is a one-line loop; the result commonly
+turns out to be more encoded data (see below) rather than the final
+plaintext.
+### Base64-wrapped binary data
+Once unmasked, a value often turns out to be Base64 text — decoding it
+(any standard library's Base64 decoder) reveals the next layer
+underneath, typically further XOR'd bytes rather than plaintext yet.
+### Repeating-key XOR
+The innermost layer is frequently a multi-byte repeating-key XOR: each
+byte of the data is XOR'd against the corresponding byte of a short,
+fixed key (cycling the key as needed). The key itself is almost always
+sitting in the same binary, readable directly as raw bytes at a fixed
+address — finding and reading it out is usually the whole task.
+### Independent constants per secret
+A binary might reuse the exact same technique for more than one hidden
+value (for example, two different passwords), each with its own
+independent mask/key constants. Recognising the pattern once makes the
+second instance much faster to reverse, since only the constants differ,
+not the method.
+## How to recognise it in a lab
+- A `strings` scan of the binary shows no readable secret, password, or
+  flag — but the binary's behavior (an "incorrect password" message, a
+  successful unlock) implies one exists somewhere.
+- Reading the relevant function in a decompiler shows a short loop XOR-ing
+  bytes against a constant, and/or a call into a Base64 decode routine.
+- The "key" or "mask" value used is itself a constant embedded nearby in
+  the same binary, not derived from anything external (user input,
+  network data, the system clock) — a strong signal that recovering it
+  is just a matter of reading the right bytes.
+## Common mistakes and false assumptions
+### "It's encoded, so it must be secure"
+Encoding (Base64) and masking (XOR) are not encryption. Neither has a
+secret an attacker lacks: the "key" for XOR ships right there in the
+binary, and Base64 has no key at all. Reversing either is mechanical,
+not probabilistic.
+### "Multiple layers add up to real security"
+Stacking several weak, reversible layers multiplies the *time* to
+reverse by roughly the number of layers, not the *difficulty* in any
+cryptographic sense — each layer is independently trivial once
+recognised, and recognising the pattern (mask → Base64 → XOR, in some
+order) is itself quick once you've seen it on one value.
+### "A repeating-key XOR with a long-ish key is basically a one-time pad"
+A one-time pad requires a key that is truly random, used exactly once,
+and never stored anywhere the attacker can read it. A fixed, reused,
+binary-embedded XOR key satisfies none of those properties.
+## Impact
+Any secret recovered this way — a license key, a credential, a flag — is
+fully compromised the moment someone takes the time to read the relevant
+function and the constants it uses; there is no meaningful "partial"
+protection from stacking more of these layers.
+## How developers prevent relying on this
+- Don't treat obfuscation as a security boundary for anything that
+  actually needs to stay secret — if the data and the "key" both ship in
+  the same artifact, nothing is actually protected against a motivated,
+  patient reader.
+- If a value genuinely must not be recoverable by the end user, it
+  can't live in a client-side artifact the end user fully controls at
+  all — the check needs to move server-side (see the related technique
+  on AES key derivation from split secrets, for why even "real" crypto
+  doesn't change this once the key is derivable client-side).
+- Reserve light obfuscation for genuinely low-stakes cases (avoiding a
+  trivial `strings` leak of something non-sensitive), and be explicit
+  that it is a deterrent, not a control.
+## Related labs
+The `dual-check` lab in this catalog uses exactly this layered pattern —
+byte-masking, Base64, and repeating-key XOR — to hide two passwords
+inside `game.exe`, each independently recoverable by reading the
+relevant function and the embedded key bytes.
+## FAQ
+### How is this different from "real" obfuscation tools used in production software?
+Commercial obfuscators/packers (control-flow flattening, virtualization,
+string encryption with per-build keys, anti-tamper checksums) raise the
+reversing effort substantially higher than a hand-rolled XOR/Base64
+stack, but the underlying limit is the same: if the program must be able
+to use the secret at runtime on a device the attacker controls, the
+secret is ultimately recoverable given enough effort.
+### Is Base64 ever a meaningful security layer on its own?
+No — it has no key and is fully public knowledge; it only changes how
+the data looks, not what an attacker needs to reverse it.
+### What should I keep in a lab writeup?
+The exact sequence of layers you identified (mask, encoding, XOR — and
+in what order), the constant(s) you extracted and where you found them,
+and the final recovered value — this makes the writeup itself a useful
+reference for the next similar pattern.
 
 ## Command injection
 
@@ -1487,3 +1954,107 @@ No. Autoescaping protects how a value is placed into output. SSTI begins earlier
 It is a small, non-destructive way to distinguish literal rendering from expression evaluation when the syntax matches the suspected engine.
 ### What should I include in a lab writeup?
 Include the benign baseline, the minimal expression, the rendered result, the likely engine evidence, and the security boundary that the server crossed.
+
+## Static binary analysis with a decompiler
+
+Source: https://openlabs.duckurity.com/technique/static-binary-analysis-ghidra
+
+## Overview
+Static analysis means understanding a program by reading it, not by
+running it: disassembling its machine code back into assembly or a
+C-like pseudo-code approximation, and reading the raw bytes it embeds,
+without ever executing a single instruction. A decompiler like Ghidra
+(free, cross-platform) automates the disassembly-to-pseudo-C step, turning
+a reverse-engineering task into something much closer to reading
+unfamiliar source code.
+## Where it matters
+Anywhere a binary is handed to someone who isn't meant to see how it
+works: license-check tools, DRM, crackmes, malware samples under
+analysis, or — in this catalog — reverse-engineering CTF challenges. If
+the binary can be read and disassembled offline, with no network
+dependency, static analysis is almost always the fastest and safest way
+in, since it carries none of dynamic analysis's risk of the program
+detecting it's being watched.
+## Examples
+### Reading embedded constants
+Keys, seeds, masks, and other fixed data a program uses are typically
+stored in a `.data` or `.rdata` section and show up directly in a
+decompiler's Listing/Memory view as raw bytes at a fixed address — no
+execution needed to see them.
+### Reading program logic as pseudo-C
+A decompiler reconstructs something close to the original source from
+the compiled machine code: variable names are usually synthetic
+(`local_9`, `param_1`), but control flow, arithmetic, and function calls
+are preserved well enough to read a function's actual behavior line by
+line.
+### Recognising decompiler artifacts
+Decompilers sometimes render adjacent data in a way that looks like one
+longer string or structure than what the program actually reads at
+runtime (for example, two separate string literals placed next to each
+other in memory rendering as one concatenated string). Cross-checking
+against the raw bytes in a Listing/Memory view — not just the decompiler's
+higher-level guess — avoids being misled by this.
+## How to recognise it as the right approach in a lab
+- You have the binary file itself (not just access to a running
+  instance of it), and the environment is offline or the binary doesn't
+  need network access to do what you're investigating.
+- The task is to recover a fixed value (a key, a password, a target
+  number) or understand a fixed algorithm (a check function, a transform)
+  — both are things a decompiler shows you directly, rather than things
+  you'd need to observe via side effects at runtime.
+- A plain `strings` scan isn't enough (the answer isn't sitting there as
+  readable text) but the program also isn't hiding its logic behind
+  anything dynamic (network calls, server-side checks) that static
+  reading alone can't see.
+## Common mistakes and false assumptions
+### "I need to run it in a debugger to understand it"
+Dynamic analysis (debugging, tracing) is useful, but for a program whose
+logic and data are fully present in the compiled file, everything a
+debugger would show you stepping through is already visible by reading
+the decompiled function directly — often faster and without triggering
+any anti-debug checks the program might have.
+### "The decompiler's pseudo-C is the literal original source"
+It's a reconstruction, not the original — variable and function names are
+usually synthetic unless debug symbols are present, and some constructs
+(especially around how adjacent static data renders) can be decompiler
+artifacts rather than real program behavior. Cross-check anything
+surprising against the raw disassembly or the raw bytes.
+### "If `strings` doesn't show it, it's not in the binary"
+`strings` only finds contiguous printable-text runs. Encoded, encrypted,
+masked, or binary (non-text) data is still sitting in the file — a
+decompiler's Listing/Memory view shows the actual bytes regardless of
+whether they happen to look like text.
+## Impact
+Static analysis is what makes any purely offline, client-side protection
+mechanism fundamentally breakable given enough time: if the data and
+logic needed to pass a check are fully present in a file an attacker
+controls, they can always eventually be read out, no matter how
+obfuscated.
+## How developers prevent relying on an insecure design here
+This isn't a bug to "fix" with a coding change — it's a structural limit.
+The defense isn't a stronger obfuscation technique; it's not putting the
+check, or the secret it depends on, somewhere a static read can reach it
+in the first place (typically: move the actual validation server-side).
+## Related labs
+The `dual-check` lab in this catalog is entirely solvable through static
+analysis alone — no dynamic debugging is required at any stage, by
+design; every value needed is either directly readable as raw bytes or
+computable by faithfully reproducing a documented algorithm.
+## FAQ
+### Do I need Ghidra specifically?
+No — any capable disassembler/decompiler (Ghidra, IDA, Binary Ninja,
+radare2/Cutter) exposes the same underlying information. Ghidra is free
+and commonly used as a default.
+### When would dynamic analysis actually be necessary?
+When the logic you need to understand only becomes visible at runtime —
+for example, values computed from environment-dependent input, or
+behavior that's meaningfully obfuscated against static reading (such as
+self-modifying code or heavy virtualization-based protection). Neither
+applies to a straightforward crackme built around static data and
+deterministic transforms.
+### What should I keep in a lab writeup?
+The exact addresses or function names where you found each piece of
+data or logic, the raw bytes you extracted, and the reproduction script
+or tool recipe you used to turn that into the final answer — this is
+what lets someone else (or future-you) verify the solve without redoing
+the whole analysis from scratch.

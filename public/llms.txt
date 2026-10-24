@@ -10,6 +10,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Aegis ctf](https://openlabs.duckurity.com/labs/aegis-ctf): Chained API trust vulnerabilities across REST, GraphQL, and gRPC.
 - [Cafe house rules](https://openlabs.duckurity.com/labs/cafe-house-rules): A cafe rules site with a report bot and a guarded back-room route.
 - [Cloudvault](https://openlabs.duckurity.com/labs/cloudvault): A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.
+- [Dual check](https://openlabs.duckurity.com/labs/dual-check): Two independent Windows PE binaries bound by a shared secret — recover an obfuscated password from game.exe, t
 - [Duck cross](https://openlabs.duckurity.com/labs/duck-cross): A reports portal with a missing object-level authorization check.
 - [Duck nest](https://openlabs.duckurity.com/labs/duck-nest): An internal project workspace for staff and interns.
 - [Duckexchange](https://openlabs.duckurity.com/labs/duckexchange): A tenant document API with a gRPC transcoding authorization bypass.
@@ -34,14 +35,18 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [How to play](https://openlabs.duckurity.com/play): Clone, run, solve. Verify each flag from the repo root.
 - [Tracks](https://openlabs.duckurity.com/tracks): Five lab families. Start with web.
 - [Techniques](https://openlabs.duckurity.com/technique): Vulnerability classes, defined once and exercised across labs.
+- [AES key derivation from client-controlled split secrets](https://openlabs.duckurity.com/technique/aes-key-derivation-from-split-secrets): Learn why combining two client-side values into an AES key does not protect encrypted data once an attacker ca
 - [API version enumeration](https://openlabs.duckurity.com/technique/api-version-enumeration): Learn how to map versioned API surfaces and spot legacy endpoints that no longer meet the current security pol
 - [Authentication bypass](https://openlabs.duckurity.com/technique/auth-bypass): The server trusts a client-supplied field instead of verifying identity against a real credential check.
+- [Reimplementing a chained byte transform from decompiled code](https://openlabs.duckurity.com/technique/chained-byte-transform-reversing): Learn how to read a custom, CBC-like chained algorithm out of decompiled pseudo-C and faithfully reproduce it 
+- [Reversing client-side obfuscation (XOR, Base64, byte-masking)](https://openlabs.duckurity.com/technique/client-side-obfuscation-xor-base64-masking): Learn to recognize and reverse the common layered-obfuscation techniques used to hide secrets inside a binary,
 - [Command injection](https://openlabs.duckurity.com/technique/command-injection): User input reaches a shell command unsanitized, letting you run commands alongside the intended one.
 - [Broken object-level authorization (IDOR)](https://openlabs.duckurity.com/technique/idor): Learn how missing per-object checks expose records that an authenticated user should not be able to read or ch
 - [Mass assignment](https://openlabs.duckurity.com/technique/mass-assignment): Learn how automatic request binding can let a client change protected object properties.
 - [SQL injection](https://openlabs.duckurity.com/technique/sqli): Learn how unsanitized query input can change database logic and expose records outside normal access rules.
 - [Server-side request forgery (SSRF)](https://openlabs.duckurity.com/technique/ssrf): The server fetches a URL you control, letting you reach internal services it can see but you normally can't.
 - [Server-side template injection (SSTI)](https://openlabs.duckurity.com/technique/ssti): Learn why user input must be treated as template data, never as template source, and how to recognise unsafe r
+- [Static binary analysis with a decompiler](https://openlabs.duckurity.com/technique/static-binary-analysis-ghidra): Learn how to recover a program's logic and embedded data without running it, using a disassembler/decompiler s
 
 ## Rules
 

@@ -1,0 +1,226 @@
+# Challenge design — dual-check
+
+## Design brief
+
+`dual-check` is an offline, artifact-only static reverse-engineering
+challenge: two independent Windows PE binaries, `game.exe` and
+`checker.exe`, cryptographically bound so that neither one alone yields
+the flag. There is no network service and no server the solve depends
+on — the player receives the two executables and a flag-checking
+script, and does everything locally. A distribution-only
+`docker-compose.yml` exists (see `../README.md`, "Delivery model") purely
+to satisfy the catalog's general compose/validator requirement; nothing
+in the intended solve path touches it.
+
+| Property | Value |
+| --- | --- |
+| Track | binary (static reverse engineering) |
+| Difficulty | medium |
+| Platform | Windows PE only (MinGW/TDM-GCC build) |
+| Delivery | artifact-only for solving — `port: 8091` in `lab.yml` is only for the distribution-only helper, not the solve |
+| Tooling expected | Ghidra (or similar decompiler), Python or CyberChef |
+
+## Learning objective
+
+A player who finishes `dual-check` should be able to explain, in their
+own words:
+
+- Why any secret or validation logic embedded in a binary the attacker
+  can run and disassemble offline is, in principle, always fully
+  recoverable — obfuscation only raises the cost, never makes recovery
+  impossible.
+- How to recognize and reverse common client-side obfuscation layers:
+  repeating-key XOR, Base64, and byte-masking.
+- Why an anti-debugging check (`IsDebuggerPresent`-style) stops casual
+  dynamic analysis but does nothing against static analysis.
+- How to read a custom, chained (CBC-like) byte transform out of
+  decompiled pseudo-C and reproduce it faithfully in an external tool,
+  rather than extracting a value that is never actually stored in the
+  binary.
+- How a symmetric cipher (AES-128-CBC) protects data at rest, and that
+  encryption does not help once the attacker fully controls how the key
+  itself is derived.
+- Why splitting a secret across two components does not add real
+  security if both components still ship to the same untrusted client.
+
+## Skills exercised
+
+- Static binary analysis (Ghidra: import, auto-analyze, navigate the
+  Symbol Tree, read decompiled pseudo-C, read raw bytes from
+  `.data`/`.rdata`).
+- Recognizing and reversing common client-side obfuscation techniques:
+  multi-byte XOR, Base64 encoding, byte-masking, and chained/sequential
+  bit transforms.
+- Identifying and bypassing a basic anti-debugging check without needing
+  to actually debug the binary.
+- Tracing a multi-stage gate (password → quiz → mini-game → second
+  password) across two independent binaries.
+- Replicating a custom algorithm read from decompiled code in an
+  external tool (Python or CyberChef) to compute a value that is not
+  stored anywhere in the binary.
+- Understanding how a symmetric cipher (AES-128-CBC) is used to protect
+  a secret at rest, and correctly extracting the key material, IV, and
+  ciphertext needed to decrypt it.
+
+The challenge is intentionally built so that no step can be skipped by a
+naive `strings` dump or by guessing — every value must be either
+extracted correctly or computed correctly, and the two binaries are
+cryptographically bound together (the flag cannot be obtained from
+either file alone).
+
+## Story and actors
+
+There is no in-fiction company or service for this challenge — it is
+framed directly as two provided tools: `game.exe` ("looks like a simple
+password-protected game with a quiz and a number-guessing round") and
+`checker.exe` ("looks like a standalone flag-verification tool"). Neither
+documents how it works. This is intentionally closer to a traditional
+crackme than to the narrative SaaS framing used by this catalog's web
+labs, matching the track's conventions.
+
+## Intended chain
+
+```
+game.exe
+  -> recover Password 1 via static analysis
+     (byte-mask XOR -> Base64 decode -> repeating 4-byte XOR,
+      key extracted by reading raw bytes from .data)
+  -> pass the in-app quiz (answerable from the same analysis)
+  -> win the mini-game (the target number is a visible integer literal)
+  -> game.exe reveals Password 2
+
+checker.exe (fully independent binary; does not read game.exe at runtime)
+  -> gate 1: enter Password 2 -> checked only via a stored SHA-256 hash
+  -> gate 2: enter a 16-byte hex value that is NOT stored anywhere in
+     the binary -> must be computed by reading compute_check_value()
+     in the decompiler and reimplementing its chained transform
+  -> checker.exe derives the final AES-128 key as
+     fold(Password 2) XOR hexvalue, decrypts the embedded ciphertext,
+     and prints the flag
+```
+
+### Stage boundaries
+
+1. **Password 1 recovery** requires nothing but `game.exe` itself and a
+   decompiler — this is the "entry" stage, doable by reading static
+   data and reversing a known obfuscation layer.
+2. **The quiz and mini-game** are gated on already having done stage 1's
+   analysis — the quiz questions ask about the mechanics just reversed
+   (key byte count, the key itself, the checking function's name), and
+   the mini-game's answer is a plain literal visible in the decompiled
+   function. Neither can be skipped by guessing in any practical way.
+3. **Password 2** is only revealed after stages 1–2 complete; it uses the
+   same obfuscation technique with independent constants, so it is also
+   statically recoverable on its own if a player prefers not to run the
+   program interactively.
+4. **`checker.exe`'s gate 1** requires Password 2 from `game.exe` — the
+   two binaries are independent at runtime, but the challenge is not
+   solvable by analyzing only one of them.
+5. **`checker.exe`'s gate 2** requires reading and reimplementing
+   `compute_check_value()`'s chained transform; because each byte
+   depends on the previous byte's result, it cannot be computed
+   out of order or guessed byte-by-byte.
+6. **Flag derivation** happens only once both gates pass; it cannot be
+   bypassed by static reading alone, since it requires the actual
+   correct password and hex value as runtime input — though the
+   derivation itself (fold → XOR → AES-128-CBC decrypt) can also be
+   reproduced entirely offline once both values are known, which the
+   official solution demonstrates as an independent cross-check.
+
+## Architecture and trust boundaries
+
+Everything the player needs — and everything an attacker has — ships in
+the two binaries. There is no server-side component and nothing held
+back; the entire point of the challenge, documented explicitly in
+`security-report.mdx`, is that this is the realistic (and realistically
+breakable) condition of any purely client-side validation design. `checker.exe` runs an
+`IsDebuggerPresent()`-style anti-debug check, but this is a deterrent
+against dynamic analysis only — the intended solve path is 100% static
+and does not require defeating it.
+
+## UI contract
+
+Both binaries are plain console (stdin/stdout) programs — there is no
+GUI. `game.exe`'s interaction order is: password prompt → quiz (3
+questions) → mini-game guess → prints Password 2 on success.
+`checker.exe`'s order is: file-password prompt → hex-value prompt →
+prints the flag or a generic rejection message. Neither program ever
+prints the flag, a password, or the flag's format on an incorrect
+attempt.
+
+## Determinism and flag design
+
+- Both passwords, the chained-transform constants, and the flag are
+  fixed at build time (embedded as constants in `game.c`/`checker.c`) —
+  every player who solves the challenge correctly recovers the same
+  values and the same flag. There is no per-player randomization,
+  consistent with this being a static, offline artifact rather than a
+  live multi-tenant service.
+- The flag is fully randomly generated and matches the catalog's
+  `^duck\{[a-z0-9_]{16,40}\}$` format. `lab.yml`'s `flag_hash` is the
+  SHA-256 of the full flag string, braces included. (The flag originally
+  authored for this challenge contained uppercase letters and symbols
+  and did not match this format — see `validation-report.mdx` for the
+  fix and the re-verification evidence this produced.)
+- The flag never appears as plaintext in either binary; a `strings` scan
+  of both confirms no leakage of the flag, its format, or either
+  password (also reconfirmed in `validation-report.mdx`).
+
+## Difficulty and safety
+
+**Why medium, not easy or hard:** the challenge requires chaining four
+distinct static-analysis skills (byte-mask/XOR/Base64 reversal, reading
+raw bytes from a decompiler's data view, reimplementing a chained
+custom transform, and AES key/IV/ciphertext extraction) across two
+binaries, but every value needed is genuinely present and extractable
+by static reading alone — nothing requires dynamic debugging,
+brute-forcing, or guessing, which keeps it below "hard" for this track.
+
+**Safety boundaries:** both binaries are self-contained console
+programs with no network access, no file-system writes outside their
+own working directory, and no destructive behavior of any kind — running
+them repeatedly, including with wrong input, is always safe. This is a
+much narrower safety surface than this catalog's web labs, since there
+is no live service and no shared infrastructure to protect.
+
+## Appendix A. Implementation reference
+
+### A.1 Key constants (as implemented)
+
+- `game.c`: Password 1 and Password 2 each use independent XOR-mask +
+  Base64 + repeating 4-byte-XOR obfuscation; the mini-game's target
+  number is a plain integer literal.
+- `checker.c`: `PW2_HASH_HEX` (SHA-256 of Password 2); `CHECK_SEED[16]`
+  and `CHECK_CONST[16]` (inputs to the chained transform); `FLAG_IV[16]`
+  and `FLAG_CIPHERTEXT[48]` (AES-128-CBC, PKCS7-padded).
+- `gen_checker_v3.c` (dev-only, never shipped): computes every embedded
+  constant in `checker.c` from the source passwords/flag. Used to
+  regenerate `FLAG_IV`/`FLAG_CIPHERTEXT` when the flag changes, without
+  touching the password hash or the chained-transform constants.
+
+### A.2 Intentional defect boundaries
+
+Everything in this document describes an intentionally designed puzzle
+mechanic, not an unintended bug. See `official-solution.mdx` for the
+exact reproduction steps, and `validation-report.mdx` for the evidence
+that the intended path works and nothing unintended was found.
+
+## Appendix B. Design decisions
+
+### Design guardrails
+
+- No step can be skipped by a naive `strings` dump or by guessing —
+  every value must be either correctly extracted (static data read
+  directly from the binary) or correctly computed (the chained
+  transform), matching this catalog's general preference for
+  deterministic, non-guessable solve paths.
+- The two binaries are deliberately independent at runtime (`checker.exe`
+  never reads `game.exe`) so that the "binding" between them is
+  cryptographic (Password 2 + the derived hex value, both required for
+  the final key), not a file-system or process dependency — this keeps
+  the artifact-only delivery model simple (no coordination between the
+  two executables needed beyond the player carrying a value over
+  themselves).
+- The anti-debug check is included as a deliberately weak, realistic
+  deterrent (per `security-report.mdx`'s framing) rather than as a
+  genuine obstacle — the intended solve never requires defeating it.

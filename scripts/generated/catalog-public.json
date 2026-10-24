@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 20,
+  "catalogued_count": 21,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -24,6 +24,14 @@
       "path": "labs/web/cloudvault",
       "status": "experimental",
       "track": "web"
+    },
+    {
+      "description": "Two independent Windows PE binaries bound by a shared secret \u2014 recover an obfuscated password from game.exe, then reimplement a chained transform read from checker.exe's decompiled code to derive the AES-128 key that decrypts the embedded flag.",
+      "difficulty": "medium",
+      "name": "dual-check",
+      "path": "labs/binary/dual-check",
+      "status": "experimental",
+      "track": "binary"
     },
     {
       "description": "An internal project workspace for staff and interns.",
@@ -154,10 +162,10 @@
       "track": "web"
     }
   ],
-  "experimental_count": 19,
+  "experimental_count": 20,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 25,
+    "directory_count": 26,
     "uncatalogued_count": 5,
     "uncatalogued_paths": [
       "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",
