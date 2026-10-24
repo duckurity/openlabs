@@ -157,7 +157,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -775,6 +775,55 @@ docker compose up --build -d
 Practise in this lab:
 - [Server-side request forgery (SSRF)](/technique/ssrf)
 
+## Sealdesk
+
+Source: https://openlabs.duckurity.com/labs/sealdesk
+
+Harbor Office Records runs a fictional local records desk. A sealed continuity plan for Mara Chen is waiting there for its delivery to be confirmed.
+## Brief
+SealDesk is a **medium Crypto** lab. The case file contains the plan's encrypted delivery receipt, while the signed document stays held at the records desk until someone supplies its access code. Your goal is to recover that access code, open the document, and submit the returned flag to the checker.
+The scenario, people, case files, and records are fictional. Use only the supplied local lab instance.
+## Setup
+Prerequisites:
+- Docker Desktop using Linux containers, or Docker Engine on Linux, with Docker Compose `v2.17.0` or later.
+- Python 3.10 or later on the host for hash synchronization, reset, and the local checker; no additional Python packages are required.
+- A browser or an HTTP client, and an available local port `8080`.
+- The first build requires internet access to download the pinned base image and hash-locked Python packages. The running lab needs no external service.
+Run the commands from this lab directory. Substitute `python3` for `python` if needed, for example on Linux and macOS.
+```text
+docker compose up -d --build --wait
+python scripts/sync_flag_hash.py
+docker compose ps
+```
+Open the local pages:
+- Workbench: `http://127.0.0.1:8080/`
+- Health check: `http://127.0.0.1:8080/health`
+Read the [player guide](/play) for the lab workflow.
+The only published host port is `127.0.0.1:8080`. The application container is not published directly.
+To reset the instance and refresh the checker digest:
+```text
+python reset.py
+```
+The reset rotates the keys, access code, receipt, and flag. Any receipt, code, or flag captured before the reset is no longer valid. The reset does not pull images or rebuild.
+To stop the lab and remove its containers and networks:
+```text
+docker compose down
+```
+The lab keeps its runtime state in memory. Stopping, restarting, or removing the application container creates a fresh instance with a new flag when it starts again. Run `python scripts/sync_flag_hash.py` after every start, or the checker will reject the new flag. The local images remain available for the next start.
+## Goal
+Recover the access code for the case document, open the document through the records desk, and capture the final flag in the form `duck{...}`. Check it from this directory:
+```text
+python ../../../scripts/check.py .
+```
+The checker prompts for a flag and prints `solved` or `not solved`. It does not repeat the submitted value, and it compares only against the SHA-256 digest in `lab.yml`.
+## Notes
+- This lab is intentionally vulnerable. Do not apply the technique to systems you do not own or have permission to test.
+- Treat the lab as a black box: only the workbench and HTTP API at `127.0.0.1:8080` are in scope. The lab directory also holds the source code and maintainer documentation, including the official solution; reading them spoils the challenge.
+- The host, Docker, container internals, images, and reset controls belong to the operator and are not challenge assets. In hosted delivery, only the assigned HTTP(S) endpoint is in scope.
+## Techniques
+Practise in this lab:
+- [CBC padding oracle](/technique/padding-oracle)
+
 ## Shopvault
 
 Source: https://openlabs.duckurity.com/labs/shopvault
@@ -1376,6 +1425,36 @@ No. The server must reject or ignore the field. A client can edit a request outs
 Use your own authorized test object, preserve a normal request, add one low-impact candidate property, and verify the stored result. Do not send broad property lists.
 ### Can PATCH be secure?
 Yes. PATCH is safe when the server allowlists paths and applies authorization and validation to every supported property.
+
+## CBC padding oracle
+
+Source: https://openlabs.duckurity.com/technique/padding-oracle
+
+# CBC padding oracle
+## Overview
+A padding oracle occurs when an application decrypts attacker-controlled ciphertext and exposes whether the decrypted plaintext has valid padding. An attacker can alter a ciphertext block or IV and observe that response to recover protected plaintext without learning the encryption key.[1]
+For CBC decryption, each plaintext block depends on the decrypted current ciphertext block XORed with the preceding ciphertext block; for the first block, the IV takes that preceding-block role. Carefully chosen changes can make candidate plaintext suffixes satisfy PKCS#7 padding. A stable difference between invalid padding and a later rejection supplies the oracle signal.
+A padding oracle does not require a timing leak. Different status codes, response bodies, redirects, or other observable outcomes can be sufficient. OWASP describes a secure implementation as checking integrity and exposing only a generic success or failure, without side channels that reveal internal error states.[1]
+## Examples
+A safe test uses an authorized lab and its own ciphertext. Submit the original value, then change one byte of the IV or of the block before a target block and compare the outcomes. A vulnerable service separates inputs whose padding fails from inputs that pass padding but fail a later check. The separation can appear as a different status code, error field, message, or redirect, even when the service never returns plaintext.
+A vulnerable implementation decrypts and unpads ciphertext before it verifies an independent MAC. The essential defect is the verification order, not the block cipher.
+The defensive order is the opposite: authenticate the complete canonical envelope before decrypting or unpadding. Prefer a well-reviewed authenticated-encryption API that returns plaintext only on successful authentication and a single failure otherwise.[3][4] Keep error messages minimal and audience-appropriate.[2]
+## Related labs
+- [SealDesk: local CBC padding-oracle exercise](/labs/sealdesk)
+- [Browse all labs](/labs)
+- [Play in the local lab environment](/play)
+## FAQ
+### Does the attack recover the encryption key?
+No. The oracle can reveal plaintext from ciphertexts under the vulnerable service, but it does not reveal the key or forge the HMAC.
+### Must every plaintext block be recovered?
+No. Recover only the bytes needed to obtain the protected value. Additional plaintext recovery is not a challenge requirement.
+### How should applications prevent the issue?
+Authenticate before decrypting legacy CBC ciphertext, or use an authenticated-encryption mode through a maintained library. Return one generic failure for unauthenticated data; uniform text alone is not a substitute for correct verification order.[1][3][4]
+## Sources
+[1] https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle (OWASP Web Security Testing Guide: Testing for Padding Oracle)
+[2] https://cwe.mitre.org/data/definitions/209.html (CWE-209: Generation of Error Message Containing Sensitive Information)
+[3] https://csrc.nist.gov/pubs/sp/800/38/d/final (NIST SP 800-38D: GCM and GMAC)
+[4] https://www.rfc-editor.org/rfc/rfc5116.html (RFC 5116: An Interface and Algorithms for Authenticated Encryption)
 
 ## SQL injection
 
