@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create account · MarketNest</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<main class="auth-shell">
+    <section class="auth-aside">
+        <a class="brand" href="/"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6M3 19h18"/></svg></span><span><span class="brand-name">MarketNest</span><span class="brand-caption">Retail operations</span></span></a>
+        <div class="auth-copy">
+            <p class="eyebrow">A better way to stock up</p>
+            <h1>Your catalog, without the spreadsheet headache.</h1>
+            <p>Set up your workspace and turn a full product catalog into an organized, price-ready inventory.</p>
+            <ul class="feature-list"><li><span>✓</span> Import products in bulk</li><li><span>✓</span> Preview pricing before you publish</li><li><span>✓</span> Keep your operation beautifully simple</li></ul>
+        </div>
+    </section>
+    <section class="auth-main">
+        <div class="auth-card">
+            <a class="brand" href="/"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6M3 19h18"/></svg></span><span><span class="brand-name">MarketNest</span><span class="brand-caption">Retail operations</span></span></a>
+            <p class="eyebrow">Get started</p>
+            <h2>Create your workspace</h2>
+            <p class="lead">A few details and you’ll be ready to import your first catalog.</p>
+            <div th:if="${error}" class="alert" th:text="${error}">Unable to create account</div>
+            <form class="form-stack" method="post" action="/signup">
+                <input type="hidden" name="_csrf" th:value="${csrfToken}">
+                <div class="field"><label for="username">Choose a username</label><input id="username" type="text" name="username" placeholder="e.g. greenmarket" autocomplete="username" required><span class="field-hint">Use 3–32 letters, numbers, dots, dashes, or underscores.</span></div>
+                <div class="field"><label for="password">Create a password</label><input id="password" type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required></div>
+                <button class="button full" type="submit">Create account <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="form-foot">Already have an account? <a href="/login">Sign in</a></p>
+        </div>
+    </section>
+</main>
+</body>
+</html>
