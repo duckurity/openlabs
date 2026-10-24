@@ -1,0 +1,111 @@
+# Operations runbook
+
+**SealDesk · Local operator edition · Updated 25 October 2026**
+
+> Run commands from `labs/crypto/sealdesk/`. Startup builds the two local images. Reset recreates only the app while ingress is stopped. The reset helper verifies the Compose project before changing it.
+
+## Service topology
+
+| Service | Responsibility | Exposure and writable state |
+|---|---|---|
+| `sealdesk` | Flask and Gunicorn application | Internal `sealdesk_default` network only. No published port. State is on `/run/sealdesk` tmpfs. |
+| `ingress` | Bounded asyncio TCP relay | Sole host binding is `127.0.0.1:8080`. Fixed upstream is `sealdesk:8000`. |
+
+Compose creates internal bridge network `sealdesk_default` and normal bridge network `sealdesk_ingress`. The app joins only the internal backend. Ingress joins both networks and is the only published service. The relay forwards only to its fixed upstream. The normal bridge allows host port publication. The app has no published port.
+
+Both containers run as `10001:10001`, use read-only root filesystems, drop all capabilities, enable `no-new-privileges`, and run an init process. Compose sets bounded tmpfs, PID, memory, CPU, and log limits. It declares no named volumes or host bind mounts. These controls reduce exposure. They do not guarantee general Docker host security.
+
+The production app image contains the application and runtime configuration. Tests, operator scripts, and the evaluator solver are copied only into the Docker `test` stage.
+
+## Host prerequisites
+
+- Docker Desktop in Linux-container mode or a local Docker Engine that supports Linux containers.
+- Docker Compose `v2.17.0` or later for `--wait`.
+- Python `3.10` or later for local operator and checker helpers. No extra host Python packages are required.
+- Host port `8080` must be free.
+- The first image build needs internet access to fetch the pinned Python base and hash-locked wheels. The running app does not require external network access.
+
+## First build and start
+
+Before running any raw `docker` or `docker compose` command, confirm that the active Docker context is the intended local engine and that `DOCKER_HOST`, `DOCKER_CONTEXT` and `COMPOSE_*` overrides are unset. The Python helpers enforce this scope; raw CLI commands do not.
+
+From the lab directory:
+
+```sh
+docker compose config --quiet
+docker compose up -d --build --wait
+python scripts/sync_flag_hash.py
+docker compose ps
+```
+
+Open `http://127.0.0.1:8080/`. The sync helper verifies the stack, receives only the current checker digest from the app-side state command, and updates only `flag_hash` in `lab.yml`. The state command reads and validates private state to compute the digest; it does not print the flag, access code, or keys. Use `python3` when the host provides that command instead of `python`.
+
+The committed `lab.yml` retains the last synchronized instance digest. Synchronize after every start or container restart before using the local flag checker. Reset updates the digest itself.
+
+A cold first start took 49.9 seconds on 25 October 2026, measured on the author's Windows host with Docker Desktop (engine 29.6.2, Compose 5.3.1). No SealDesk image, base image, or build cache was present. The time runs from `docker compose up -d --build --wait` to both services reporting healthy, and includes pulling the pinned base image and downloading the hash-locked wheels. Network speed and host resources change this figure. Later starts reuse the local images and build cache.
+
+## Health and diagnostics
+
+The workbench is `http://127.0.0.1:8080/`. The health route is `http://127.0.0.1:8080/health` and returns `{"service":"sealdesk","status":"ok"}`.
+
+Inspect both services with:
+
+```sh
+docker compose ps
+docker compose logs --tail=100 sealdesk ingress
+```
+
+Gunicorn writes access and error logs to standard streams with bounded Docker log rotation. The app does not log request bodies or document response values. Treat logs as operational evidence. Do not copy runtime secrets into them.
+
+## Reset and cleanup
+
+Synchronize the digest after first start, then reset with:
+
+```sh
+python reset.py
+```
+
+The helper verifies the local Docker context and the identity and hardening of both containers and both networks. It refuses to proceed if the checker digest is stale. It stops ingress, recreates only `sealdesk` with build and pull disabled, waits for app health, reads the new digest, updates `lab.yml`, restarts ingress, and verifies health through the relay and stack identity. Reset creates new runtime state and invalidates earlier receipts, access codes, and flags. If a later reset step fails, the helper attempts to stop ingress before returning the error. That cleanup is best-effort.
+
+Stop the lab and remove its project containers and networks with:
+
+```sh
+docker compose down
+```
+
+Runtime state lives on tmpfs, so it disappears whenever the app container stops. `docker compose restart`, `stop` and `start`, and `down` and `up` each create a new instance. Synchronize `lab.yml` again before checking its flag. Do not use broad Docker prune commands or remove resources belonging to another project.
+
+## Validation and maintenance
+
+From the lab directory, build the test target and run its suite in a restricted container:
+
+```sh
+docker build --network=default --target test --tag sealdesk:test .
+docker run --rm --network=none --read-only --user 10001:10001 \
+  --cap-drop ALL --security-opt no-new-privileges:true \
+  --memory 256m --memory-swap 256m --cpus 1 --pids-limit 64 \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700 \
+  --entrypoint python sealdesk:test -B -m unittest discover -s tests -v
+```
+
+The documented suite contains 41 tests. The test image includes the app, tests, operator scripts, and reference solver. The test container has no network. A first image build can fetch the approved base and wheels. This suite does not replace live HTTP solve and reset checks, repository validators, source review, hosted CI, or maintainer review.
+
+## Troubleshooting
+
+| Symptom | Check | Safe response |
+|---|---|---|
+| The Docker command cannot reach an engine | Confirm the selected local Docker context and that Linux containers are available. | Do not switch to an unfamiliar remote context. |
+| Port binding fails | Confirm no process already listens on `127.0.0.1:8080`. | Stop only a process you own. Do not publish the service on another interface. |
+| An image build cannot fetch a dependency | Check engine network access and the pinned dependency source. | Do not replace pinned inputs or add unreviewed packages. |
+| A service is unhealthy | Inspect `docker compose ps` and `docker compose logs --tail=100 sealdesk ingress`. | Preserve relevant output. Do not weaken health checks or runtime controls. |
+| The sync helper refuses the instance | Verify the active context, container and network labels, and both service states. | Do not target another context or container. Investigate the scoped setup. |
+| Reset reports a stale checker digest | `lab.yml` does not match the running app. | Run `python scripts/sync_flag_hash.py`. Retry reset only after the helper reports a valid stack. |
+| Reset refuses a container or network | One or more ownership or hardening checks failed. | Do not force recreation. Inspect the Compose project before changing controls. |
+| Reset returns an error after stopping ingress | A reset stage or best-effort cleanup failed. | Preserve the original error. Inspect both service states before retrying. |
+| A previous flag no longer works | Reset, an app container stop or restart, or app recreation generated new runtime state. | Solve the current instance and use its synchronized digest. |
+| The checker rejects a freshly opened flag | `lab.yml` still holds the digest of an earlier instance. | Run `python scripts/sync_flag_hash.py`, then check the flag again. |
+| The test suite fails or the count differs | Rebuild the test target and inspect the complete test output. | Do not treat an old test image as evidence for the current source. |
+
+## Operational prohibitions
+
+Do not expose the app beyond loopback ingress or attach the app to an external network. Do not add a host path, Docker socket, secret, or persistent volume. Do not print or save runtime keys, access codes, state files, or flags in evidence. Do not pull, rebuild, reset, prune, or remove resources outside the SealDesk project. Do not weaken the configured runtime controls.
