@@ -1,0 +1,38 @@
+services:
+  challenge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PLAYER_TOKEN: ${PLAYER_TOKEN:-local-player}
+      ADMIN_BOT_TOKEN: ${ADMIN_BOT_TOKEN:-local-admin-bot}
+      SAFENOTES_DATABASE: /data/safenotes.sqlite3
+      FLAG_FILE: /app/flag.txt
+    ports:
+      - "127.0.0.1:5000:5000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/healthz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - safenotes-data:/data
+
+  admin-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    environment:
+      CHALLENGE_URL: http://challenge:5000/
+      ADMIN_BOT_TOKEN: ${ADMIN_BOT_TOKEN:-local-admin-bot}
+      BOT_INTERVAL_MIN: ${BOT_INTERVAL_MIN:-10}
+      BOT_INTERVAL_MAX: ${BOT_INTERVAL_MAX:-20}
+    depends_on:
+      challenge:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  safenotes-data:

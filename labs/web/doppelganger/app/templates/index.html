@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Secured Notes API</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --panel: #151b24;
+        --line: #273241;
+        --text: #e6edf3;
+        --muted: #8b98a8;
+        --blue: #58a6ff;
+        --green: #3fb950;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 32px 18px;
+        color: var(--text);
+        background: var(--bg);
+        font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
+      }
+      main { width: min(900px, 100%); margin: auto; }
+      header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+      h1 { margin: 0; font-size: 20px; font-weight: 600; }
+      .hint { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+      .hint code { color: var(--text); }
+      .hint a { color: var(--blue); }
+      .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+      .panel-title { padding: 12px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+      textarea, pre {
+        display: block;
+        width: 100%;
+        min-height: 300px;
+        margin: 0;
+        padding: 16px;
+        border: 0;
+        outline: 0;
+        background: #0d1117;
+        color: var(--text);
+        font: 13px/1.7 ui-monospace, SFMono-Regular, Consolas, monospace;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      textarea { resize: vertical; }
+      textarea:focus { box-shadow: inset 0 0 0 1px var(--blue); }
+      .toolbar { display: flex; justify-content: flex-end; padding: 12px 14px; border-top: 1px solid var(--line); }
+      button {
+        cursor: pointer;
+        padding: 7px 14px;
+        color: #fff;
+        border: 0;
+        border-radius: 6px;
+        background: #238636;
+        font: inherit;
+      }
+      button:hover { background: #2ea043; }
+      button:disabled { cursor: wait; opacity: .6; }
+      @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Secured Notes</h1>
+      </header>
+
+      <p class="hint">
+        Inbox token: <code>{{ player_token }}</code> ·
+        Captured reviews: <a href="/api/solved">/api/solved</a>
+      </p>
+
+      <section class="layout">
+        <div class="panel">
+          <div class="panel-title">Request · application/json</div>
+          <textarea id="request" spellcheck="false">{
+  "content": "Write a note here"
+}</textarea>
+          <div class="toolbar">
+            <button id="send" type="button">Send</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Response</div>
+          <pre id="response">{}</pre>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const requestBox = document.getElementById("request");
+      const responseBox = document.getElementById("response");
+      const send = document.getElementById("send");
+
+      send.addEventListener("click", async () => {
+        send.disabled = true;
+
+        try {
+          JSON.parse(requestBox.value);
+          const result = await fetch("/api/notes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: requestBox.value
+          });
+          const body = await result.text();
+          try {
+            responseBox.textContent = JSON.stringify(JSON.parse(body), null, 2);
+          } catch {
+            responseBox.textContent = body;
+          }
+        } catch (error) {
+          responseBox.textContent = JSON.stringify({ error: error.message }, null, 2);
+        } finally {
+          send.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
