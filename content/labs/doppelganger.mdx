@@ -1,0 +1,61 @@
+---
+title: Doppelganger
+description: A note service with duplicate JSON keys, a fragile HTML blocklist, and a private admin review bot.
+track: web
+difficulty: medium
+port: "5000"
+type: lab
+key: lab-doppelganger
+slug: labs/doppelganger
+intent: Solve a medium web lab in Docker.
+keywords:
+  primary: Doppelganger web security lab docker
+  secondary:
+    - medium web practice
+    - openlabs doppelganger
+verified: true
+score: 97
+score_grade: A
+status: experimental
+linksTo:
+  - technique/xss
+author_name: "mohand166"
+author_url: "https://github.com/mohand166"
+author_avatar: "https://github.com/mohand166.png"
+author_date: "2026-10-25"
+ogImage: /og/labs-doppelganger.png
+---
+
+{/* Generated from labs/web/doppelganger/lab.yml and README.md. Do not edit by hand. Run scripts/sync_site_content.py. */}
+
+`medium` · `web`
+
+## Brief
+
+Secured Notes is a shared note service with a private administrator review bot. Submit JSON notes, and make the administrator's browser hand you its session value.
+
+## Setup
+
+Run these from the lab directory:
+
+```bash
+docker compose up -d --build
+```
+
+Open `http://localhost:5000`. The review bot starts with the stack and checks notes roughly every 10 to 20 seconds. Captured reviews appear at `http://localhost:5000/api/solved`.
+
+The inbox token is shown on the page. Reset the lab with:
+
+```bash
+docker compose down -v
+```
+
+## Goal
+
+Recover the administrator's session value and read the flag. The flag has the form `duck{...}`.
+## Techniques
+
+Practise in this lab:
+
+- [Cross-site scripting (XSS)](/technique/xss)
+

@@ -10,6 +10,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Aegis ctf](https://openlabs.duckurity.com/labs/aegis-ctf): Chained API trust vulnerabilities across REST, GraphQL, and gRPC.
 - [Cafe house rules](https://openlabs.duckurity.com/labs/cafe-house-rules): A cafe rules site with a report bot and a guarded back-room route.
 - [Cloudvault](https://openlabs.duckurity.com/labs/cloudvault): A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.
+- [Doppelganger](https://openlabs.duckurity.com/labs/doppelganger): A note service with duplicate JSON keys, a fragile HTML blocklist, and a private admin review bot.
 - [Duck cross](https://openlabs.duckurity.com/labs/duck-cross): A reports portal with a missing object-level authorization check.
 - [Duck nest](https://openlabs.duckurity.com/labs/duck-nest): An internal project workspace for staff and interns.
 - [Duckexchange](https://openlabs.duckurity.com/labs/duckexchange): A tenant document API with a gRPC transcoding authorization bypass.
@@ -42,6 +43,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [SQL injection](https://openlabs.duckurity.com/technique/sqli): Learn how unsanitized query input can change database logic and expose records outside normal access rules.
 - [Server-side request forgery (SSRF)](https://openlabs.duckurity.com/technique/ssrf): The server fetches a URL you control, letting you reach internal services it can see but you normally can't.
 - [Server-side template injection (SSTI)](https://openlabs.duckurity.com/technique/ssti): Learn why user input must be treated as template data, never as template source, and how to recognise unsafe r
+- [Cross-site scripting (XSS)](https://openlabs.duckurity.com/technique/xss): Learn how untrusted input becomes executable browser markup, and why output encoding and a strict sanitizer ma
 
 ## Rules
 
