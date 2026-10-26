@@ -27,6 +27,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Techvault](https://openlabs.duckurity.com/labs/techvault): An e-commerce GraphQL API with a chained authentication bypass, SSRF, and command injection vulnerability.
 - [Threadline](https://openlabs.duckurity.com/labs/threadline): A clothing store REST API. One customer sees more than they should.
 - [Vault api](https://openlabs.duckurity.com/labs/vault-api): Inspect an internal employee management API and recover a protected employee archive. The lab starts with a lo
+- [Vaultcorp](https://openlabs.duckurity.com/labs/vaultcorp): Six-stage SaaS exploit chain from client-side secret leak to SSRF-driven RCE via an unauthenticated Hangfire d
 
 ## Guides
 

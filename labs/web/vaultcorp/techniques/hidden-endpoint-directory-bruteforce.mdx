@@ -1,0 +1,118 @@
+---
+---
+title: Finding hidden endpoints with directory brute-forcing
+description: Learn why "it's not linked anywhere" is not access control, and how to find unlinked routes a server still responds to.
+type: technique
+key: technique-hidden-endpoint-directory-bruteforce
+slug: technique/hidden-endpoint-directory-bruteforce
+intent: Learn why unlinked endpoints are still reachable and which labs exercise finding them.
+keywords:
+  primary: hidden endpoint discovery practice lab
+  secondary:
+    - directory brute-force explained
+    - security through obscurity routes
+linksTo:
+  - labs/vaultcorp-ssrf-rce
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+A route that is never linked from the UI is still a route. The server will
+happily answer it the moment someone sends the right request — a
+navigation menu is a convenience for legitimate users, not an access
+control for anyone else. Directory and endpoint brute-forcing is simply the
+practice of asking a server about paths it never advertised, to find the
+functionality that was hidden rather than protected.
+
+## Why "unlinked" is not "unreachable"
+
+Client-side routing, a missing nav link, or a path that "nobody would
+guess" all rely on the same false assumption: that an attacker only
+interacts with the parts of an application a normal user would click
+through. Any HTTP server responds to any path matching its routing table,
+regardless of whether a link to that path exists anywhere in the rendered
+UI. The only way to make a route actually unreachable is to not register it
+at all, or to put real authentication and authorization in front of it.
+
+## Examples
+
+### Internal or maintenance endpoints
+
+Diagnostic, internal-API, or maintenance routes are often added during
+development and left in place, reachable, with the assumption that "nobody
+will find it" standing in for actual access control.
+
+### Admin panels without a visible link
+
+An admin interface might only ever be reached, for legitimate users,
+through a direct bookmark or a link sent out of band — but the path itself
+is no harder to request than any other.
+
+### Static assets that leak structure
+
+Occasionally the giveaway isn't the endpoint itself but something that
+references it: a JavaScript bundle, a sitemap, a robots.txt disallow entry,
+or an API client file can all name a path well before brute-forcing would
+find it. Checking these sources first is usually faster than blind
+brute-forcing.
+
+## How to recognise it in an authorized lab
+
+- Before brute-forcing, read what's already there: view source, linked
+  JavaScript and CSS files, `robots.txt`, and any API client code shipped
+  to the browser — these often name routes directly.
+- Use a wordlist-based tool (for example `ffuf`, `gobuster`, or `dirsearch`)
+  against the target, trying common naming patterns (`/admin`, `/internal`,
+  `/api/internal`, `/debug`, `/_internal`, and similar) as well as any
+  project-specific wordlist built from the application's own naming style.
+- Pay attention to status codes and response sizes, not just 200s — a 403
+  on a path that 404s everywhere else still confirms the path exists.
+- Once a candidate route is found, check what it actually requires: does it
+  enforce authentication, or does simply knowing the path get you in?
+
+## How developers prevent it
+
+- Put real authentication and authorization on every route that should be
+  restricted, regardless of whether it's linked from the UI. Obscurity is
+  not a substitute for access control.
+- Don't leave debug, internal, or maintenance endpoints in a production
+  build at all if they're not meant to be used there.
+- Treat any route name, parameter, or comment shipped to the client
+  (in JavaScript, in HTML comments, in source maps) as public information,
+  since it gives an attacker a far shorter list to search than blind
+  brute-forcing would.
+- If an endpoint must exist for internal tooling, enforce that at the
+  network layer as well as the application layer, rather than relying on
+  the path being hard to guess.
+
+## Related labs
+
+The VaultCorp lab in this catalog has an internal API endpoint that is
+never linked from any page, reachable only by request path, which becomes
+the actual target of the chain's server-side request once other steps get
+a request to originate from a trusted location.
+
+## FAQ
+
+### Isn't guessing paths just noisy and unreliable?
+
+It's one tool among several, and combining it with reading client-side
+source material (as above) usually narrows the search significantly before
+any brute-forcing is needed at all.
+
+### Does a 403 or 401 response mean the endpoint is safe?
+
+It means a check is happening — not that the check is correct. It's still
+worth confirming what that check actually verifies (a real credential,
+versus something attacker-influenced like a source IP or a header).
+
+### What should I keep in a lab writeup?
+
+Note what led you to the endpoint (client-side reference, wordlist hit, or
+otherwise), the exact path, and what you found once you could reach it —
+on its own, "endpoint found" is rarely the interesting part; what it
+exposes or allows usually is.

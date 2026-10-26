@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] — VaultCorp</title>
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+<nav class="navbar">
+    <a class="brand" href="/">⬡ VaultCorp</a>
+    <div class="nav-links">
+        @if (Context.Session.GetString("UserId") != null)
+        {
+            <span class="nav-user">@Context.Session.GetString("Username")</span>
+            @if (Context.Session.GetString("Role") == "Admin")
+            {
+                <a href="/admin">Admin</a>
+            }
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout">Logout</a>
+        }
+        else
+        {
+            <a href="/login">Login</a>
+            <a href="/register" class="btn-primary">Get Started</a>
+        }
+    </div>
+</nav>
+
+<main class="container">
+    @RenderBody()
+</main>
+
+<footer class="footer">
+    <span>© 2024 VaultCorp Inc. — Secure Cloud Backup</span>
+</footer>
+
+<script src="/js/site.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

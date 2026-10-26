@@ -1,0 +1,47 @@
+@page "/admin"
+@model VaultCorp.Pages.Admin.AdminIndexModel
+@{
+    ViewData["Title"] = "Admin Panel";
+}
+
+<div class="page-header">
+    <h1>Admin Panel</h1>
+    <span class="badge badge-admin">Administrator</span>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-num">@Model.UserCount</span>
+        <span class="stat-label">Total users</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-num">@Model.StorageUsed</span>
+        <span class="stat-label">Storage used</span>
+    </div>
+</div>
+
+<div class="section-card">
+    <h3>Quick Actions</h3>
+    <div class="action-row">
+        <a href="/admin/import" class="btn-primary">⬆ Import Backup from URL</a>
+    </div>
+</div>
+
+<div class="section-card">
+    <h3>Team Members</h3>
+    <table class="data-table">
+        <thead>
+            <tr><th>Username</th><th>Email</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var u in Model.Users)
+        {
+            <tr>
+                <td>@u.Username</td>
+                <td>@u.Email</td>
+                <td><span class="badge @(u.Role == "Admin" ? "badge-admin" : "badge-user")">@u.Role</span></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

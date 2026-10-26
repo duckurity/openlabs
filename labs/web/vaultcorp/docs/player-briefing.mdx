@@ -1,0 +1,35 @@
+> **No spoilers. This is exactly what the player sees before starting.**
+
+# Player briefing — VaultCorp
+
+## Scenario
+
+VaultCorp is a cloud backup SaaS platform used by small businesses to
+store and manage their data backups. The company recently opened public
+registration for a free trial — anyone can sign up and get their own
+private workspace.
+
+During a routine security review, an internal red team flagged the
+platform as a potential target. Your job is to assess it.
+
+## Your mission
+
+You have been given one thing: **the URL of the VaultCorp platform**.
+
+```
+http://<target>:5000
+```
+
+Find a way to read the contents of `/app/flag.txt` on the server.
+
+## Rules
+
+- You are allowed to register an account (it's a free trial after all).
+- You are **not** allowed to attack the infrastructure itself (DoS,
+  container escape, etc.).
+- The flag format is: `duck{...}`
+- There is no time limit.
+
+## Difficulty
+
+**Hard**

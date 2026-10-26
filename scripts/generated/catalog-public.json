@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 20,
+  "catalogued_count": 21,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -152,12 +152,20 @@
       "path": "labs/web/vault-api",
       "status": "experimental",
       "track": "web"
+    },
+    {
+      "description": "Six-stage SaaS exploit chain from client-side secret leak to SSRF-driven RCE via an unauthenticated Hangfire dashboard (CVE-2021-41238).",
+      "difficulty": "hard",
+      "name": "vaultcorp",
+      "path": "labs/web/vaultcorp",
+      "status": "experimental",
+      "track": "web"
     }
   ],
-  "experimental_count": 19,
+  "experimental_count": 20,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 25,
+    "directory_count": 26,
     "uncatalogued_count": 5,
     "uncatalogued_paths": [
       "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",

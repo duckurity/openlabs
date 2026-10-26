@@ -2,12 +2,12 @@
 
 Auditable M0 completion record for [#72](https://github.com/duckurity/openlabs/issues/72) (M0-09). Use it before enabling branch protection on `main`. Depends on [#71](https://github.com/duckurity/openlabs/issues/71) (**CI required**).
 
-Reviewed on `2026-10-08`. Regenerate with `python3 scripts/baseline_report.py --write-wiki wiki/M0-Baseline-Evidence.md`. Write `--json` when you need the reviewed git commit and full inventory snapshot.
+Reviewed on `2026-10-24`. Regenerate with `python3 scripts/baseline_report.py --write-wiki wiki/M0-Baseline-Evidence.md`. Write `--json` when you need the reviewed git commit and full inventory snapshot.
 
 ## Catalog manifest
 
 - Supported: **1**
-- Experimental: **19**
+- Experimental: **20**
 - Invalid status: **0**
 - Uncatalogued directories: **5**
 
@@ -70,10 +70,11 @@ Run the script locally or read CI artifacts; this report does not start containe
 - `labs/web/techvault` (validates)
 - `labs/web/threadline` (validates)
 - `labs/web/vault-api` (validates)
+- `labs/web/vaultcorp` (validates)
 
 ### Triage follow-ups (from M0-05)
 
-Directories inventoried: **25**. Uncatalogued: **5**.
+Directories inventoried: **26**. Uncatalogued: **5**.
 
 - M0-05 follow-up: rename and catalog Sayed Khashana REST IDOR lab
 - M0-05 follow-up: compose and lab.yml for duckcorp-savegame or approved removal
@@ -84,6 +85,7 @@ Directories inventoried: **25**. Uncatalogued: **5**.
 - M0-05 follow-up: raise invoiceportal score hygiene (optional)
 - M0-05 follow-up: snapconnect techniques and docs score pass
 - M0-05 follow-up: snapsync techniques and Dockerfile score pass
+- M0-05 follow-up: L0-L6 review for vaultcorp promotion
 
 ## Local commands matching CI
 

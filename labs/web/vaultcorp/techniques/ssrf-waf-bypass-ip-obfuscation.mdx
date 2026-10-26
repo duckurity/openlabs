@@ -1,0 +1,134 @@
+---
+---
+title: SSRF filter bypass via alternate loopback literals
+description: Learn why a naive string blacklist cannot catch every way to spell "localhost," and how attackers bypass it with alternate IP literal forms.
+type: technique
+key: technique-ssrf-waf-bypass-ip-obfuscation
+slug: technique/ssrf-waf-bypass-ip-obfuscation
+intent: Learn why blacklist-based SSRF filters fail and which labs exercise bypassing one.
+keywords:
+  primary: SSRF filter bypass practice lab
+  secondary:
+    - loopback IP obfuscation explained
+    - blacklist vs allowlist SSRF protection
+linksTo:
+  - labs/vaultcorp-ssrf-rce
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+Once a team knows they have an SSRF sink, a common first fix is a string
+blacklist: reject any URL containing `localhost`, `127.0.0.1`, `0.0.0.0`,
+or similar. This feels like it closes the hole, but IP addresses have many
+valid alternate spellings that a short, literal blacklist never anticipates.
+The underlying request library still resolves and connects to the same
+host — only the filter's pattern match fails to recognise it.
+
+## Why a blacklist is the wrong shape of fix
+
+A blacklist enumerates known-bad inputs. The real fix for SSRF is almost
+always the opposite shape: an allowlist of destinations the server is
+permitted to reach, checked after DNS resolution, not a list of strings the
+input must not contain. Any blacklist built on raw URL text is fighting a
+combinatorial problem — IP addresses, hostnames, redirects, and URL parser
+quirks all give an attacker more representations than a maintainer can
+enumerate by hand.
+
+## Examples
+
+### Alternate loopback literals
+
+`127.0.0.1` is only one way to write the IPv4 loopback address. Depending on
+what actually parses the string (the OS resolver, a browser, a language's
+URL/IP parsing library), these may all resolve to the same host:
+
+- Short forms that omit octets, such as `127.1`
+- Decimal integer form, such as `2130706433`
+- Octal form, such as `0177.0.0.1` (and variants with fewer octets)
+- Hexadecimal form, such as `0x7f000001`
+- IPv6 loopback written as `::1`, `[::1]`, or with an IPv4-mapped prefix
+
+A blacklist that only matches the handful of spellings its author thought of
+leaves every other valid representation untouched.
+
+### Hostname-based bypasses
+
+Beyond alternate IP literals, a DNS name the attacker controls can be set up
+to resolve to an internal address, or to resolve to a safe address at
+filter-check time and a different one by the time the request is actually
+made (a DNS rebinding race). Neither of these contains any of the blocked
+strings either.
+
+### Redirect-based bypasses
+
+Even a filter that correctly rejects every internal-looking URL can still be
+bypassed if the server follows HTTP redirects: the first request goes to an
+allowed, external URL, which then 30x-redirects to an internal address the
+filter never saw.
+
+## How to recognise it in an authorized lab
+
+- Find a feature that fetches a server-side resource from a URL you supply
+  (an import, webhook, preview, or proxy feature).
+- Try the obvious internal targets first (`localhost`, `127.0.0.1`,
+  `0.0.0.0`) to confirm a filter exists and observe exactly how it responds
+  — a distinct block page or error code is a strong signal you're looking at
+  a pattern-matched blacklist rather than a network-level restriction.
+- If blocked, try alternate literal forms of the same address (short,
+  decimal, octal, hex, IPv6) one at a time, and watch for a different
+  response — a connection attempt, a timeout, or real content means the
+  filter was bypassed and the request actually reached the target.
+
+## Impact
+
+A bypassed SSRF filter has the same impact as an unfiltered SSRF: access to
+internal-only services, cloud metadata endpoints, admin interfaces that
+trust the request's source address, or any other resource the filter was
+meant to put out of reach.
+
+## How developers prevent it
+
+- Resolve the hostname first, then check the resulting IP address against
+  an allowlist (or deny private/loopback/link-local ranges) — never match
+  on the raw input string.
+- Re-check the resolved address immediately before connecting, not only at
+  validation time, to close DNS-rebinding races.
+- Disable automatic redirect-following for outbound fetches, or re-validate
+  every redirect target against the same check.
+- Where possible, make the real fix architectural: don't let application
+  code reach internal services directly at all — put a proxy or network
+  boundary in front of them that enforces this regardless of the app layer.
+
+## Related labs
+
+The VaultCorp lab in this catalog pairs this exact bypass with a loopback-
+trusting internal API: the outbound fetch is blocked for a handful of
+literal strings, but an alternate loopback form slips through untouched and
+reaches an endpoint that only checks the request's source address.
+
+## FAQ
+
+### Why not just add every alternate form to the blacklist?
+
+Because the list is not finite in any way that is easy to enumerate by
+hand — between IPv4 and IPv6 literal notations, encoding quirks in URL
+parsers, and DNS tricks, there is always another representation. Checking
+the resolved address against an allowlist sidesteps the entire category
+instead of chasing it.
+
+### Is this specific to one language or framework?
+
+No. Any outbound HTTP client that the application calls into will normalize
+and resolve these alternate forms the same way a browser or `curl` would,
+regardless of the application's language or framework. The vulnerability is
+in trusting pre-resolution string matching, not in a specific library.
+
+### What should I keep in a lab writeup?
+
+Note the exact blocked strings you identified (from error messages or by
+testing), which alternate form bypassed the filter, and what the
+bypass actually reached once the request went through.

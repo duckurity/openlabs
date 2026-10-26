@@ -1,0 +1,27 @@
+@page
+@model VaultCorp.Pages.RegisterModel
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="auth-card">
+    <h2>Create your workspace</h2>
+    <p class="subtitle">A private backup environment will be provisioned for your organisation.</p>
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="alert alert-error">@Model.Error</div>
+    }
+
+    <form method="post">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="johndoe" required autocomplete="off" />
+
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required />
+
+        <button type="submit" class="btn-primary full-width">Create Account</button>
+    </form>
+
+    <p class="auth-link">Already have an account? <a href="/login">Sign in</a></p>
+</div>

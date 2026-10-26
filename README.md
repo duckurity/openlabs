@@ -13,7 +13,7 @@
   <a href="LICENSE-CONTENT"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/content-license-dark.svg?v=b83304a6"><img src=".github/assets/badges/content-license-light.svg?v=b42ada1f" alt="content: CC-BY-4.0" height="20"></picture></a>
   <!-- catalog-public:badges-start -->
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-supported-dark.svg?v=5fbde818"><img src=".github/assets/badges/labs-supported-light.svg?v=154daa66" alt="labs: 1 supported" height="20"></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-experimental-dark.svg?v=01e16b65"><img src=".github/assets/badges/labs-experimental-light.svg?v=7b1e1bb3" alt="labs: 19 experimental" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-experimental-dark.svg?v=01e16b65"><img src=".github/assets/badges/labs-experimental-light.svg?v=7b1e1bb3" alt="labs: 20 experimental" height="20"></picture>
 <!-- catalog-public:badges-end -->
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/docker-dark.svg?v=2b6c885f"><img src=".github/assets/badges/docker-light.svg?v=d7abbc30" alt="docker: compose v2" height="20"></picture>
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/checker-dark.svg?v=cff908fc"><img src=".github/assets/badges/checker-light.svg?v=6052eb0b" alt="checker: python3" height="20"></picture>
@@ -107,11 +107,11 @@ not how long it takes.
 ## Labs <span id="labs-catalog"></span>
 
 <!-- catalog-public:start -->
-<sub>1 supported · 19 experimental</sub>
+<sub>1 supported · 20 experimental</sub>
 
 <div align="center">
 
-**Supported** labs have documented L0–L6 evidence on file. **19 experimental** labs are runnable but not promoted. Experimental entries are not guaranteed supported.
+**Supported** labs have documented L0–L6 evidence on file. **20 experimental** labs are runnable but not promoted. Experimental entries are not guaranteed supported.
 
 | Lab | Track | Difficulty | Description |
 |:---:|:---:|:---:|:---|
@@ -140,6 +140,7 @@ not how long it takes.
 | [`techvault`](labs/web/techvault) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | An e-commerce GraphQL API with a chained authentication bypass, SSRF, and command injection vulnerability. |
 | [`threadline`](labs/web/threadline) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A clothing store REST API. One customer sees more than they should. |
 | [`vault-api`](labs/web/vault-api) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | Inspect an internal employee management API and recover a protected employee archive. The lab starts with a low-privileged analyst account and explores how security boundaries are enforced across an API. |
+| [`vaultcorp`](labs/web/vaultcorp) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | Six-stage SaaS exploit chain from client-side secret leak to SSRF-driven RCE via an unauthenticated Hangfire dashboard (CVE-2021-41238). |
 
 Uncatalogued directories are omitted from public totals. Maintainers track them in the [lab triage inventory](https://github.com/Duckurity/openlabs/wiki/Lab-Triage-Inventory).
 

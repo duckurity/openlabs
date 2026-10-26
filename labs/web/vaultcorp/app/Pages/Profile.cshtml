@@ -1,0 +1,108 @@
+@page
+@model VaultCorp.Pages.ProfileModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="page-header">
+    <h1>My Profile</h1>
+</div>
+
+<div class="section-card">
+    <h3>Account Details</h3>
+    <div class="field-row">
+        <span class="field-label">Username</span>
+        <span class="field-value">@Model.Username</span>
+    </div>
+    <div class="field-row">
+        <span class="field-label">Email</span>
+        <span class="field-value">@Model.Email</span>
+    </div>
+    <div class="field-row">
+        <span class="field-label">Role</span>
+        <span class="field-value">@Model.Role</span>
+    </div>
+    <div class="field-row">
+        <span class="field-label">Organisation</span>
+        <span class="field-value">@Model.CompanyName</span>
+    </div>
+</div>
+
+<div class="section-card">
+    <h3>Update Display Name</h3>
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-success">✓ @Model.Message</div>
+    }
+    <form method="post" class="profile-form">
+        <div class="profile-field">
+            <label for="displayName">Display Name</label>
+            <div class="profile-input-row">
+                <input id="displayName" type="text" name="displayName" value="@Model.DisplayName"
+                       placeholder="Enter your display name" maxlength="64" autocomplete="off" required />
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+            <p class="field-hint">This name is shown to other team members.</p>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <style>
+        .profile-form {
+            margin-top: 4px;
+        }
+
+        .profile-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .profile-field label {
+            font-size: .82rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .profile-input-row {
+            display: flex;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        .profile-input-row input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 11px 14px;
+            color: var(--text);
+            font-size: .95rem;
+        }
+
+        .profile-input-row input:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+
+        .profile-input-row .btn-primary {
+            border-radius: 0 var(--radius) var(--radius) 0;
+            padding: 11px 20px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .field-hint {
+            font-size: .8rem;
+            color: var(--muted);
+            margin: 0;
+        }
+    </style>
+    <script src="/js/user-utils.js"></script>
+    <script src="/js/internal.js"></script>
+    <script src="/js/internal.js"></script>
+}
