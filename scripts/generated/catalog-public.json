@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 20,
+  "catalogued_count": 21,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -98,6 +98,14 @@
       "track": "web"
     },
     {
+      "description": "Investigate a fictional courier API and recover two flags through its parcel-release workflow.",
+      "difficulty": "medium",
+      "name": "parcelpoint",
+      "path": "labs/web/parcelpoint",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
       "description": "An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level access.",
       "difficulty": "hard",
       "name": "shopvault",
@@ -154,10 +162,10 @@
       "track": "web"
     }
   ],
-  "experimental_count": 19,
+  "experimental_count": 20,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 25,
+    "directory_count": 26,
     "uncatalogued_count": 5,
     "uncatalogued_paths": [
       "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",

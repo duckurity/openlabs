@@ -14,8 +14,8 @@ python3 scripts/score_lab.py --min 70 --json score-report.json
 
 ## Summary
 
-- Directories inventoried: **25** (issue #68 opened at 24; `duckexchange` added after that count).
-- Catalogued: **20**; uncatalogued: **5**.
+- Directories inventoried: **26** (issue #68 opened at 24; `duckexchange` added after that count).
+- Catalogued: **21**; uncatalogued: **5**.
 - Score gate reference: **70** (recommendations only).
 
 ## Inventory
@@ -40,6 +40,7 @@ python3 scripts/score_lab.py --min 70 --json score-report.json
 | `labs/web/firmdrama` | experimental | 100 | none | none | maintain | maintainers | none |
 | `labs/web/invoiceportal` | experimental | 78 | none | dockerfile: no USER directive (runs as root); docs: README missing ## Goal; docs: no challenge-sheet PDF beside the lab | maintain | maintainers | M0-05 follow-up: raise invoiceportal score hygiene (optional) |
 | `labs/web/nexora-platform` | experimental | 97 | none | docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
+| `labs/web/parcelpoint` | experimental | 100 | none | none | maintain | maintainers | none |
 | `labs/web/shopvault` | experimental | 97 | none | docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
 | `labs/web/snapconnect` | experimental | 81 | none | dockerfile: no USER directive (runs as root); docs: no challenge-sheet PDF beside the lab | maintain | maintainers | M0-05 follow-up: snapconnect techniques and docs score pass |
 | `labs/web/snapsync` | experimental | 81 | none | dockerfile: no USER directive (runs as root); docs: no challenge-sheet PDF beside the lab | maintain | maintainers | M0-05 follow-up: snapsync techniques and Dockerfile score pass |

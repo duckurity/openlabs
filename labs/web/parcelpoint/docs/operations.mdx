@@ -1,0 +1,103 @@
+# Operations runbook
+
+**ParcelPoint · Local operator edition · Updated 17 October 2026**
+
+> Run this lab only as a local, disposable training service. The supported host binding is `127.0.0.1:8080`. Do not publish the vulnerable application to a LAN or public endpoint.
+
+## Service topology
+
+| Service | Responsibility | Exposure and writable state |
+|---|---|---|
+| `parcelpoint` | Flask, Gunicorn, seed generation, SQLite database | Internal `backend` network only; writes only to `/run/parcelpoint` and `/tmp` tmpfs |
+| `parcelpoint-ingress` | Bounded standard-library TCP forwarding, at most 32 concurrent connections | Sole host binding: `127.0.0.1:8080`; no writable mount |
+| `tests` | Application test suite, `test` Compose profile only | `network_mode: none`; writes only to `/tmp` tmpfs; no published port |
+
+Compose creates an internal backend network and a frontend network for ingress publication. The app is attached only to the backend. There are no named volumes, host mounts, or Docker socket mounts.
+
+Both runtime containers use UID/GID `10001`, read-only root filesystems, dropped capabilities, `no-new-privileges`, and Linux `amd64` images. The app is limited to 256 MiB memory, one CPU, and 64 PIDs, with a `16 MiB` state tmpfs. Ingress is limited to 64 MiB, 0.5 CPU, and 32 PIDs. Container logs are bounded by Compose. These limits reduce exposure; they are not a general-purpose sandbox guarantee.
+
+## Host prerequisites
+
+- Docker Desktop with Linux containers or Docker Engine with Docker Compose `v2.17.0` or later. The start and reset helpers use `up --wait-timeout`, which earlier releases lack.
+- Python `3.10` or later on the host for digest synchronization and the start and reset helpers. The local checker also uses the host Python runtime. No extra Python packages are required.
+- An HTTP client or browser, and an unused host port `8080`.
+- Internet access for the first image build to resolve the pinned base image and download the hash-pinned Python wheels. Once built, normal runtime uses local images and makes no application network calls.
+- Host architecture may differ; Compose requests `linux/amd64`.
+
+If your shell uses `python3`, substitute it for `python` in the commands below. Run them from the `parcelpoint` lab root.
+
+## First build and start
+
+```text
+docker compose up -d --build --wait
+python scripts/sync_flag_hash.py
+docker compose ps
+```
+
+Wait for both services to report healthy. Open `http://127.0.0.1:8080/`. The synchronizer reads only the runtime generation ID and both SHA-256 digests, updates `flag_hash` and `checkpoint_flag_hash` in the local `lab.yml` in one write, and never prints or retrieves a plaintext flag.
+
+When the images already exist, `python start.py` starts the project without building or pulling and synchronizes both digests. Host-side helpers coordinate through an ignored `.runtime/operator.lock` file; it holds no challenge state and may remain after shutdown.
+
+Treat the synchronized `lab.yml` as local instance state. Do not add a runtime flag to it or commit a local instance digest as if it were a release decision.
+
+## Health and diagnostics
+
+The health endpoint is `http://127.0.0.1:8080/health`. It should return:
+
+```json
+{"service":"parcelpoint","status":"ok"}
+```
+
+Inspect status and, when needed, bounded service logs:
+
+```text
+docker compose ps
+docker compose logs --tail 100 parcelpoint parcelpoint-ingress
+```
+
+The API returns JSON errors without tracebacks or filesystem paths. It does not intentionally log passwords, reset codes, bearer tokens, or flags. Do not copy any runtime flag or reset code into diagnostic logs.
+
+## Reset and cleanup
+
+Reset the current instance and refresh both checker digests:
+
+```text
+python reset.py
+```
+
+The helper takes an operator lock and verifies that existing Compose containers and networks belong to this checkout before acting. It stops ingress, force-recreates the app from existing images with pulls and builds disabled, checks that the generation and both stage digests rotated, updates the digest-only metadata, recreates ingress, and verifies loopback health. A reset failure stops ingress on a best-effort basis and reports the original error, even if that cleanup also fails. Inspect the project-specific status and logs before retrying. Do not remove unrelated Docker resources.
+
+Stop and remove this Compose project's containers and networks with:
+
+```text
+docker compose down
+```
+
+No named volume is used. Accounts, sessions, mailbox rows, reset codes, flags, and the digest live in the app container's tmpfs and disappear when it is recreated or removed. `docker compose down` does not delete built images. Do not use broad prune commands for cleanup.
+
+## Validation and maintenance
+
+The `test` Compose profile builds the Dockerfile's `test` target and runs the suite with no network, a read-only root, user `10001:10001`, and all capabilities dropped. A clean first build may need network access to resolve dependencies:
+
+```text
+docker compose --profile test run --build --rm tests
+```
+
+The suite runs the Python standard-library `unittest` tests. It does not unit-test ingress concurrency or half-close behavior; a live solve covers the ordinary forwarding path. This test command does not replace a clean release build, live reset and solve, repository integration tests, independent review, or hosted CI. See the dated [validation report](validation-report.mdx).
+
+Changes to routes, payloads, limits, state generation, reset, Compose, or the ingress require updating the relevant tests and [design](challenge-design.mdx), [security](security-report.mdx), and [validation](validation-report.mdx) records. Regenerate the challenge PDF only through the repository generator.
+
+## Troubleshooting
+
+| Symptom | Check | Safe response |
+|---|---|---|
+| Port allocation error | Local use of `8080` and `docker compose ps` | Stop the conflicting local service you own. Keep the binding loopback-only; do not expose the app directly. |
+| Build cannot resolve base image or wheels | Internet access and Docker build output | First build requires registry and package-index access. Do not describe a cached runtime as a clean build. |
+| Service remains unhealthy | `docker compose ps` and project-specific logs | Read the bounded logs. Correct the cause, then use `docker compose up -d --build --wait` only if source or image layers need rebuilding. |
+| Reset reports ownership collision | Project names, labels, and working directory | Stop. Do not remove or adopt a same-named resource until its owner is established. |
+| Reset fails or health check fails | Project status and logs | Ingress is stopped by the failure path. Preserve state, resolve the local cause, then retry the scoped reset. |
+| A saved flag is rejected | Whether reset or container recreation occurred and whether `lab.yml` matches this instance | Run `python scripts/sync_flag_hash.py` after startup. A reset intentionally invalidates old values. |
+
+## Operational prohibitions
+
+Do not add host mounts, attach a Docker socket, enable privileged mode, publish the app service, add outbound application dependencies, store runtime flags in persistent volumes, or remove the read-only/network/resource controls without a separately reviewed design change.

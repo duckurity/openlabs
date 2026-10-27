@@ -1,0 +1,10 @@
+contract_version: 1
+name: parcelpoint
+track: web
+difficulty: medium
+description: Investigate a fictional courier API and recover two flags through its parcel-release workflow.
+flag_hash: 1a7168868fbae0c926161687958837a546a219e25a2dcc14ef85262813860fff
+checkpoint_flag_hash: 03768d54b8125382ffa540d57786b50df7be145e66338e30ccab2097fb2a40f7
+status: experimental
+techniques: [password-reset-target-confusion]
+port: 8080

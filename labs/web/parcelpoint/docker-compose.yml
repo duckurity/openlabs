@@ -1,0 +1,92 @@
+name: parcelpoint
+services:
+  parcelpoint:
+    image: parcelpoint:local
+    pull_policy: never
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    labels:
+      org.openlabs.lab: parcelpoint
+    user: 10001:10001
+    read_only: true
+    init: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /run/parcelpoint:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700
+    networks: [backend]
+    mem_limit: 256m
+    memswap_limit: 256m
+    cpus: 1.0
+    pids_limit: 64
+    restart: "no"
+    logging:
+      driver: json-file
+      options: {max-size: "1m", max-file: "2"}
+  parcelpoint-ingress:
+    image: parcelpoint-ingress:local
+    pull_policy: never
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.ingress
+    labels:
+      org.openlabs.lab: parcelpoint
+    user: 10001:10001
+    read_only: true
+    init: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      parcelpoint: {condition: service_healthy}
+    ports: ["127.0.0.1:8080:8000"]
+    networks: [backend, frontend]
+    mem_limit: 64m
+    memswap_limit: 64m
+    cpus: 0.5
+    pids_limit: 32
+    restart: "no"
+    logging:
+      driver: json-file
+      options: {max-size: "1m", max-file: "2"}
+  tests:
+    image: parcelpoint-tests:local
+    pull_policy: never
+    platform: linux/amd64
+    profiles: [test]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    labels:
+      org.openlabs.lab: parcelpoint
+    user: 10001:10001
+    read_only: true
+    init: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    network_mode: none
+    environment:
+      PARCELPOINT_STATE_DIR: /tmp/state
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,uid=10001,gid=10001,mode=0700
+    mem_limit: 256m
+    memswap_limit: 256m
+    cpus: 1.0
+    pids_limit: 64
+    restart: "no"
+    healthcheck:
+      disable: true
+    logging:
+      driver: json-file
+      options: {max-size: "1m", max-file: "2"}
+networks:
+  backend:
+    internal: true
+    labels: {org.openlabs.lab: parcelpoint}
+  frontend:
+    labels: {org.openlabs.lab: parcelpoint}
