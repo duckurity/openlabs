@@ -105,6 +105,12 @@
       "blocker": "",
       "follow_up_title": "M0-05 follow-up: raise invoiceportal score hygiene (optional)"
     },
+    "labs/web/last-reel": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
     "labs/web/nexora-platform": {
       "action": "maintain",
       "owner": "maintainers",

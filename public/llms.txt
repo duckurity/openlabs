@@ -19,6 +19,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Fieldops 360](https://openlabs.duckurity.com/labs/fieldops-360): A tenant portal with email open tracking and an admin export surface.
 - [Firmdrama](https://openlabs.duckurity.com/labs/firmdrama): A law firm's meeting-room portal with chained API authorization flaws and a vulnerable legacy template rendere
 - [Invoiceportal](https://openlabs.duckurity.com/labs/invoiceportal): InvoicePortal is a SaaS platform for managing company invoices.
+- [Last reel](https://openlabs.duckurity.com/labs/last-reel): A film restoration archive with a restricted release-clearance record.
 - [Nexora platform](https://openlabs.duckurity.com/labs/nexora-platform): Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, O
 - [Shopvault](https://openlabs.duckurity.com/labs/shopvault): An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level acce
 - [Snapconnect](https://openlabs.duckurity.com/labs/snapconnect): SnapConnect is a small social app with profiles and avatars, served by a GraphQL API.
