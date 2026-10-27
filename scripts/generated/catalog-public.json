@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 20,
+  "catalogued_count": 21,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -40,6 +40,14 @@
       "path": "labs/web/duckexchange",
       "status": "experimental",
       "track": "web"
+    },
+    {
+      "description": "An internal vault app that keeps its PIN and promo code inside the APK.",
+      "difficulty": "easy",
+      "name": "duckleak",
+      "path": "labs/binary/duckleak",
+      "status": "experimental",
+      "track": "binary"
     },
     {
       "description": "A gRPC document archive with authentication and a SQL injection vulnerability.",
@@ -154,10 +162,10 @@
       "track": "web"
     }
   ],
-  "experimental_count": 19,
+  "experimental_count": 20,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 25,
+    "directory_count": 26,
     "uncatalogued_count": 5,
     "uncatalogued_paths": [
       "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",

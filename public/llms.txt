@@ -13,6 +13,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Duck cross](https://openlabs.duckurity.com/labs/duck-cross): A reports portal with a missing object-level authorization check.
 - [Duck nest](https://openlabs.duckurity.com/labs/duck-nest): An internal project workspace for staff and interns.
 - [Duckexchange](https://openlabs.duckurity.com/labs/duckexchange): A tenant document API with a gRPC transcoding authorization bypass.
+- [Duckleak](https://openlabs.duckurity.com/labs/duckleak): An internal vault app that keeps its PIN and promo code inside the APK.
 - [Duckrpc archive](https://openlabs.duckurity.com/labs/duckrpc-archive): A gRPC document archive with authentication and a SQL injection vulnerability.
 - [Duckvault web ctf](https://openlabs.duckurity.com/labs/duckvault-web-ctf): A document management API with a broken object-level authorization check.
 - [Duckvault](https://openlabs.duckurity.com/labs/duckvault): A records portal leaks an internal reference through broken access control and weak authorization.
@@ -37,6 +38,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [API version enumeration](https://openlabs.duckurity.com/technique/api-version-enumeration): Learn how to map versioned API surfaces and spot legacy endpoints that no longer meet the current security pol
 - [Authentication bypass](https://openlabs.duckurity.com/technique/auth-bypass): The server trusts a client-supplied field instead of verifying identity against a real credential check.
 - [Command injection](https://openlabs.duckurity.com/technique/command-injection): User input reaches a shell command unsanitized, letting you run commands alongside the intended one.
+- [Hardcoded secrets](https://openlabs.duckurity.com/technique/hardcoded-secrets): Credentials, PINs, and keys written into an app's code or resources can be read by anyone who can unpack the a
 - [Broken object-level authorization (IDOR)](https://openlabs.duckurity.com/technique/idor): Learn how missing per-object checks expose records that an authenticated user should not be able to read or ch
 - [Mass assignment](https://openlabs.duckurity.com/technique/mass-assignment): Learn how automatic request binding can let a client change protected object properties.
 - [SQL injection](https://openlabs.duckurity.com/technique/sqli): Learn how unsanitized query input can change database logic and expose records outside normal access rules.

@@ -161,7 +161,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -372,6 +372,33 @@ Do not edit the application source or database files by hand.
 Practise in this lab:
 - [SQL injection](/technique/sqli)
 - [API version enumeration](/technique/api-version-enumeration)
+
+## Duckleak
+
+Source: https://openlabs.duckurity.com/labs/duckleak
+
+`easy` · `binary`
+## Brief
+DuckCorp ships NestGuard, an internal Android app for staff. It keeps a vault of private files and a staff discount behind a PIN. The developer shipped the build in a hurry. Download the APK and open the vault.
+## Setup
+Run these from the lab directory:
+```bash
+docker compose up -d
+```
+Open `http://localhost:8080` and download `duckleak.apk`. Install it on an Android emulator or device:
+```bash
+adb install duckleak.apk
+```
+You need a decompiler such as JADX. Static analysis of the APK is enough for a full solve. Running the app needs an emulator or device plus adb (Android platform-tools).
+## Goal
+Unlock the vault, reach the employee discount, and recover the flag. Verify the solve from the lab directory:
+```bash
+python3 ../../../scripts/check.py .
+```
+See [how to play](/play) for the usual solve loop.
+## Techniques
+Practise in this lab:
+- [Hardcoded secrets](/technique/hardcoded-secrets)
 
 ## Duckrpc archive
 
@@ -1185,6 +1212,24 @@ Browse all [labs](/labs) when it is solved.
 Same family of flaw — unsanitized input reaching an interpreter — but the interpreter here is the OS shell, not a database engine.
 **Do I need special tooling?**
 A browser or `curl` is enough to start. Read [how to play](/play) for the loop.
+
+## Hardcoded secrets
+
+Source: https://openlabs.duckurity.com/technique/hardcoded-secrets
+
+## Overview
+A hardcoded secret is a value the app needs to check something, such as a PIN, password, API key, or promo code, written straight into its code or resources. The app ships to every user, so every user also receives the secret. Client-side checks only hide it from people who never look.
+## Examples
+Unpack the app and read what it contains. Decompile the code and search it for strings, constants, and comparisons that look like credentials. Check resource files and build settings too, since values often live there instead of in the code.
+## Related labs
+Practise on a live target:
+- [Duckleak](/labs/duckleak) — an Android app that keeps its PIN and promo code inside the APK.
+Browse all [labs](/labs) when it is solved.
+## FAQ
+**Is a secret safe if the app is obfuscated?**
+No. Obfuscation only slows a reader down. If the app can use the value, someone with the app can recover it.
+**Do I need special tooling?**
+A decompiler such as JADX is enough for an Android app. Read [how to play](/play) for the loop.
 
 ## Broken object-level authorization (IDOR)
 

@@ -3,6 +3,12 @@
   "reviewed_on": "2026-09-26",
   "parent_issue": 68,
   "labs": {
+    "labs/binary/duckleak": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
     "labs/web/Sayed_Khashana_REST_API_IDOR_CTF": {
       "action": "keep_uncatalogued",
       "owner": "maintainers",

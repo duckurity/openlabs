@@ -79,7 +79,7 @@
   ],
   "known_limitations": [
     "Only duck-cross has a Tier 1 lifecycle guarantee",
-    "Nineteen experimental labs lack full lifecycle support",
+    "Twenty experimental labs lack full lifecycle support",
     "Tier 2 and Tier 3 hosts lack hosted runner lifecycle evidence at release",
     "Eight experimental labs declare container_name and block lifecycle mutation",
     "Legacy prove_reference_lab.py runs beside CLI Tier 1 evidence until prove removal",
