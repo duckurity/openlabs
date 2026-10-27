@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Secured Notes admin review</title>
+  </head>
+  <body>
+    <h1>Submitted notes</h1>
+    <section id="notes"></section>
+    <script>
+      const notes = {{ notes | tojson }};
+      const container = document.getElementById('notes');
+      for (const note of notes) {
+        const article = document.createElement('article');
+        article.innerHTML = note.content;
+        container.appendChild(article);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+FROM mcr.microsoft.com/playwright:v1.52.0-noble
+
+WORKDIR /app
+
+COPY package.json .
+RUN npm install --omit=dev
+
+COPY bot.js .
+RUN chown -R pwuser:pwuser /app
+
+USER pwuser
+
+CMD ["node", "bot.js"]

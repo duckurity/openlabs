@@ -1,0 +1,12 @@
+{
+  "name": "doppelganger-admin-bot",
+  "private": true,
+  "version": "1.0.0",
+  "description": "JavaScript Playwright admin bot for the Doppelganger challenge",
+  "scripts": {
+    "bot": "node bot.js"
+  },
+  "dependencies": {
+    "playwright": "1.52.0"
+  }
+}

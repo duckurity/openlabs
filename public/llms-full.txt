@@ -157,7 +157,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -263,6 +263,29 @@ See [how to play](/play) for the usual solve loop.
 ## Techniques
 Practise in this lab:
 - [Server-side request forgery (SSRF)](/technique/ssrf)
+
+## Doppelganger
+
+Source: https://openlabs.duckurity.com/labs/doppelganger
+
+`medium` · `web`
+## Brief
+Secured Notes is a shared note service with a private administrator review bot. Submit JSON notes, and make the administrator's browser hand you its session value.
+## Setup
+Run these from the lab directory:
+```bash
+docker compose up -d --build
+```
+Open `http://localhost:5000`. The review bot starts with the stack and checks notes roughly every 10 to 20 seconds. Captured reviews appear at `http://localhost:5000/api/solved`.
+The inbox token is shown on the page. Reset the lab with:
+```bash
+docker compose down -v
+```
+## Goal
+Recover the administrator's session value and read the flag. The flag has the form `duck{...}`.
+## Techniques
+Practise in this lab:
+- [Cross-site scripting (XSS)](/technique/xss)
 
 ## Duck cross
 
@@ -1068,7 +1091,7 @@ Practise in this lab:
 Source: https://openlabs.duckurity.com/technique
 
 Vulnerability classes, defined once. Each technique links every lab that exercises it.
-Start with [broken object-level authorization](/technique/idor). See also [authentication bypass](/technique/auth-bypass), [SSRF](/technique/ssrf), and [command injection](/technique/command-injection). Browse all [labs](/labs) when it is solved.
+Start with [broken object-level authorization](/technique/idor). See also [authentication bypass](/technique/auth-bypass), [SSRF](/technique/ssrf), [command injection](/technique/command-injection), and [cross-site scripting](/technique/xss). Browse all [labs](/labs) when it is solved.
 
 ## API version enumeration
 
@@ -1487,3 +1510,45 @@ No. Autoescaping protects how a value is placed into output. SSTI begins earlier
 It is a small, non-destructive way to distinguish literal rendering from expression evaluation when the syntax matches the suspected engine.
 ### What should I include in a lab writeup?
 Include the benign baseline, the minimal expression, the rendered result, the likely engine evidence, and the security boundary that the server crossed.
+
+## Cross-site scripting (XSS)
+
+Source: https://openlabs.duckurity.com/technique/xss
+
+## Overview
+Cross-site scripting happens when an application puts untrusted input into a page without preserving the boundary between text and markup. The browser receives input that looks like HTML or JavaScript, parses it as executable content, and runs it with the origin's privileges.
+The important detail is the sink. A value that is echoed as text stays text. A value inserted through an API such as `innerHTML`, a server-rendered template without escaping, or a JavaScript string that is later evaluated can become markup or code. The same string can be harmless at one sink and dangerous at another.
+> **Encoding is context-specific**
+>
+> HTML text, attribute values, URLs, JavaScript strings, and CSS each have different rules. One escaping routine does not protect every context.
+## Examples
+### Stored note rendered as HTML
+A note service stores submitted text and an administrator later reviews it. The review page builds each note with:
+```javascript
+article.innerHTML = note.content;
+```
+If `note.content` contains an element with an event handler, the administrator's browser parses and executes it when the page loads. Because the page belongs to the application's origin, the payload can read a session cookie that is not marked `HttpOnly`.
+A safer review page treats the note as text:
+```javascript
+article.textContent = note.content;
+```
+If limited formatting is required, a maintained allowlist sanitizer can run before insertion. A hand-written blocklist is not a substitute, because browsers accept whitespace, attribute variants, and parser edge cases that substring checks miss.
+### The difference a sink makes
+The same string can appear safely in a JSON response and dangerously in a page:
+```text
+stored value:  <svg\tonload =run()>
+text sink:     shown literally
+HTML sink:     parsed as markup
+```
+This is why a payload that is rejected in one field may work in another, and why validation must match the parser that ultimately consumes the value.
+## Related labs
+- [Doppelganger](/labs/doppelganger) chains duplicate JSON keys with an incomplete HTML blocklist and a private review bot.
+- [Browse the lab catalog](/labs) to find other web exercises.
+- Read [how to play](/play) before starting a lab.
+## FAQ
+### Is XSS only a client-side problem?
+The execution happens in a browser, but the cause can be server-side rendering, client-side DOM code, or a stored value that reaches either. Treat it as an application-wide output-handling problem.
+### Does Content Security Policy replace output encoding?
+No. CSP is defense in depth. It can reduce the impact of some payloads, but it does not make an unsafe sink safe, and a permissive policy may not block the payload at all.
+### Why do filters sometimes miss an obvious payload?
+Many filters search for exact substrings. HTML allows equivalent syntax through whitespace, quoting, casing, and parser differences. Use a real parser and a strict allowlist rather than trying to enumerate every dangerous string.

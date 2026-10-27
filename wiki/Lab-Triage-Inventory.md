@@ -14,8 +14,8 @@ python3 scripts/score_lab.py --min 70 --json score-report.json
 
 ## Summary
 
-- Directories inventoried: **25** (issue #68 opened at 24; `duckexchange` added after that count).
-- Catalogued: **20**; uncatalogued: **5**.
+- Directories inventoried: **26** (issue #68 opened at 24; `duckexchange` added after that count).
+- Catalogued: **21**; uncatalogued: **5**.
 - Score gate reference: **70** (recommendations only).
 
 ## Inventory
@@ -26,6 +26,7 @@ python3 scripts/score_lab.py --min 70 --json score-report.json
 | `labs/web/aegis-ctf` | experimental | 100 | none | none | maintain | maintainers | none |
 | `labs/web/cafe-house-rules` | experimental | 91 | none | dockerfile: no USER directive (runs as root); docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
 | `labs/web/cloudvault` | experimental | 100 | none | none | maintain | maintainers | none |
+| `labs/web/doppelganger` | experimental | 97 | none | docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
 | `labs/web/duck-cross` | supported | 97 | none | docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
 | `labs/web/duck-nest` | experimental | 97 | none | docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
 | `labs/web/duckcorp-savegame` | uncatalogued | 39 | missing compose file | score 39 is below threshold 70; structure: missing docker-compose.yml (or compose.yml); structure: missing lab.yml; dockerfile: no USER directive (runs as root); compose: missing compose file | keep_uncatalogued | maintainers | M0-05 follow-up: compose and lab.yml for duckcorp-savegame or approved removal |

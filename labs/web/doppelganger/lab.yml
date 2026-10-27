@@ -1,0 +1,8 @@
+contract_version: 1
+name: doppelganger
+track: web
+difficulty: medium
+description: A note service with duplicate JSON keys, a fragile HTML blocklist, and a private admin review bot.
+flag_hash: 57f7fd98378c531c6e700bbb495b89f654a1e415c71434ad02930a3229651d67
+status: experimental
+techniques: [xss]
