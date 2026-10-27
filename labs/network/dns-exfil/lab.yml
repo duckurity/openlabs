@@ -1,0 +1,8 @@
+contract_version: 1
+name: dns-exfil
+track: network
+difficulty: easy
+status: experimental
+description: Analyze a PCAP to find data exfiltrated over DNS queries.
+flag_hash: 78947587fe2d4e213aad6083762685324f218ce92c934ac9368c1d11630ebe26
+techniques: [dns]

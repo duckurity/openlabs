@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 20,
+  "catalogued_count": 21,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -24,6 +24,14 @@
       "path": "labs/web/cloudvault",
       "status": "experimental",
       "track": "web"
+    },
+    {
+      "description": "Analyze a PCAP to find data exfiltrated over DNS queries.",
+      "difficulty": "easy",
+      "name": "dns-exfil",
+      "path": "labs/network/dns-exfil",
+      "status": "experimental",
+      "track": "network"
     },
     {
       "description": "An internal project workspace for staff and interns.",
@@ -154,10 +162,10 @@
       "track": "web"
     }
   ],
-  "experimental_count": 19,
+  "experimental_count": 20,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 25,
+    "directory_count": 26,
     "uncatalogued_count": 5,
     "uncatalogued_paths": [
       "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",
