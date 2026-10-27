@@ -1,0 +1,14 @@
+services:
+  coupon-reuse:
+    build: .
+    ports:
+      - "127.0.0.1:8080:5000"
+    environment:
+      DB_PATH: /data/backstage.sqlite3
+      SECURE_MODE: "${SECURE_MODE:-0}"
+    volumes:
+      - coupon_reuse_data:/data
+    restart: unless-stopped
+
+volumes:
+  coupon_reuse_data:

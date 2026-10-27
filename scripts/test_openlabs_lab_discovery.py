@@ -15,6 +15,7 @@ SCRIPTS = REPO_ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 from cli_contract import validate_envelope  # noqa: E402
+from openlabs_contract import load_lab_metadata  # noqa: E402
 from openlabs_cli.lab_discovery import (  # noqa: E402
     LabSelectionError,
     ResolvedLab,
@@ -81,12 +82,26 @@ def _mini_repo(tmp: Path) -> Path:
     return tmp
 
 
+def _metadata_counts(root: Path) -> dict[str, int]:
+    counts = {"supported": 0, "experimental": 0}
+    for metadata in sorted((root / "labs").glob("*/*/lab.yml")):
+        track, name = metadata.relative_to(root / "labs").parts[:2]
+        if track.startswith((".", "_")) or name.startswith((".", "_")):
+            continue
+        result = load_lab_metadata(metadata)
+        assert result.record is not None, str(metadata)
+        counts[result.record.status] += 1
+    return counts
+
+
 def test_list_json_baseline_counts() -> None:
     code, out, _err = _run(["--json", "lab", "list"])
     assert code == 0
     payload = _json(out, label="list.json")
     assert payload["data"]["action"] == "list"
-    assert payload["data"]["counts"] == {"supported": 1, "experimental": 19}
+    expected = _metadata_counts(REPO_ROOT)
+    assert payload["data"]["counts"] == expected
+    assert len(payload["data"]["experimental"]) == expected["experimental"]
     supported = payload["data"]["supported"]
     assert len(supported) == 1
     assert supported[0]["slug"] == "duck-cross"
@@ -100,8 +115,9 @@ def test_list_human_sections() -> None:
     code, out, err = _run(["lab", "list"])
     assert code == 0
     assert err == ""
-    assert "supported (1):" in out
-    assert "experimental (19):" in out
+    expected = _metadata_counts(REPO_ROOT)
+    assert f"supported ({expected['supported']}):" in out
+    assert f"experimental ({expected['experimental']}):" in out
     assert "duck-cross" in out
 
 
@@ -135,7 +151,9 @@ def test_fixture_catalog_independent() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = _mini_repo(Path(tmp))
         _write_lab(root, "web", "alpha", status="supported", slug="alpha")
+        assert _metadata_counts(root) == {"supported": 1, "experimental": 0}
         lab = _write_lab(root, "web", "beta", status="experimental", slug="beta")
+        assert _metadata_counts(root) == {"supported": 1, "experimental": 1}
         compose = lab / "docker-compose.yml"
         compose.write_text(
             compose.read_text(encoding="utf-8")

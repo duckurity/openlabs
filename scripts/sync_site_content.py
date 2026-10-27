@@ -402,9 +402,11 @@ def render_mdx(
     status = meta.get("status", "").strip()
     if status:
         extra.append(f"status: {status}")
+    extra.append("linksTo:")
     if techniques:
-        extra.append("linksTo:")
         extra.extend(f"  - technique/{slug}" for slug, _ in techniques)
+    else:
+        extra.append("  - play")
     for key in (
         "author_name",
         "author_url",
@@ -425,6 +427,8 @@ def render_mdx(
             f"- [{name}](/technique/{slug})" for slug, name in techniques
         )
         techniques_block = f"\n## Techniques\n\nPractise in this lab:\n\n{links}\n"
+    else:
+        techniques_block = "\nRead the [OpenLabs player guide](/play) for setup and flag verification."
     return f"""---
 title: {title}
 description: {meta["description"]}

@@ -27,6 +27,12 @@
       "blocker": "",
       "follow_up_title": ""
     },
+    "labs/web/coupon-reuse": {
+      "action": "catalog_experimental_review",
+      "owner": "0xSp1D3rM4n",
+      "blocker": "New experimental lab; maintainer design review remains pending in issue #168.",
+      "follow_up_title": "Review coupon-reuse experimental lab for issue #168"
+    },
     "labs/web/duck-cross": {
       "action": "maintain",
       "owner": "maintainers",

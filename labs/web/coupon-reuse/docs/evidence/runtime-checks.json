@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-22",
+  "lab_commit": "230b3120710625da9766166facc6a981116051f4",
+  "clean_clone_compose_up": "passed",
+  "health": "healthy",
+  "documented_port": 8080,
+  "offline_tests": {
+    "network_mode": "none",
+    "results": [
+      {
+        "test": "vulnerable solve without external networking",
+        "result": "passed",
+        "totals": [
+          300,
+          250,
+          200,
+          150,
+          100
+        ],
+        "flag_format_and_hash": "passed",
+        "shared_checker": "solved"
+      },
+      {
+        "test": "secure mode rejects reuse",
+        "result": "passed",
+        "second_coupon_status": 409
+      },
+      {
+        "test": "reset restores state and permits a second solve",
+        "result": "passed",
+        "totals": [
+          300,
+          250,
+          200,
+          150,
+          100
+        ],
+        "flag_format_and_hash": "passed",
+        "shared_checker": "solved"
+      }
+    ],
+    "plaintext_flags_logged": false
+  }
+}

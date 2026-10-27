@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Shop | Backstage Merch{% endblock %}
+{% block content %}
+  <p class="eyebrow">Digital collection / 02</p>
+  <div class="page-heading">
+    <h1>One pass.<br>All access.</h1>
+    <p class="wallet">Your wallet <strong id="balance">{{ balance }} credits</strong></p>
+  </div>
+  <div class="columns">
+    <section class="panel product" aria-labelledby="product-heading">
+      <span class="badge">Digital exclusive</span>
+      <h2 id="product-heading">{{ product.name }}</h2>
+      <p>Access the next Backstage digital experience. Your confirmation is available after payment.</p>
+      <p class="price">{{ product.price }} credits</p>
+      <form method="post" action="{{ url_for('add_item') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit">Add to cart <span aria-hidden="true">&rarr;</span></button>
+      </form>
+    </section>
+    <aside class="panel offer" aria-labelledby="offer-heading">
+      <p class="eyebrow">Welcome offer</p>
+      <h2 id="offer-heading">Save 50 credits.</h2>
+      <p>Use the public coupon <code>WELCOME50</code> at checkout.</p>
+      <p class="policy">Once per cart.</p>
+    </aside>
+  </div>
+{% endblock %}

@@ -1,0 +1,72 @@
+/* Local openlabs palette: Ink, Warm, Canvas and Ember. No external assets. */
+:root {
+  --ink: #1e1e1e;
+  --warm: #f4f2f1;
+  --canvas: #1c1916;
+  --ember: #ff3616;
+  --muted: #615c58;
+  --rule: #c9c3be;
+  font-family: system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--warm);
+  line-height: 1.6;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; text-underline-offset: 4px; }
+button, input { font: inherit; }
+button, a, input { outline-offset: 5px; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--ink); }
+.site-header, main, .site-footer { max-width: 1120px; margin: auto; padding: 28px 36px; }
+.site-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--rule); }
+.brand { font-size: 1.25rem; font-weight: 800; letter-spacing: -.04em; text-decoration: none; }
+.brand span { font-weight: 400; }
+nav { display: flex; align-items: center; gap: 24px; font-size: .9rem; }
+nav a { text-decoration: none; }
+nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--ember); text-decoration-thickness: 2px; }
+main { min-height: calc(100vh - 185px); padding-top: 52px; padding-bottom: 64px; }
+h1 { font-size: clamp(2.7rem, 7vw, 5rem); line-height: 1.02; letter-spacing: -.055em; margin: 20px 0 32px; font-weight: 650; }
+h2 { font-size: 1.65rem; line-height: 1.2; letter-spacing: -.035em; margin: 18px 0; }
+p { margin: 16px 0; }
+.intro { max-width: 540px; color: var(--muted); }
+.eyebrow, .badge { font-family: ui-monospace, monospace; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
+.eyebrow { color: var(--muted); }
+.badge { display: inline-block; border: 1px solid var(--rule); padding: 5px 9px; }
+.page-heading { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.wallet { min-width: 165px; border-left: 3px solid var(--ember); padding-left: 20px; color: var(--muted); }
+.wallet strong { display: block; color: var(--ink); font-size: 1.4rem; }
+.columns { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; }
+.panel { border: 1px solid var(--rule); padding: 30px; }
+.login-panel { max-width: 480px; margin-top: 32px; }
+.panel h2:first-child { margin-top: 0; }
+.offer { align-self: start; }
+.offer .eyebrow { margin-top: 0; }
+.price { font-size: 2rem; font-weight: 650; letter-spacing: -.04em; }
+label { display: block; margin: 20px 0 6px; font-size: .9rem; }
+input { display: block; width: 100%; padding: 12px; color: var(--ink); background: transparent; border: 1px solid var(--muted); border-radius: 0; }
+button { display: inline-flex; align-items: center; justify-content: space-between; gap: 28px; margin-top: 22px; padding: 12px 20px; color: var(--warm); background: var(--canvas); border: 1px solid var(--canvas); border-radius: 0; cursor: pointer; }
+button:hover { background: var(--ink); }
+.text-button { margin: 0; padding: 0; border: 0; background: none; color: inherit; font-weight: 400; }
+.text-button:hover { background: none; text-decoration: underline; }
+.policy { font-size: .85rem; color: var(--muted); }
+.totals { margin: 28px 0 0; }
+.totals > div { display: flex; justify-content: space-between; gap: 16px; margin: 10px 0; }
+dd { margin: 0; text-align: right; }
+.totals .total-row { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 1.3rem; }
+.notice, .success { border-left: 3px solid var(--ember); padding: 18px 24px; margin-bottom: 24px; }
+.error { color: #a21d08; }
+code { font-family: ui-monospace, monospace; overflow-wrap: anywhere; }
+#flag { display: block; padding: 16px; background: #e9e4e0; }
+.site-footer { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--rule); color: var(--muted); font-size: .8rem; }
+.skip-link { position: absolute; left: -9999px; }
+.skip-link:focus { top: 8px; left: 8px; background: var(--warm); padding: 8px; }
+@media (max-width: 680px) {
+  .site-header, main, .site-footer { padding-left: 20px; padding-right: 20px; }
+  .site-header { flex-wrap: wrap; gap: 16px; }
+  main { padding-top: 32px; }
+  .page-heading { display: block; }
+  .wallet { margin-bottom: 28px; }
+  .columns { grid-template-columns: 1fr; }
+  .panel { padding: 24px; }
+  .site-footer { flex-direction: column; gap: 4px; }
+}

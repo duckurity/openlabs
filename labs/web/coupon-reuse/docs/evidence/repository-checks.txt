@@ -1,0 +1,120 @@
+Repository checks on 2026-10-22.
+No plaintext flags are retained.
+
+$ python3 scripts/validate.py
+exit: 0
+blocking failures (supported): none
+advisory findings (experimental): none
+uncatalogued directories (5; not in public catalog):
+  labs/web/Sayed_Khashana_REST_API_IDOR_CTF
+  labs/web/duckcorp-savegame
+  labs/web/duckdesk
+  labs/web/duckfleet
+  labs/web/duckmarket
+catalog: 1 supported, 20 experimental
+
+$ python3 scripts/test_contract.py
+exit: 0
+tier1 lifecycle tests: passed 11 tests
+openlabs runner: passed 2 tests
+openlabs cli: passed 13 tests
+openlabs issue: passed 6 tests
+openlabs lab discovery: passed 6 tests
+openlabs environment: passed 11 tests
+openlabs doctor: passed 5 tests
+openlabs state: passed 2 tests
+openlabs namespace: passed 3 tests
+openlabs port: passed 3 tests
+openlabs lab setup: passed 5 tests
+openlabs lab lifecycle: passed 5 tests
+openlabs reset safety: passed 6 tests
+openlabs lab verify: passed 5 tests
+cli contract fixtures: passed 22
+cli contract coverage: ok (openlabs.command.v1, lab actions ['check', 'compose', 'list', 'prove', 'reset', 'score', 'setup', 'start', 'status', 'stop', 'validate', 'verify'])
+document shape: ok (46 entries)
+registry integrity: ok
+registry references: ok
+redaction: ok
+duplicate fixture: ok
+m2 docs tests: passed
+m2 release report fixtures and generator ok
+m2 gate: passed 18 suites
+fixtures: passed 5 cases
+catalog context: passed 21 labs
+duplicate parsers: none outside openlabs_contract.py
+schema document: ok
+valid fixtures: passed 4
+invalid fixtures: rejected 7
+catalog representation: passed 21 labs
+contract gate: passed 3 suites
+
+$ python3 scripts/test_validate_status.py
+exit: 0
+passed 4 status fixtures
+
+$ python3 scripts/test_status_aware_inventory.py
+exit: 0
+passed 6 inventory tests
+
+$ python3 scripts/test_lab_triage_inventory.py
+exit: 0
+triage ok: 26 directories, 5 uncatalogued
+
+$ python3 scripts/test_sync_catalog_public.py
+exit: 0
+catalog public outputs up to date
+
+$ python3 scripts/test_baseline_report.py
+exit: 0
+baseline report fixtures and generator ok
+
+$ python3 scripts/test_lab_author_metadata.py
+exit: 0
+lab author ok: 21 catalogued labs
+
+$ python3 scripts/baseline_report.py --check --wiki wiki/M0-Baseline-Evidence.md
+exit: 0
+baseline ok: commit 230b31207106, 1 supported labs
+
+$ python3 scripts/validate.py --compose
+exit: 0
+blocking failures (supported): none
+advisory findings (experimental): none
+uncatalogued directories (5; not in public catalog):
+  labs/web/Sayed_Khashana_REST_API_IDOR_CTF
+  labs/web/duckcorp-savegame
+  labs/web/duckdesk
+  labs/web/duckfleet
+  labs/web/duckmarket
+catalog: 1 supported, 20 experimental
+
+$ python3 scripts/sync_catalog_public.py --check
+exit: 0
+catalog public outputs up to date
+
+$ python3 scripts/sync_site_content.py --check
+exit: 0
+content up to date
+
+$ python3 scripts/score_lab.py --min 70
+exit: 0
+blocking failures (supported): none
+advisory findings (experimental): none
+uncatalogued directories (5; not in public catalog):
+  labs/web/Sayed_Khashana_REST_API_IDOR_CTF
+  labs/web/duckcorp-savegame
+  labs/web/duckdesk
+  labs/web/duckfleet
+  labs/web/duckmarket
+catalog: 1 supported, 20 experimental
+
+$ python3 scripts/test_sync_site_content.py
+exit: 0
+passed 6 author login cases and 2 lab link cases
+
+$ Node 22.23.4: contentbit doctor --strict-seo
+exit: 0
+Files: 37
+Errors: 0
+SEO findings: 0
+Non-blocking content warnings: 54

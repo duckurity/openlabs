@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Backstage Merch{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="{{ url_for('shop') }}">Backstage <span>Merch</span></a>
+      {% if session.get('user_id') %}
+        <nav aria-label="Main navigation">
+          <a href="{{ url_for('shop') }}" {% if request.endpoint == 'shop' %}aria-current="page"{% endif %}>Shop</a>
+          <a href="{{ url_for('cart') }}" {% if request.endpoint == 'cart' %}aria-current="page"{% endif %}>Cart</a>
+          <form method="post" action="{{ url_for('logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="text-button" type="submit">Log out</button>
+          </form>
+        </nav>
+      {% endif %}
+    </header>
+    <main id="content">
+      {% for message in get_flashed_messages() %}
+        <p class="notice" role="status">{{ message }}</p>
+      {% endfor %}
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">Backstage Merch <span>Digital access. One experience.</span></footer>
+  </body>
+</html>

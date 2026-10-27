@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}{{ error.code }} | Backstage Merch{% endblock %}
+{% block content %}
+  <p class="eyebrow">Request / {{ error.code }}</p>
+  <h1>{{ error.name }}</h1>
+  <section class="panel">
+    <p class="error" role="alert">{{ error.description }}</p>
+    <a href="{{ url_for('cart') if session.get('user_id') else url_for('login') }}">Return to the portal</a>
+  </section>
+{% endblock %}

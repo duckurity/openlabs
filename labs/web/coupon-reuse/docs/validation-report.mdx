@@ -1,0 +1,71 @@
+# Validation report
+
+## Scope
+
+Validated on `2026-10-22`.
+
+The author reported a successful manual solve.
+The independent checks below tested the published lab from a clean clone.
+The application code was unchanged.
+
+## Application results
+
+| Test | Observed result | Status |
+| --- | --- | --- |
+| Image build from a clean clone | The pinned Docker image built | Passed |
+| `docker compose up -d` | The service started on `127.0.0.1:8080` and became healthy | Passed |
+| Customer login | The supplied account signed in with `100` credits | Passed |
+| Apply the coupon once | The total became `250`; checkout returned `409` | Passed |
+| Apply the coupon four times | The totals were `250`, `200`, `150`, then `100` | Passed |
+| Purchase and flag delivery | Payment completed and the confirmation displayed the flag | Passed |
+| Shared flag checker | The recovered value matched the metadata; the checker returned `solved` | Passed |
+| Secure mode | The first coupon worked; the second returned `409`; the total stayed `250` | Passed |
+| Reset | Old sessions were invalidated and the fresh wallet returned to `100` credits | Passed |
+| Second solve after reset | A new purchase succeeded and the checker accepted the flag | Passed |
+| Offline runtime | The solve, secure mode, and reset checks passed with Docker networking set to `none` | Passed |
+
+The clean clone used lab commit `230b312`.
+The normal startup check used a separate Compose project and a fresh volume.
+The offline tests used temporary data in an isolated container.
+No plaintext flag was retained in the evidence.
+
+See [runtime evidence](evidence/runtime-checks.json), the
+[walkthrough](challenge-design.mdx#walkthrough), and the
+[operations guide](operations.mdx).
+
+## Repository checks
+
+| Check | Result |
+| --- | --- |
+| Structure and metadata validation | Passed |
+| Compose validation | Passed |
+| Full contract gate, including the M2 suite | Passed |
+| Flag format and SHA-256 match | Passed |
+| Catalog, creator metadata, and triage inventory | Passed |
+| Documentation links, formatting, and flag hygiene | Passed |
+| Site generation and strict SEO check | Passed |
+
+The [repository output](evidence/repository-checks.txt) records the commands and results.
+
+The strict content check used official Node `22.23.4` and returned exit `0`,
+with no errors or SEO findings. It also reported non-blocking content warnings.
+
+## Catalog integration
+
+The new lab raises the experimental catalog count from `19` to `20`.
+Two discovery tests previously required the fixed count `19`.
+They now compare CLI output with counts read from catalog metadata.
+The existing reference-lab assertions remain in place.
+The fixture test checks the count before and after adding another lab.
+
+The lab is registered under the author's GitHub account.
+Its status remains `experimental`, with maintainer review pending in issue `#168`.
+Catalog and inventory pages were regenerated with the repository tools.
+Generated pages for labs without technique tags now link to the player guide.
+Regression checks cover both empty and populated technique lists.
+
+## Limits
+
+These checks validate the documented local training flow.
+They do not constitute a full penetration test or dependency vulnerability audit.
+Maintainer design approval and the hosted CI result remain separate requirements.
