@@ -1,0 +1,19 @@
+.git
+.github
+.gitignore
+
+# Secrets — NEVER bake these into an image layer
+flag.txt
+.env
+
+README.md
+*.md
+
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+
+*.sqlite3
+instance/
+uploads/

@@ -44,7 +44,9 @@ def badge_asset_version(stem: str, *, variant: str) -> str:
     path = REPO_ROOT / ".github/assets/badges" / f"{stem}-{variant}.svg"
     if not path.is_file():
         return "00000000"
-    return hashlib.sha256(path.read_bytes()).hexdigest()[:8]
+
+    content = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(content).hexdigest()[:8]
 
 CHIP_RE = re.compile(
     r'<picture><source media="\(prefers-color-scheme: dark\)" '

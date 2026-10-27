@@ -78,10 +78,10 @@ def discover_uncatalogued_dirs() -> list[Path]:
     if not LABS_DIR.is_dir():
         return []
     uncatalogued: list[Path] = []
-    for track in sorted(LABS_DIR.iterdir()):
+    for track in sorted(LABS_DIR.iterdir(), key=lambda path: path.name.casefold()):
         if not track.is_dir() or track.name.startswith((".", "_")):
             continue
-        for lab in sorted(track.iterdir()):
+        for lab in sorted(track.iterdir(), key=lambda path: path.name.casefold()):
             if lab.is_dir() and not lab.name.startswith((".", "_")):
                 if not (lab / "lab.yml").is_file():
                     uncatalogued.append(lab)

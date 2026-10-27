@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 20,
+  "catalogued_count": 21,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -30,6 +30,14 @@
       "difficulty": "medium",
       "name": "duck-nest",
       "path": "labs/web/duck-nest",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "DuckBot is a lightweight customer-support chatbot that has internal instructions containing a secret flag.",
+      "difficulty": "easy",
+      "name": "duckbot",
+      "path": "labs/web/duckbot",
       "status": "experimental",
       "track": "web"
     },
@@ -154,17 +162,17 @@
       "track": "web"
     }
   ],
-  "experimental_count": 19,
+  "experimental_count": 20,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 25,
+    "directory_count": 26,
     "uncatalogued_count": 5,
     "uncatalogued_paths": [
-      "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",
       "labs/web/duckcorp-savegame",
       "labs/web/duckdesk",
       "labs/web/duckfleet",
-      "labs/web/duckmarket"
+      "labs/web/duckmarket",
+      "labs/web/Sayed_Khashana_REST_API_IDOR_CTF"
     ]
   },
   "supported": [

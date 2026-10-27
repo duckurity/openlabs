@@ -12,6 +12,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Cloudvault](https://openlabs.duckurity.com/labs/cloudvault): A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.
 - [Duck cross](https://openlabs.duckurity.com/labs/duck-cross): A reports portal with a missing object-level authorization check.
 - [Duck nest](https://openlabs.duckurity.com/labs/duck-nest): An internal project workspace for staff and interns.
+- [Duckbot](https://openlabs.duckurity.com/labs/duckbot): DuckBot is a lightweight customer-support chatbot that has internal instructions containing a secret flag.
 - [Duckexchange](https://openlabs.duckurity.com/labs/duckexchange): A tenant document API with a gRPC transcoding authorization bypass.
 - [Duckrpc archive](https://openlabs.duckurity.com/labs/duckrpc-archive): A gRPC document archive with authentication and a SQL injection vulnerability.
 - [Duckvault web ctf](https://openlabs.duckurity.com/labs/duckvault-web-ctf): A document management API with a broken object-level authorization check.
@@ -39,6 +40,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Command injection](https://openlabs.duckurity.com/technique/command-injection): User input reaches a shell command unsanitized, letting you run commands alongside the intended one.
 - [Broken object-level authorization (IDOR)](https://openlabs.duckurity.com/technique/idor): Learn how missing per-object checks expose records that an authenticated user should not be able to read or ch
 - [Mass assignment](https://openlabs.duckurity.com/technique/mass-assignment): Learn how automatic request binding can let a client change protected object properties.
+- [Prompt Injection](https://openlabs.duckurity.com/technique/prompt-injection): Learn how crafted user input can override an AI assistant's intended behavior and expose internal instructions
 - [SQL injection](https://openlabs.duckurity.com/technique/sqli): Learn how unsanitized query input can change database logic and expose records outside normal access rules.
 - [Server-side request forgery (SSRF)](https://openlabs.duckurity.com/technique/ssrf): The server fetches a URL you control, letting you reach internal services it can see but you normally can't.
 - [Server-side template injection (SSTI)](https://openlabs.duckurity.com/technique/ssti): Learn why user input must be treated as template data, never as template source, and how to recognise unsafe r

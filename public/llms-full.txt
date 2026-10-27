@@ -161,7 +161,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -323,6 +323,37 @@ See [how to play](/play) for the usual solve loop.
 ## Techniques
 Practise in this lab:
 - [Broken object-level authorization (IDOR)](/technique/idor)
+
+## Duckbot
+
+Source: https://openlabs.duckurity.com/labs/duckbot
+
+## Brief
+DuckBot is a lightweight customer-support chatbot running in an isolated CTF environment.
+The assistant has internal instructions containing a secret flag. The application is intentionally vulnerable to prompt injection, allowing a user to manipulate the assistant into disclosing information that should remain private.
+## Setup
+Build and start the challenge:
+```bash
+docker compose up --build
+```
+The challenge is available at:
+```text
+http://localhost:8080
+```
+## Goal
+Interact with DuckBot and obtain the hidden flag through prompt injection.
+## Scope
+This challenge is self-contained and does not require an external LLM, API key, database, or Internet access.
+## Intended Technique
+Prompt Injection / System Prompt Leakage.
+## Evidence
+A successful submission should include:
+- The request/prompt used to manipulate DuckBot.
+- The relevant chatbot response containing the flag.
+- A concise explanation of why the secret was exposed.
+## Techniques
+Practise in this lab:
+- [Prompt Injection](/technique/prompt-injection)
 
 ## Duckexchange
 
@@ -1380,6 +1411,22 @@ No. The server must reject or ignore the field. A client can edit a request outs
 Use your own authorized test object, preserve a normal request, add one low-impact candidate property, and verify the stored result. Do not send broad property lists.
 ### Can PATCH be secure?
 Yes. PATCH is safe when the server allowlists paths and applies authorization and validation to every supported property.
+
+## Prompt Injection
+
+Source: https://openlabs.duckurity.com/technique/prompt-injection
+
+## Overview
+Prompt injection occurs when crafted input manipulates an AI application into ignoring or overriding its intended instructions. Depending on the application's design, this may cause it to disclose internal instructions or expose information that should remain confidential.
+## Examples
+See the [duckbot](/labs/duckbot) lab for a self-contained chatbot that demonstrates prompt injection and system prompt disclosure without requiring an external AI service.
+## Related labs
+- [duckbot](/labs/duckbot)
+Browse all [labs](/labs) when it is solved.
+## FAQ
+### Does prompt injection always expose the system prompt?
+No. The impact depends on how the application processes user input and handles sensitive information. Prompt injection may influence application behavior, but system prompt disclosure is only one possible outcome.
+Read [how to play](/play) for the usual solve loop.
 
 ## SQL injection
 
