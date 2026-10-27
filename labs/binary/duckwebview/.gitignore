@@ -1,0 +1,7 @@
+.env
+.gradle/
+**/build/
+**/.idea/
+__pycache__/
+*.pyc
+android/local.properties

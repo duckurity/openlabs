@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DuckWebView is an Android security challenge focused on WebView security and JavaScript bridge behavior.">
+  <title>DuckWebView | Mobile CTF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="shell">
+    <div class="eyebrow">DUCKURITY OPENLABS · ANDROID</div>
+
+    <h1>DuckWebView</h1>
+    <p class="lead">The Unsafe Preview</p>
+
+    <div class="meta">
+      <span>MEDIUM</span>
+      <span>WEBVIEW SECURITY</span>
+      <span>ANDROID</span>
+    </div>
+
+    <section class="panel">
+      <h2>Mission Brief</h2>
+      <p>
+        A mobile application uses an Android WebView to display HTML content.
+        Your task is to inspect the application and investigate how its
+        JavaScript interface interacts with native functionality.
+      </p>
+      <p>
+        Analyze the available application artifacts, trace the relevant
+        execution flow, and retrieve the challenge flag by identifying
+        and exploiting the intended security weakness.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Challenge APK</h2>
+      {% if apk_exists %}
+        <a class="button" href="{{ url_for('download_apk') }}">
+          Download DuckWebView APK
+        </a>
+      {% else %}
+        <p class="notice">
+          The APK is not available yet. Follow the build instructions in
+          <code>README.md</code>, then place the generated file at
+          <code>src/static/downloads/duckwebview.apk</code>.
+        </p>
+      {% endif %}
+    </section>
+
+    <p class="foot">
+      Authorized CTF environment only. Do not test against systems outside
+      the designated challenge environment.
+    </p>
+  </main>
+</body>
+</html>

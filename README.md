@@ -12,8 +12,8 @@
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/code-license-dark.svg?v=6164d6e0"><img src=".github/assets/badges/code-license-light.svg?v=d7baa62a" alt="code: Apache-2.0" height="20"></picture></a>
   <a href="LICENSE-CONTENT"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/content-license-dark.svg?v=b83304a6"><img src=".github/assets/badges/content-license-light.svg?v=b42ada1f" alt="content: CC-BY-4.0" height="20"></picture></a>
   <!-- catalog-public:badges-start -->
-  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-supported-dark.svg?v=5fbde818"><img src=".github/assets/badges/labs-supported-light.svg?v=154daa66" alt="labs: 1 supported" height="20"></picture>
-  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-experimental-dark.svg?v=01e16b65"><img src=".github/assets/badges/labs-experimental-light.svg?v=7b1e1bb3" alt="labs: 19 experimental" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-supported-dark.svg?v=8b1b53fc"><img src=".github/assets/badges/labs-supported-light.svg?v=1fc5bb5c" alt="labs: 1 supported" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-experimental-dark.svg?v=8ad4b1e9"><img src=".github/assets/badges/labs-experimental-light.svg?v=ed6f2e9e" alt="labs: 20 experimental" height="20"></picture>
 <!-- catalog-public:badges-end -->
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/docker-dark.svg?v=2b6c885f"><img src=".github/assets/badges/docker-light.svg?v=d7abbc30" alt="docker: compose v2" height="20"></picture>
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/checker-dark.svg?v=cff908fc"><img src=".github/assets/badges/checker-light.svg?v=6052eb0b" alt="checker: python3" height="20"></picture>
@@ -107,11 +107,11 @@ not how long it takes.
 ## Labs <span id="labs-catalog"></span>
 
 <!-- catalog-public:start -->
-<sub>1 supported · 19 experimental</sub>
+<sub>1 supported · 20 experimental</sub>
 
 <div align="center">
 
-**Supported** labs have documented L0–L6 evidence on file. **19 experimental** labs are runnable but not promoted. Experimental entries are not guaranteed supported.
+**Supported** labs have documented L0–L6 evidence on file. **20 experimental** labs are runnable but not promoted. Experimental entries are not guaranteed supported.
 
 | Lab | Track | Difficulty | Description |
 |:---:|:---:|:---:|:---|
@@ -129,6 +129,7 @@ not how long it takes.
 | [`duckrpc-archive`](labs/web/duckrpc-archive) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A gRPC document archive with authentication and a SQL injection vulnerability. |
 | [`duckvault`](labs/web/duckvault) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A records portal leaks an internal reference through broken access control and weak authorization. |
 | [`duckvault-web-ctf`](labs/web/duckvault-web-ctf) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg?v=78286c0b"><img src=".github/assets/badges/chip-easy-light.svg?v=cb5cf439" alt="EASY" height="18"></picture> | A document management API with a broken object-level authorization check. |
+| [`duckwebview`](labs/binary/duckwebview) | `experimental` | `binary` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | DuckWebView is an Android security challenge demonstrating risks of insecure WebView JavaScript bridges. |
 | [`fieldops-360`](labs/web/fieldops-360) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A tenant portal with email open tracking and an admin export surface. |
 | [`firmdrama`](labs/web/firmdrama) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-hard-dark.svg?v=1c4a365b"><img src=".github/assets/badges/chip-hard-light.svg?v=bcda98cd" alt="HARD" height="18"></picture> | A law firm's meeting-room portal with chained API authorization flaws and a vulnerable legacy template renderer. |
 | [`invoiceportal`](labs/web/invoiceportal) | `experimental` | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | InvoicePortal is a SaaS platform for managing company invoices. |

@@ -16,6 +16,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Duckrpc archive](https://openlabs.duckurity.com/labs/duckrpc-archive): A gRPC document archive with authentication and a SQL injection vulnerability.
 - [Duckvault web ctf](https://openlabs.duckurity.com/labs/duckvault-web-ctf): A document management API with a broken object-level authorization check.
 - [Duckvault](https://openlabs.duckurity.com/labs/duckvault): A records portal leaks an internal reference through broken access control and weak authorization.
+- [Duckwebview](https://openlabs.duckurity.com/labs/duckwebview): DuckWebView is an Android security challenge demonstrating risks of insecure WebView JavaScript bridges.
 - [Fieldops 360](https://openlabs.duckurity.com/labs/fieldops-360): A tenant portal with email open tracking and an admin export surface.
 - [Firmdrama](https://openlabs.duckurity.com/labs/firmdrama): A law firm's meeting-room portal with chained API authorization flaws and a vulnerable legacy template rendere
 - [Invoiceportal](https://openlabs.duckurity.com/labs/invoiceportal): InvoicePortal is a SaaS platform for managing company invoices.
@@ -42,6 +43,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [SQL injection](https://openlabs.duckurity.com/technique/sqli): Learn how unsanitized query input can change database logic and expose records outside normal access rules.
 - [Server-side request forgery (SSRF)](https://openlabs.duckurity.com/technique/ssrf): The server fetches a URL you control, letting you reach internal services it can see but you normally can't.
 - [Server-side template injection (SSTI)](https://openlabs.duckurity.com/technique/ssti): Learn why user input must be treated as template data, never as template source, and how to recognise unsafe r
+- [Android WebView JavaScript Bridge Exposure](https://openlabs.duckurity.com/technique/webview-security): Learn how insecure Android WebView JavaScript bridges can expose native functionality to untrusted JavaScript.
 
 ## Rules
 

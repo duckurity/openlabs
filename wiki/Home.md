@@ -13,12 +13,12 @@
   </picture>
   <!-- catalog-public:badges-start -->
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-supported-dark.svg?v=5fbde818">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-supported-light.svg?v=154daa66" alt="labs: 1 supported" height="20">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-supported-dark.svg?v=8b1b53fc">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-supported-light.svg?v=1fc5bb5c" alt="labs: 1 supported" height="20">
   </picture>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-dark.svg?v=01e16b65">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-light.svg?v=7b1e1bb3" alt="labs: 19 experimental" height="20">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-dark.svg?v=8ad4b1e9">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-light.svg?v=ed6f2e9e" alt="labs: 20 experimental" height="20">
   </picture>
 <!-- catalog-public:badges-end -->
   <picture>
@@ -79,5 +79,5 @@ Open `http://localhost:8377`. Verify a solve with
 [Report a broken lab](https://github.com/Duckurity/openlabs/issues)
 
 <!-- catalog-public:start -->
-Catalog totals: **1 supported**, **19 experimental**. Experimental labs are not guaranteed supported. See [[Lab catalog status](Lab-Catalog-Status)] and [[Lab triage inventory](Lab-Triage-Inventory)].
+Catalog totals: **1 supported**, **20 experimental**. Experimental labs are not guaranteed supported. See [[Lab catalog status](Lab-Catalog-Status)] and [[Lab triage inventory](Lab-Triage-Inventory)].
 <!-- catalog-public:end -->

@@ -1,6 +1,7 @@
 {
   "version": "openlabs.lab_creator_github.v1",
   "labs": {
+    "labs/binary/duckwebview": "0xkero",
     "labs/web/aegis-ctf": "YousefElSayed19",
     "labs/web/cafe-house-rules": "l3b4nk4",
     "labs/web/cloudvault": "mirnashams01-star",
