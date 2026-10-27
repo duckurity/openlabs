@@ -1,0 +1,158 @@
+<p align="center">
+  <strong>Created by Ziad Osama El-Boshy</strong><br />
+  <sub>Challenge author and creator</sub>
+</p>
+
+# Validation report
+
+**SealDesk · Evidence baseline · Updated 25 October 2026**
+
+> **Release decision:** The author-run playtest passed on 25 October 2026. The author approved difficulty `medium`. The result is not an independent playtest and does not provide independent difficulty calibration. Application, live lifecycle, clean-export, browser, repository-local, PDF, SEO, and read-only source-review checks passed within their stated limits. Hosted CI and maintainer review remain pending.
+
+[Evidence ledger](#evidence-ledger) · [Validation coverage](#validation-coverage) · [Reproduction](#reproduction) · [Repository integration](#repository-integration) · [Release decision](#release-decision) · [Independent playtest procedure](#independent-playtest-procedure) · [Independent playtest record](#independent-playtest-record) · [Evidence handling](#evidence-handling)
+
+## Evidence ledger
+
+| Date | Check | Result | Evidence limit |
+|---|---|---|---|
+| 24 October 2026 | Restricted test image and application suite | **Passed: 41 tests.** Built the test target and ran the suite with `--network=none`, read-only root, UID/GID `10001:10001`, dropped capabilities, `no-new-privileges`, and bounded resources. | Evidence applies to the recorded source and test image. It does not replace a live solve, source review, or hosted CI. |
+| 24 October 2026 | Live lifecycle and containment gates | **Passed: 25 of 25 gates.** The run covered test build and suite, Compose start, digest sync, relay health, and workbench access. It tested wrong-flag, receipt, and code rejection; valid receipt handling; and solver acceptance by the shared checker. It covered reset, app recreation with ingress retained, stale flag, receipt, and code rejection, and a second accepted solve. It also checked state rotation, both services' runtime controls, both networks, blocked app egress, read-only app root, and state mode and owner. | One local stack run. It does not establish hosted CI or general Docker host isolation. |
+| 24 October 2026 | Clean-export Windows player simulation | **Passed: 29 of 29 gates.** Fresh exports followed the player README. Cold BuildKit (`--no-cache --pull`) and classic-builder (`DOCKER_BUILDKIT=0`, `COMPOSE_BAKE=false`, `--no-cache`) builds passed. The 41-test suite passed, both solves were accepted by the checker, stale values were rejected after reset, runtime controls were confirmed on both services, and cleanup removed the project containers and networks. | One Windows environment. Cold builds were exercised on Windows only. |
+| 24 October 2026 | Clean-export WSL player simulation | **Passed: 27 of 27 gates.** The player README lifecycle ran with `python3`. The 41-test suite passed, both solves were accepted by the checker, stale values were rejected after reset, runtime controls were confirmed on both services, and cleanup removed the project containers and networks. | One WSL distribution. Cold-build checks were not run in this environment. |
+| 25 October 2026 | Final-revision lifecycle with existing images | **Passed: 27 of 27 gates on Windows and 27 of 27 on WSL.** Fresh exports of the final lab tree ran the README lifecycle with `--no-build`. The runtime images were verified byte-identical to the committed source, and the test stage was rebuilt offline on that runtime image. The 41-test suite, both accepted solves, reset, stale-value rejection, runtime controls, and cleanup passed. | No image was rebuilt from the network. The cold-build evidence is the 24 October Windows run. |
+| 25 October 2026 | Cold first start | **Passed in 49.9 seconds.** With no SealDesk image, base image, or build cache present, `docker compose up -d --build --wait` on a fresh export pulled the pinned base image, downloaded the hash-locked wheels, built both images, and brought both services to healthy. The digest sync and relay health check then passed. | One measurement on the author's Windows host (Docker Desktop engine 29.6.2, Compose 5.3.1) and network. It is not a performance guarantee. |
+| 25 October 2026 | Instance rotation on restart | **Confirmed.** `docker compose restart`, `stop` and `start`, and `down` and `up` each created a new instance that required a fresh digest sync. | One local check. It confirms the documented re-sync rule, not general container behavior. |
+| 24 October 2026 | Browser behavior | **Passed for the checked paths.** Valid, damaged, untrusted, invalid-JSON, and wrong-code messages were checked. Input was retained, and no horizontal overflow appeared at `390` px. | Observed in an interactive browser check on 24 October 2026. No screenshot or log was retained. |
+| 25 October 2026 | Challenge sheet | **Passed.** `python -B scripts/make_lab_pdf.py labs/crypto/sealdesk --strict` produced a two-page A4 preview whose text matches the committed sheet. The committed sheet is two A4 pages; a visual check found no clipping and no solution content. | Preview and visual checks do not establish hosted content checks. |
+| 25 October 2026 | Score and repository validators | **Passed.** `score_lab` returned `100/A`. `scripts/validate.py --compose` reported no blocking failures and no advisory findings. | Static and structural checks do not prove runtime behavior. |
+| 25 October 2026 | Dockerfile checks | **Passed.** `docker build --check` reported no warnings for `Dockerfile` and `Dockerfile.ingress`. | Syntax checks do not build or deploy images. |
+| 25 October 2026 | Local Markdown links | **Passed: zero local link errors.** | Checks local paths and heading anchors. It does not validate external link availability. |
+| 25 October 2026 | Linux CI emulation and changed-file secret scan | **Passed: 16 of 16 emulated steps with registration entries applied. The secret scan reported zero hits.** The emulation covered the Validate, Security score, and Content Python steps for the registered lab and its documents and generated artifacts. | This is local emulation, not hosted CI. Gitleaks and the filesystem vulnerability scan run only in hosted CI. |
+| 25 October 2026 | Strict SEO | **Passed: zero errors and zero SEO findings.** The strict check covered 38 pages, including the SealDesk page and the padding-oracle technique page. | The run also reported 53 repository-wide warnings. Warning count is broader than the zero-finding SealDesk result. |
+| 24 October 2026 | Independent read-only source review | **Passed for the reviewed source.** The review covered the app, relay, Compose configuration, Dockerfiles, operator helpers, solver, tests, and player README. It reported no unintended security or logic issues and noted one relay limitation: connections beyond the 64 forwarding slots are accepted and closed after a 50 ms wait for a slot. | Read-only source review is not dynamic testing, hosted CI, or maintainer review. |
+| 25 October 2026 | Author-run playtest | **Passed, as reported by the author.** Reviewer: Ziad Osama El-Boshy (challenge author). A fresh start from the player README and flag-digest sync passed. The solve passed, and the checker accepted the final flag. Reset passed and rejected the old flag. No ambiguities or unintended paths were reported. The author approved difficulty `medium`. This was not an independent playtest or independent difficulty calibration. | Owner-provided record. |
+| Current release gates | Hosted CI | **Pending.** | Must run against the submitted revision. |
+| Current release gates | Maintainer review | **Pending.** | Maintainers must review the registration entries and release evidence. |
+
+## Validation coverage
+
+The 41-test suite covers receipt parsing and cryptographic response order, HTTP behavior, runtime state, document opening, solver behavior, and operator safeguards. The documented test container has no network and runs with a read-only root, non-root identity, dropped capabilities, `no-new-privileges`, and bounded resources.
+
+The 25-gate live lifecycle run covered the intended HTTP solve, checker acceptance, reset and rotation, stale-value rejection, and selected runtime controls. The two clean-export runs followed the player README from fresh exports. The Windows run also exercised cold BuildKit and classic-builder builds. The WSL run used `python3`; it did not include cold builds. On 25 October 2026, the final lab tree passed the same lifecycle on both platforms with existing images, and a restart check confirmed that every app container stop, restart, or removal creates a new instance. Logged full solves took 81.0 to 161.5 seconds across the retained live and export runs. This timing is not a difficulty measure.
+
+The browser review checked five message classes, input retention, and overflow at one narrow viewport. Observed in an interactive browser check on 24 October 2026. No screenshot or log was retained. The strict PDF evidence is a visually checked two-page A4 sheet. Strict SEO reported no errors or findings while retaining 53 warnings across the repository. The read-only source review is separate from runtime testing and maintainer review.
+
+| Scope | Coverage and limit |
+|---|---|
+| Application suite | 41 tests passed in the restricted test container. This is finite behavioral coverage, not proof against every unintended behavior. |
+| Live runtime | 25 of 25 gates passed on one local stack. This is not hosted CI and does not prove general Docker Engine or kernel isolation. |
+| Clean export | Windows passed 29 of 29 gates, including cold BuildKit and classic-builder builds. WSL passed 27 of 27 gates with `python3`; cold builds were not run there. |
+| Browser review | Checked valid, damaged, untrusted, invalid-JSON, and wrong-code messages, retained input, and no overflow at `390` px. Interactive check only. |
+| Author-run playtest | Passed, as reported by the author. Fresh start from the player README, flag-digest sync, solve with checker acceptance, and reset with old-flag rejection passed. |
+| Difficulty | The author approved `medium`. The author-run result does not independently calibrate difficulty. |
+| Source review | Read-only review reported no unintended security or logic issues and noted the relay limitation. It is not dynamic testing or maintainer review. |
+| Supply chain | Dockerfile checks passed. No image vulnerability scan is recorded. |
+| Repository CI | Local Linux emulation passed 16 of 16 steps with registration entries applied. Hosted CI has not run. |
+| SEO | Zero errors and zero findings across the strict check. The 53 warnings are repository-wide. |
+| Challenge sheet | Strict output was visually checked as two-page A4. This does not establish hosted rendering. |
+
+## Reproduction
+
+From the repository root, run the structural and Compose validators:
+
+```sh
+python -B scripts/validate.py
+python -B scripts/validate.py --compose
+```
+
+From the lab directory, build the test target and run the suite in the restricted container. Before running these raw Docker commands, confirm that the active Docker context targets the intended local engine and that `DOCKER_HOST`, `DOCKER_CONTEXT`, and `COMPOSE_*` overrides are unset. The raw Docker CLI does not enforce the scope checks performed by the Python helpers.
+
+```sh
+docker build --network=default --target test --tag sealdesk:test .
+docker run --rm --network=none --read-only --user 10001:10001 \
+  --cap-drop ALL --security-opt no-new-privileges:true \
+  --memory 256m --memory-swap 256m --cpus 1 --pids-limit 64 \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700 \
+  --entrypoint python sealdesk:test -B -m unittest discover -s tests -v
+```
+
+To reproduce the local lifecycle from the lab directory:
+
+Before running these raw Compose commands, follow the context and override check in the [operations runbook](operations.mdx).
+
+```sh
+docker compose up -d --build --wait
+python scripts/sync_flag_hash.py
+docker compose ps
+python solver/solve.py --url http://127.0.0.1:8080
+python reset.py
+python solver/solve.py --url http://127.0.0.1:8080
+docker compose down
+```
+
+The solver passes the returned flag to the repository checker in memory and does not print it. For a manual checker exercise, use `python ../../../scripts/check.py .` and enter a test value only at the prompt. The [official solution](official-solution.mdx) describes the player workflow. The test image build may need internet access for the pinned base and wheels. The test container itself has no network. Use `python3` where the host does not provide `python`.
+
+The recorded Dockerfile checks used `docker build --check` for `Dockerfile` and `Dockerfile.ingress`. The strict challenge-sheet check used the repository's canonical PDF generator. The strict SEO check used `contentbit doctor --strict-seo`. The local link result covers local paths and heading anchors only. These commands reproduce their respective checks; they do not substitute for hosted CI.
+
+## Repository integration
+
+Lab-specific validation, score, local links, PDF, Dockerfile, strict SEO, and secret-scan checks passed. Shared CI gates enumerate every catalogued lab. The discovery counts, triage registry, and creator fixture used by the author-metadata check require SealDesk registration entries.
+
+The Linux CI emulation passed when those registration entries were applied. This verifies the emulated steps for that candidate state. It does not show that hosted CI has run. Maintainers must review the registration entries and decide how to carry them with the release. The registration entries are isolated in the final, droppable shared-gate commit. Maintainers may drop it and update `main` with the entries instead. The documentation changes in this report do not alter shared registries, fixtures, tests, workflows, or generators.
+
+## Release decision
+
+| Gate | Status | Evidence and limit |
+|---|---|---|
+| Application suite | Passed | 41 tests in the restricted test container. |
+| Live solve, checker, and reset | Passed | 25 of 25 local lifecycle gates. Both clean-export solves were accepted by the checker; stale values were rejected after reset. |
+| Runtime containment | Passed for checked controls | Both services, networks, app egress, read-only root, and state ownership and mode were checked. This does not prove host or kernel isolation. |
+| Repository-local validators | Passed | `score_lab` returned `100/A`; `scripts/validate.py --compose` reported no blocking failures and no advisory findings. Local links had zero errors. |
+| Dockerfile checks | Passed | `docker build --check` reported no warnings for `Dockerfile` and `Dockerfile.ingress`. This is a syntax check, not an image vulnerability scan. |
+| Challenge sheet | Passed | `scripts/make_lab_pdf.py labs/crypto/sealdesk --strict` produced a two-page A4 preview whose text matches the committed sheet. The committed sheet is two A4 pages; a visual check found no clipping and no solution content. |
+| Clean-export readiness | Passed | Windows: 29 of 29 gates, including cold BuildKit and classic-builder builds. WSL: 27 of 27 gates with `python3`; no cold builds. The final lab tree passed 27 of 27 no-build gates on each platform. |
+| Browser behavior | Passed for checked paths | Five message classes, retained input, and overflow at `390` px checked in an interactive browser session. |
+| Strict SEO | Passed | Zero errors and zero findings; 53 warnings across the repository. |
+| Independent read-only source review | Passed for inspected source | No unintended security or logic issues reported. One relay limitation was noted. This is not dynamic testing or maintainer review. |
+| Author-run playtest | Passed, as reported by the author; author approved difficulty `medium` | Reviewer Ziad Osama El-Boshy (challenge author). |
+| Independent difficulty calibration | Not established | The author-run playtest does not provide independent calibration. |
+| Hosted CI | Pending | Must run against the submitted revision. |
+| Maintainer review | Pending | Review registration entries and release evidence. |
+
+SealDesk remains an `experimental` lab. The author approved difficulty `medium`. Hosted CI and maintainer review remain pending, so release approval is not established.
+
+## Independent playtest procedure
+
+This procedure describes a separate source-blind assessment. It does not describe or relabel the completed author-run playtest. If a separate assessment is conducted, provide only a service-only package and the player README. Do not provide this document set, the evaluator solver, source code, or runtime filesystem access. The reviewer should not receive coaching during the solve.
+
+Record the following:
+
+- Whether clean deployment from the player README succeeds, including setup friction.
+- What response evidence led the reviewer to identify the oracle.
+- Whether the reviewer recovered the required code and submitted the final flag.
+- Any hints used and whether they changed the intended learning objective.
+- Reset and stale-value rejection results.
+- Any ambiguity, unintended shortcut, or non-obvious failure.
+- The reviewer's own difficulty assessment and the basis for it.
+
+An independent reviewer can provide separate difficulty evidence. The author-run result recorded below cannot provide that evidence. The procedure is guidance, not a release-status claim.
+
+## Independent playtest record
+
+This record captures the challenge author's playtest. It is not an independent playtest.
+
+| Field | Record |
+|---|---|
+| Reviewer | Ziad Osama El-Boshy (challenge author) |
+| Date | 25 October 2026 |
+| Playtest type | Author-run, not independent |
+| Fresh start from the player README | Passed, as reported by the author |
+| Flag-digest synchronization | Passed, as reported by the author |
+| Solve and checker acceptance | Passed, as reported by the author; the checker accepted the final flag |
+| Reset and stale-value rejection | Passed, as reported by the author |
+| Ambiguities or unintended paths | None reported by the author |
+| Difficulty | `medium`, approved by the author; not independently calibrated |
+
+## Evidence handling
+
+Keep generated flags, access codes, keys, full runtime state, and raw response captures out of public documentation. Record sanitized pass/fail outcomes rather than secret values. Update this report only from evidence for the current source and document revision. Keep the intentional bounded padding oracle described in the [security report](security-report.mdx).

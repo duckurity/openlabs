@@ -1,0 +1,101 @@
+# Official solution
+
+**SealDesk · Evaluator edition · Updated 25 October 2026**
+
+> **Spoilers:** This document gives the complete intended solve. Keep it with maintainer and evaluator materials. Do not provide it during a player-only exercise.
+
+## Intended path at a glance
+
+```mermaid
+sequenceDiagram
+  participant P as Player
+  participant W as Workbench
+  participant R as Receipt checker
+  participant D as Document endpoint
+  participant C as Local checker
+  P->>W: Open the workbench and request GET /case
+  W-->>P: Synthetic case information and public receipt
+  P->>R: Check the original receipt
+  R-->>P: 200 valid_receipt
+  loop Vary IV or preceding ciphertext block
+      P->>R: Submit a bounded modified receipt
+      R-->>P: damaged_envelope or untrusted_envelope
+  end
+  Note over P,R: Different responses expose padding validity; no decrypted bytes are returned.
+  Note over P: Recover the framed plaintext and access code.
+  P->>D: Submit CASE-4107 and the recovered access code
+  D-->>P: Fictional document and current flag
+  P->>C: Submit the returned flag
+  C-->>P: Accepted
+```
+
+The weakness is the order of operations in the receipt checker. It decrypts CBC ciphertext and removes PKCS#7 padding before it verifies the HMAC. It reports invalid padding as `damaged_envelope` and valid padding with an invalid tag as `untrusted_envelope`. The difference discloses a one-bit padding predicate. The endpoint does not return plaintext.[1]
+
+## Prerequisites
+
+- Start the lab by following the player [README](../README.md). The service is published only on loopback at `http://127.0.0.1:8080/`.
+- Run from `labs/crypto/sealdesk` when using the evaluator solver or operator helpers.
+- Treat the receipt as four fields: `version`, `iv`, `ciphertext`, and `tag`. The fixed document identifier is `CASE-4107`.
+- The reference solver and operator utilities are evaluator materials. They are not part of the player-facing workbench.
+
+## 1. Establish the response oracle
+
+Load the workbench and request `GET /case`. It returns synthetic case information and the original receipt. Submitting that receipt to `POST /api/receipts/check` returns `200` with `valid_receipt`. That response confirms the reference envelope is authentic. It does not disclose the code or authorize the document.
+
+Submit bounded, modified receipts while preserving the request shape. The receipt route exposes these outcomes:
+
+| Input condition | HTTP result | Meaning |
+|---|---:|---|
+| Invalid PKCS#7 padding | `422`, `damaged_envelope` | The decrypted final block did not have valid padding. |
+| Valid padding with an invalid HMAC | `422`, `untrusted_envelope` | Padding passed, but authentication failed. |
+| Authentic original receipt | `200`, `valid_receipt` | The envelope is accepted. No plaintext is returned. |
+| Malformed JSON or receipt framing | `400`, `invalid_receipt` | Parsing stopped before the oracle check. |
+| Body above the configured limit | `413`, `request_too_large` | Request size was rejected before receipt processing. |
+
+The first two outcomes are the intentional oracle. Both are `422`, but their response messages differ. They are not timing classes. Format failures and size limits are separate checks and do not provide a padding result.
+
+## 2. Recover the access code
+
+For CBC decryption, the plaintext block is `P_i = D_K(C_i) XOR C_(i-1)`. For the first block, the IV takes the place of `C_(i-1)`. Modifying the preceding block changes the target plaintext while leaving `D_K(C_i)` unchanged.
+
+For each ciphertext block, work from the last byte toward the first. To test a padding length `p`, set the already-solved suffix of the modified preceding block so that the target suffix decrypts to `p` repeated bytes. Vary the current byte until the response reports valid padding. This identifies the corresponding byte of the intermediate block `D_K(C_i)`. XOR that value with the original preceding block to recover the original plaintext byte. For the first ciphertext block, modify the IV instead.
+
+Repeat until the code-bearing frame is recovered. The plaintext format is `SDR1|CASE-4107|<32 lowercase hexadecimal characters>`. The shipped solver recovers each ciphertext block, removes padding, checks the fixed marker and document identifier, and validates the code shape. The oracle reveals plaintext bytes. It does not reveal either key or the flag.
+
+Do not use elapsed time to classify responses. The solver relies on response content and status. Do not attempt to forge the HMAC. The separate document route is the intended way to use the recovered code.
+
+## 3. Open the separate document
+
+Submit the fixed identifier and recovered code to `POST /api/documents/open` as JSON with exactly `document_id` and `access_code`. A matching pair returns the fictional document and the current flag. A wrong identifier, wrong code, extra field, or malformed request receives the generic document-unavailable response. A successful receipt check by itself is not sufficient.
+
+The application does not submit the flag to the repository checker. The returned value is the challenge result. Do not copy it into maintainer documentation, test logs, or shared issue text.
+
+## 4. Check the final flag
+
+From the lab directory, run the repository checker:
+
+```sh
+python ../../../scripts/check.py .
+```
+
+At its prompt, enter the flag returned by the document route. A correct value is accepted. A deliberately incorrect test value is rejected. The checker reads the synchronized digest in `lab.yml` and does not call the service.
+
+## Evaluator automation
+
+The supported local solver command is:
+
+```sh
+python solver/solve.py --url http://127.0.0.1:8080
+```
+
+The solver checks the rendered page and public case response, exercises the receipt endpoint, recovers the framed plaintext, opens the document, and passes the returned flag to the repository checker in memory. It does not print the flag. It accepts only loopback HTTP URLs on the configured port, disables proxy and redirect behavior, and bounds response size and request time. A successful run verifies the intended local lifecycle. It does not establish independent difficulty calibration.
+
+## Why the response sequence works
+
+The receipt checker validates bounded framing, decrypts CBC ciphertext, removes padding, verifies HMAC, and discards plaintext. It returns `damaged_envelope` for invalid padding and `untrusted_envelope` for valid padding followed by invalid authentication. The distinct response messages reveal the padding predicate. Modifying the IV or prior ciphertext block then lets a solver recover the next plaintext block byte by byte.
+
+The original receipt still requires a valid tag. The attack does not create a valid HMAC. Document access uses a different endpoint and checks the recovered code against current server-side state. Reset creates a new state, so previously recovered values do not authorize the replacement instance.
+
+## Sources
+
+[1] https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle (OWASP Web Security Testing Guide: Testing for Padding Oracle)
