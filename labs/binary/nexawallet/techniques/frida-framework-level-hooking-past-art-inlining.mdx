@@ -1,0 +1,156 @@
+---
+title: Hooking framework methods when ART inlining defeats a direct Frida hook
+description: Learn to recognize a Frida hook that installs with no error but has no effect, why ART/JIT method inlining causes it, and how to pivot to hooking the underlying framework calls instead.
+type: technique
+key: technique-frida-framework-level-hooking-past-art-inlining
+slug: technique/frida-framework-level-hooking-past-art-inlining
+intent: Diagnose a Frida hook that silently has no effect due to ART inlining, and learn the framework-level hooking pivot that works around it.
+keywords:
+  primary: Frida ART inlining bypass practice lab
+  secondary:
+    - frida hook not working android
+    - hook framework methods instead of app method
+linksTo:
+  - labs/nexawallet
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+A Frida hook on an Android method is usually straightforward:
+`Java.use("some.Class").someMethod.implementation = function(...) { ... }`.
+Most of the time this works exactly as expected. But for small,
+single-call-site methods, the Android Runtime (ART) is free to **inline**
+the method's body directly into its caller — either ahead-of-time or via
+the JIT compiler at runtime. Once that happens, there is no longer an
+actual method call at that location for Frida to intercept: the original
+method object still exists and can still be hooked, but the code path
+that actually runs never calls through it anymore.
+
+## Examples
+
+### The silent-no-op hook
+
+A player hooks `IntegrityGate.isTampered()`, expecting it to force
+`false`. The Frida console confirms the hook installed with no error. The
+app's behavior is completely unchanged — it still redirects as if the
+original, unhooked check ran. There is no exception, no warning, nothing
+in `adb logcat` pointing at the hook itself failing — just a hook that
+has no observable effect.
+
+### Confirming inlining is actually the cause
+
+Adding a debug log directly after the call site in the *caller*
+(`Log.d("Debug", "isTampered() returned: $result")`, watched via
+`adb logcat`) shows the value is still being computed as if the original
+logic executed — because it is: the original logic was copied into the
+caller at compile/JIT time, not invoked as a separate call anymore. This
+rules out more mundane explanations (hooking the wrong class/package,
+`Java.perform` running before the class loads, an exception being
+silently swallowed).
+
+### The framework-level pivot
+
+Instead of hooking the small app-level wrapper, identify the standard
+Android/Java framework APIs it's built on — a socket connection, a
+buffered-reader read, a thread-name lookup — and hook those directly.
+Framework methods are large, heavily reused across the entire app and the
+Android framework itself, so they are not subject to the same
+single-call-site inlining; hooking them works regardless of what the
+compiler did to the small app-level function that used to call them.
+
+## How to recognise it in a lab
+
+- A hook installs with no error (Frida reports the `.implementation`
+  assignment succeeded) but produces no observable change in app
+  behavior.
+- `adb logcat` or an inline debug print shows the original, un-hooked
+  logic still appears to run at the method's call site.
+- The hooked method is small (a handful of lines, often just combining
+  calls to 2-3 other methods with boolean logic) — a strong candidate for
+  inlining, especially after the app has run a few times (JIT) or at
+  certain compile settings (AOT).
+
+## Common mistakes and false assumptions
+
+### "My hook syntax must be wrong"
+
+The very first instinct when a hook has no effect is usually to suspect a
+syntax or timing mistake (wrong class name, hooking before `Java.perform`
+fires, wrong overload selected). Those are real, more common causes and
+worth ruling out first — but if the hook genuinely installs without error
+and the method is small and has a single obvious caller, inlining is a
+real, distinct possibility worth checking for specifically.
+
+### "Forcing interpret-only mode will fix it"
+
+`adb shell cmd package compile -m interpret-only -f <package>` disables
+some ahead-of-time optimization and can be worth trying, but a JIT
+compiler operating at runtime can still inline hot, small methods
+independently of the AOT compilation mode — so this alone doesn't
+guarantee the hook will start working.
+
+### "I should patch the APK instead"
+
+Static patching (editing smali/bytecode and rebuilding) is a valid
+alternative technique in general, but for a lab specifically testing
+*dynamic* instrumentation skills, the intended lesson is recognizing and
+working around the inlining, not abandoning Frida for static patching.
+
+## Impact
+
+Any security check implemented as a small, single-call-site wrapper
+function should not be assumed safe from Frida just because a naive hook
+on that exact method "doesn't work" — this is a diagnosis problem, not
+evidence the check is hook-resistant. Once an attacker pivots to the
+underlying framework calls the check is actually built on, the same
+detection logic is just as hookable as anything else running in the same
+process.
+
+## How developers prevent relying on this as real security
+
+No amount of choosing *which* method to hook changes the fundamental
+limit here: any check performed by code running fully inside a process
+the attacker controls can eventually be intercepted or neutralized,
+whether the check is a one-line wrapper or implemented with more
+indirection. Developers should treat this as raising attacker effort, at
+best — never as an access-control boundary — and route any decision that
+actually needs to be trustworthy through a backend the attacker does not
+control.
+
+## Related labs
+
+`nexawallet`'s `IntegrityGate.isTampered()` is exactly this pattern: a
+small wrapper combining three framework-level checks (a socket connect, a
+buffered-reader read, a thread-name lookup), where a direct hook on the
+wrapper itself silently fails due to inlining, and the intended pivot is
+hooking `java.net.Socket.connect`, `java.io.BufferedReader.readLine`, and
+`java.lang.Thread.getName` instead.
+
+## FAQ
+
+### How do I know for certain inlining happened, versus some other cause?
+
+Short of attaching a native-level ART debugger, you usually can't get
+100% certainty without that level of tooling — but a debug log confirming
+the original logic's *outcome* still occurs at the call site, combined
+with the hooked method being small and single-call-site, is strong
+practical evidence, and the framework-level pivot works either way.
+
+### Does this mean app-level hooks are never useful?
+
+No — most Frida hooks on app-level methods work exactly as expected.
+This specific failure mode is narrow: small methods, few or one call
+site, under compiler conditions that favor inlining. Most application
+logic doesn't meet that profile.
+
+### What should I keep in a lab writeup?
+
+The exact symptom (hook installs cleanly, no effect), how you confirmed
+the cause (a debug log at the call site, not just assumption), and the
+specific framework methods you pivoted to hooking instead — this lets a
+reviewer verify you actually diagnosed the issue rather than guessing
+your way to a working script.

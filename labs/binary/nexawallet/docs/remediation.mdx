@@ -1,0 +1,105 @@
+# Remediation — NexaWallet
+
+This maps the lab's four root-cause findings (full detail in
+`security-report.mdx`, "Root cause analysis") to concrete fixes for a
+*real* mobile wallet/banking system. These are not changes
+that would make this specific lab harder — it's intentionally built to be
+beatable — they describe how production systems should avoid this class
+of weakness entirely.
+
+## Findings and fixes
+
+### 1. Client-side authorization decision (root cause)
+
+**Finding:** Every security decision in NexaWallet — tamper detection,
+and whether an over-limit transfer is authorized — is computed and
+enforced entirely on the client, inside an environment the attacker fully
+controls. No server independently verifies any of it.
+
+**Fix:** A mobile app should never be the system of record for "is this
+transfer allowed." The app should only submit a request (amount, account,
+intended recipient); a backend service the attacker does not control must
+independently re-validate the amount against the account's actual limit
+and any required review workflow, and only the backend's response
+determines whether the transfer proceeds. If the backend is unreachable,
+the safe default is to decline — never fall back to a client-computed
+answer.
+
+### 2. Instrumentation detection treated as a gate, not a signal
+
+**Finding:** `IntegrityGate` correctly and deterministically detects an
+active Frida session, but detection running inside the same process the
+attacker controls is advisory at best, not an access-control mechanism —
+confirmed concretely by the fact that even the detector's own output can
+be intercepted once the detection code itself is identified (via the
+pivot from app-level to framework-level hooking).
+
+**Fix:** Treat checks like this as one more risk signal reported to the
+backend (alongside device attestation, behavioral signals, velocity
+checks), never as sufficient permission on their own. For real
+device-integrity assurance, prefer a platform attestation service whose
+result is cryptographically signed by a party the client cannot forge
+(for example, Android's Play Integrity API), and verify that signed
+result **on the backend** — not just read a boolean inside the app.
+
+### 3. A non-exported Activity is not an authorization boundary
+
+**Finding:** `android:exported="false"` on `ReviewGateActivity` correctly
+blocks two real attack surfaces (another app launching it via `Intent`,
+and `adb shell am start`), but does not block an attacker with existing
+code execution inside the app's own process, for whom
+`Context.startActivity()` is just a normal method call with no OS-level
+permission check in front of it.
+
+**Fix:** If a product genuinely wants a human-in-the-loop review step for
+above-limit transfers, the approval must be a server-side event: a real
+reviewer acting in a backend admin tool which, once approved, issues a
+short-lived, cryptographically signed authorization token tied to the
+specific transaction (amount, account, timestamp, nonce), verified by the
+backend before executing the transfer. A boolean living only in the
+mobile app's process memory — settable by any code running inside that
+process, however many liveness checks guard the setter — is never a
+substitute for this.
+
+### 4. The client mints its own proof of success
+
+**Finding:** `TransferAuthorizer.mintClearanceToken()` returns a value
+decoded from a constant embedded in the APK itself. Once
+reverse-engineered, that constant can be decoded entirely offline, by
+anyone who locates it in the decompiled code — no interaction with the
+running app required.
+
+**Fix:** Any value representing "this privileged action was authorized
+and completed" (a transaction confirmation, a receipt, a flag/token) must
+be generated and signed by the backend after it independently verifies
+the action, then simply relayed to the client for display. If the client
+can compute that value on its own — even with a complex formula,
+obfuscated constants, or encryption — reverse-engineering the APK is
+sufficient to produce it without the backend ever being involved, which
+defeats the entire point of it being proof of anything.
+
+## Controls worth keeping (supporting measures, not substitutes)
+
+- **SSL/certificate pinning** (`PinningConfig`/`WebViewTrustManager`,
+  already present in the codebase): protects client↔server traffic
+  confidentiality/integrity once there *is* a real backend making the
+  actual decision — pinning a connection to a server that isn't the one
+  making the authorization decision doesn't help.
+- **Code obfuscation / hardening** (R8/ProGuard full mode,
+  anti-debugging): raises the time/skill cost of analysis. Useful
+  defense-in-depth, budgeted as a *delay*, not a *control* — this lab's
+  own flag-constant obfuscation is a direct, deliberate illustration of
+  exactly this limit (see `challenge-design.mdx`).
+- **Server-side rate limiting and anomaly detection** on the real
+  transfer endpoint, independent of whatever the client reports about its
+  own integrity.
+
+## Verification a fix is complete
+
+For a real system applying these fixes, retests should confirm: the
+backend — not the client — makes the final allow/decline decision for
+every transfer; a client reporting "not tampered" is never, by itself,
+sufficient to proceed with a sensitive action; any review/approval step
+is backed by a signed, backend-issued token tied to the specific
+transaction; and no confirmation/receipt token can be produced by running
+client code alone, offline, without backend involvement.

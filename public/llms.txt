@@ -19,6 +19,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Fieldops 360](https://openlabs.duckurity.com/labs/fieldops-360): A tenant portal with email open tracking and an admin export surface.
 - [Firmdrama](https://openlabs.duckurity.com/labs/firmdrama): A law firm's meeting-room portal with chained API authorization flaws and a vulnerable legacy template rendere
 - [Invoiceportal](https://openlabs.duckurity.com/labs/invoiceportal): InvoicePortal is a SaaS platform for managing company invoices.
+- [Nexawallet](https://openlabs.duckurity.com/labs/nexawallet): An Android wallet app that mints its flag only after a player defeats two independent, in-process gates — a Fr
 - [Nexora platform](https://openlabs.duckurity.com/labs/nexora-platform): Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, O
 - [Shopvault](https://openlabs.duckurity.com/labs/shopvault): An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level acce
 - [Snapconnect](https://openlabs.duckurity.com/labs/snapconnect): SnapConnect is a small social app with profiles and avatars, served by a GraphQL API.
@@ -36,9 +37,13 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Techniques](https://openlabs.duckurity.com/technique): Vulnerability classes, defined once and exercised across labs.
 - [API version enumeration](https://openlabs.duckurity.com/technique/api-version-enumeration): Learn how to map versioned API surfaces and spot legacy endpoints that no longer meet the current security pol
 - [Authentication bypass](https://openlabs.duckurity.com/technique/auth-bypass): The server trusts a client-supplied field instead of verifying identity against a real credential check.
+- [Client-side authorization decisions](https://openlabs.duckurity.com/technique/client-side-authorization-decisions): Learn why an authorization check implemented only in client code is not a security control, and how attacker c
 - [Command injection](https://openlabs.duckurity.com/technique/command-injection): User input reaches a shell command unsanitized, letting you run commands alongside the intended one.
+- [Framework-level Frida hooking past ART inlining](https://openlabs.duckurity.com/technique/frida-framework-level-hooking-past-art-inlining): Learn why a Java-layer Frida hook can silently miss, and how framework-level or native-layer hooking recovers 
 - [Broken object-level authorization (IDOR)](https://openlabs.duckurity.com/technique/idor): Learn how missing per-object checks expose records that an authenticated user should not be able to read or ch
+- [Launching an Activity in-process with Frida](https://openlabs.duckurity.com/technique/in-process-activity-launch-with-frida): A practical walkthrough of starting any Activity in a running Android app from an attached Frida session, with
 - [Mass assignment](https://openlabs.duckurity.com/technique/mass-assignment): Learn how automatic request binding can let a client change protected object properties.
+- [A non-exported Activity is not an access boundary](https://openlabs.duckurity.com/technique/non-exported-activity-is-not-an-access-boundary): Learn why android:exported="false" only blocks other apps, and why code running inside the same process can st
 - [SQL injection](https://openlabs.duckurity.com/technique/sqli): Learn how unsanitized query input can change database logic and expose records outside normal access rules.
 - [Server-side request forgery (SSRF)](https://openlabs.duckurity.com/technique/ssrf): The server fetches a URL you control, letting you reach internal services it can see but you normally can't.
 - [Server-side template injection (SSTI)](https://openlabs.duckurity.com/technique/ssti): Learn why user input must be treated as template data, never as template source, and how to recognise unsafe r

@@ -152,6 +152,12 @@
       "owner": "maintainers",
       "blocker": "",
       "follow_up_title": ""
+    },
+    "labs/binary/nexawallet": {
+      "action": "catalog_experimental_review",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": "M0-05 follow-up: L0-L6 review for nexawallet promotion"
     }
   }
 }

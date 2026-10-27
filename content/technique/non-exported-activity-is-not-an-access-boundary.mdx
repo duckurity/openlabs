@@ -1,0 +1,120 @@
+---
+title: A non-exported Activity is not an access boundary
+description: Learn why android:exported="false" only blocks other apps, and why code running inside the same process can still reach a hidden Activity directly.
+type: technique
+key: technique-non-exported-activity-is-not-an-access-boundary
+slug: technique/non-exported-activity-is-not-an-access-boundary
+intent: Learn what android:exported="false" actually protects against.
+keywords:
+  primary: non-exported Activity security
+  secondary:
+    - android exported false bypass
+    - hidden activity not a security control
+linksTo:
+  - labs/nexawallet
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+`android:exported="false"` on an `<activity>` tells the Android package manager to refuse an intent that originates from another application's process. It is an inter-process access control, enforced at the point where the system would otherwise hand a cross-app Intent to your component. It says nothing about code that is already running inside your own process.
+
+Treating a non-exported Activity as hidden from the player misreads what the flag protects. A debugger, a Frida agent, or any native code attached to the running app's own process is not "another app" from the system's point of view. It is the app. Code with that vantage point can call `startActivity()` the same way the app's own code would, because it is making the call from inside the same process the Activity belongs to.
+
+> **Process boundary, not code boundary**
+>
+> `exported="false"` stops Android's inter-process intent-resolution path. It does not create a privilege boundary between different pieces of code sharing one process.
+
+## Examples
+
+### What `exported="false"` actually stops
+
+```xml
+<activity
+    android:name=".AdminPanelActivity"
+    android:exported="false" />
+```
+
+Another installed app sending an explicit intent for `AdminPanelActivity` is rejected by the system before the component ever starts:
+
+```java
+// From a different app's process — refused by the OS.
+Intent i = new Intent();
+i.setClassName("com.app.target", "com.app.target.AdminPanelActivity");
+startActivity(i); // SecurityException: not exported
+```
+
+### What it does not stop
+
+From inside the target app's own process — which is exactly where an attached Frida agent executes — the same call succeeds, because the system sees it as the app launching its own component:
+
+```javascript
+Java.perform(() => {
+    const Activity = Java.use('android.app.Activity');
+    const Intent = Java.use('android.content.Intent');
+    const currentActivity = /* obtain a live Activity instance, e.g. via Activity.onResume hook */;
+
+    const intent = Intent.$new();
+    intent.setClassName('com.app.target', 'com.app.target.AdminPanelActivity');
+    currentActivity.startActivity(intent);
+});
+```
+
+No manifest check runs here that would reject an in-process caller, because the manifest-level export check exists to arbitrate between processes, and this call never crosses a process boundary.
+
+## How to recognise it in an authorized lab
+
+1. Decompile the APK and list every `<activity>` with `android:exported="false"` or no `android:exported` attribute at all (the default depends on whether the Activity declares an intent-filter).
+2. Check whether the hidden Activity's `onCreate()` performs the sensitive action directly, or only after further checks (a PIN, a role flag, a server round-trip). The export flag alone tells you reachability, not what happens once reached.
+3. From an attached Frida session in the target process, obtain a live `Activity`, `Context`, or `Application` reference and issue an explicit intent naming the hidden Activity's class.
+4. Confirm the Activity starts and observe what it exposes once reached — note that reaching it is a separate finding from any further logic flaw inside it.
+
+## Common mistakes and false assumptions
+
+### "It's not exported, so it's not reachable"
+
+Exported controls who outside the app can start it. It does not hide the component from code already running inside the app's own process, including instrumentation attached to that process.
+
+### "Hiding the entry point is a mitigation"
+
+An unreachable-from-outside Activity still ships inside the APK and still runs with the app's full in-process privileges once reached. It reduces the number of ways in, not the value of reaching it.
+
+### "This requires root"
+
+It does not. It requires the ability to attach to the target process (Frida's `-f`/spawn-gate or an attach to a debuggable or otherwise instrumentable process), which on a development or test device does not require root.
+
+## Impact
+
+Any sensitive action gated purely by non-export status — an admin panel, a debug menu, a privileged settings screen, a flag-granting state — is reachable by anything that can execute in the app's own process. The severity depends on what the Activity does once started, not on whether it was reachable from another app.
+
+## How developers prevent it
+
+- Treat `exported="false"` as process isolation, never as a user- or capability-level permission boundary.
+- Gate sensitive actions by server-verified state, not by which component the client happened to launch.
+- If an in-app debug or admin surface must exist, remove it from release builds entirely rather than relying on it being merely non-exported.
+- Pair any in-process-reachable sensitive action with its own authorization check that does not assume only the "front door" (the exported entry point) leads to it.
+
+## Related labs
+
+Apply this technique after studying it:
+
+- [Nexawallet](/labs/nexawallet)
+
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+
+## FAQ
+
+### Does setting exported to false do anything useful at all?
+
+Yes. It correctly blocks other installed apps from launching the component via an intent, which matters for components that should only ever be reached from inside your own app's normal navigation flow.
+
+### Is this the same issue as an insecure deep link?
+
+They are related but distinct. A deep link issue is usually about an *exported* component accepting unsafe input from outside. This technique is about a *non-exported* component being reachable from inside the same process regardless of export status.
+
+### Does enabling `android:permission` on the Activity fix this?
+
+A custom permission still gates the inter-process path the same way export does. It does not add a check against code already running in-process, since in-process calls never go through the permission-checked IPC path.

@@ -1,0 +1,153 @@
+# Security report — NexaWallet
+
+Training documentation for a fictional, self-contained Android
+reverse-engineering lab. Built around "NexaWallet," a fictional digital
+wallet app. No real users, accounts, funds, or backend exist anywhere in
+this lab.
+
+## Objective
+
+Dynamic Android instrumentation practice, rated **hard**, expected solve
+time 45–90 minutes for a player comfortable with jadx and basic Frida
+scripting.
+
+## Starting point
+
+The player installs the APK fresh, registers a local account (no real
+data, no network calls to any real service), and reaches the Transfer
+screen showing a fixed EGP 100.00 limit.
+
+## Attack chain
+
+1. **Recon:** Static decompilation (jadx) of `TransferActivity`,
+   `IntegrityGate`, `TransferAuthorizer`, and `ReviewState` reveals the
+   full shape of both gates and the flag-minting call site, without
+   revealing the flag itself (which is obfuscated, not plaintext).
+2. **Gate 1 bypass — diagnosing a hook that doesn't fire:** A direct hook
+   on `IntegrityGate.isTampered()` installs cleanly but has no observable
+   effect, because ART/JIT inlines the small function into its caller.
+   The player must recognize this specific failure mode and pivot to
+   hooking the underlying framework methods (`Socket.connect`,
+   `BufferedReader.readLine`, `Thread.getName`) instead.
+3. **Gate 2 discovery and reach:** `ReviewGateActivity` is present in the
+   compiled app and declared in the manifest, but `exported="false"` and
+   never referenced by any other component — unreachable through the UI
+   or `adb shell am start`. The player must launch it from inside the
+   running (Frida-attached) process via the app's own `Context`.
+4. **Flag collection:** With both gates satisfied, submitting an
+   over-limit transfer causes `TransferAuthorizer.mintClearanceToken()`
+   to execute and display the `duck{...}` token.
+
+## Root cause analysis
+
+The core issue, in one sentence: every security decision in NexaWallet —
+whether the device is being tampered with, and whether a transfer above
+the limit is authorized — is computed and enforced **entirely on the
+client**, inside an environment the attacker fully controls. No server
+ever independently verifies any of it. Everything below is a specific
+consequence of that one design choice; `remediation.mdx` maps each point
+to a concrete fix.
+
+**1. Instrumentation detection is a deterrent, not a boundary.**
+`IntegrityGate` correctly and deterministically detects an active Frida
+session (loopback port, injected-library signature in
+`/proc/self/maps`, suspicious thread names). All three checks work as
+designed and have zero environment-dependent false positives — a
+genuinely important property for a *fair* challenge, but it says nothing
+about *security*. The reason this is still bypassable has nothing to do
+with a bug in the detection logic itself: it's that the code performing
+the check, the code consuming its result, and the attacker's tooling all
+run in the **same process, at the same privilege level**. Once an
+attacker can execute arbitrary code inside that process (which dynamic
+instrumentation is, by definition), they can intercept, skip, or rewrite
+any decision that process makes about itself. There is no code a
+client-side detector can write that a sufficiently privileged attacker
+inside the same process cannot eventually neutralize; it can only raise
+the cost and time required. (A secondary, implementation-level detail
+reinforces this: even hooking the app's own `isTampered()` wrapper
+failed silently because ART's inlining folded it into its caller,
+leaving no runtime call boundary for Frida to intercept — the fix,
+hooking the underlying framework methods instead, is a *technique*
+refinement, not a *security* one.)
+
+**2. A non-exported hidden Activity is security by obscurity, not
+access control.** `ReviewGateActivity` is declared `exported="false"`
+and is never referenced from any other component in the app. This
+genuinely does prevent two specific attack surfaces: another installed
+app launching it via an `Intent`, and `adb shell am start` launching it
+externally through the OS's component-resolution path — both legitimate
+protections `exported="false"` is designed for. What it does **not**
+protect against is an attacker who already has code execution inside
+the app's own process — at that point, `startActivity()` is just a
+normal method call on an object (the app's `Context`) the attacker
+already holds a reference to, with no OS-level permission check
+standing between them and it.
+
+**3. The authorization state has no origin it can prove.**
+`ReviewState.isCleared` is a boolean living in process memory, set only
+by `ReviewState.grantClearance(activity)`, which does check that the
+passed-in object is a live, non-finishing `Activity` instance. That
+check raises the bar meaningfully, but it answers "is this a real
+Activity instance?", not "did a legitimate human reviewer actually
+approve this?". Nothing cryptographically ties `isCleared = true` back
+to any actual decision made by anyone outside the compromised process —
+because there is no one outside the process in this design to make that
+decision.
+
+**4. The proof of success is minted by the same party being tested.**
+`TransferAuthorizer.mintClearanceToken()` returns a value decoded from a
+constant embedded in the APK itself (obfuscated, but fully present
+client-side). Once reverse-engineered, that constant can be decoded
+entirely offline, with no interaction with the running app at all, by
+anyone who locates it in the decompiled code. The "proof" that a
+privileged action was authorized is generated by — and only verifiable
+relative to — the exact same client that is not trusted to make the
+decision to authorize it in the first place. A legitimate system's proof
+of authorization should come from the one party in the system the
+client cannot impersonate: a server it does not control.
+
+**The pattern underneath all four points:** each mechanism independently
+delays or complicates an attack. None of them, individually or
+combined, changes the category of problem: a decision made and enforced
+entirely within an environment the user controls cannot be relied upon
+by anyone who does not also control that environment. This is the same
+principle behind anti-cheat in games, DRM, and client-side-only payment
+validation in real mobile apps.
+
+## Mapped concepts
+
+This lab is not built around a CWE/OWASP-Mobile-Top-10 single finding in
+the way a typical injection or authz bug is; it's a demonstration of a
+broader architectural pattern — **client-side-only authorization and
+proof-of-authorization** — closest to OWASP Mobile Top 10 M8 (Security
+Misconfiguration) and M9 (Insecure Data Storage/client-trust issues) in
+spirit, and directly analogous to "never trust the client" findings
+common in real mobile-banking and anti-cheat security reviews.
+
+## Remediation (summary — full detail in `remediation.mdx`)
+
+Move the authorization decision, the integrity-signal evaluation, the
+review/approval workflow, and the proof-of-success minting all to a
+backend the attacker does not control; treat every client-side check in
+this lab as, at most, a signal reported to that backend, never as a
+decision made on its own.
+
+## Verification
+
+Retests for a remediated real-world design should confirm: no amount of
+client-side manipulation (hooking, patching, direct memory/field
+modification) can produce a valid transaction confirmation without the
+backend independently verifying and issuing it. For this lab itself
+(unchanged, since it is intentionally vulnerable for training purposes),
+verification is: the documented solve chain reliably works end-to-end on
+a clean install, and a clean device/emulator with no instrumentation
+attached is never blocked below the legitimate EGP 100 limit and never
+produces the flag through the normal, unmodified UI flow.
+
+## Scope
+
+Local, player-supplied (BYOD) environment only. No real accounts, data,
+funds, or backend services exist anywhere in this lab or its supporting
+documentation. See `player-briefing.mdx` for the player-facing,
+non-spoiler description, and `official-solution.mdx` for the full
+spoiler-laden writeup.

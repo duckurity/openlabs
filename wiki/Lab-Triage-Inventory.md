@@ -14,14 +14,15 @@ python3 scripts/score_lab.py --min 70 --json score-report.json
 
 ## Summary
 
-- Directories inventoried: **25** (issue #68 opened at 24; `duckexchange` added after that count).
-- Catalogued: **20**; uncatalogued: **5**.
+- Directories inventoried: **26** (issue #68 opened at 24; `duckexchange` added after that count).
+- Catalogued: **21**; uncatalogued: **5**.
 - Score gate reference: **70** (recommendations only).
 
 ## Inventory
 
 | Directory | Catalog status | Score | Structural blockers | Score recommendations | Action | Owner | Follow-up issue title |
 |:---|:---:|:---:|:---|:---|:---|:---|:---|
+| `labs/binary/nexawallet` | experimental | 100 | none | none | catalog_experimental_review | maintainers | M0-05 follow-up: L0-L6 review for nexawallet promotion |
 | `labs/web/Sayed_Khashana_REST_API_IDOR_CTF` | uncatalogued | 60 | directory name 'Sayed_Khashana_REST_API_IDOR_CTF' fails NAME_RE | score 60 is below threshold 70; structure: missing lab.yml; docs: README missing ## Brief; docs: README missing ## Setup; docs: README missing ## Goal | keep_uncatalogued | maintainers | M0-05 follow-up: rename and catalog Sayed Khashana REST IDOR lab |
 | `labs/web/aegis-ctf` | experimental | 100 | none | none | maintain | maintainers | none |
 | `labs/web/cafe-house-rules` | experimental | 91 | none | dockerfile: no USER directive (runs as root); docs: no challenge-sheet PDF beside the lab | maintain | maintainers | none |
@@ -52,6 +53,7 @@ python3 scripts/score_lab.py --min 70 --json score-report.json
 
 Open one GitHub issue per title below. Link the issue back to #68. Do not batch unrelated labs in one remediation pull request.
 
+- M0-05 follow-up: L0-L6 review for nexawallet promotion
 - M0-05 follow-up: rename and catalog Sayed Khashana REST IDOR lab
 - M0-05 follow-up: compose and lab.yml for duckcorp-savegame or approved removal
 - M0-05 follow-up: catalog duckdesk as experimental

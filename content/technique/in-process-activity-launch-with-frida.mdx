@@ -1,0 +1,140 @@
+---
+title: Launching an Activity in-process with Frida
+description: A practical walkthrough of starting any Activity in a running Android app from an attached Frida session, without going through the system's inter-app intent path.
+type: technique
+key: technique-in-process-activity-launch-with-frida
+slug: technique/in-process-activity-launch-with-frida
+intent: Learn the concrete Frida steps to launch an Activity from inside the target process.
+keywords:
+  primary: Frida start Activity in process
+  secondary:
+    - launch hidden Android activity Frida
+    - startActivity from attached process
+linksTo:
+  - labs/nexawallet
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+Starting an Activity normally means sending an `Intent` through the Android system, which checks export rules, intent filters, and permissions along the way. Those checks arbitrate access between processes. When Frida is attached to the target app's own process, the same `startActivity()` call can be issued directly from code already running inside that process, which is a different code path from a cross-app launch and is not subject to the same system-level gate.
+
+This page is the practical companion to [non-exported Activity is not an access boundary](/technique/non-exported-activity-is-not-an-access-boundary): that page explains why this works, this page walks through how to do it.
+
+## Examples
+
+### Getting a live Activity reference
+
+The most reliable live `Activity` instance is one the app already created. Hooking a lifecycle method such as `onResume()` on the currently foregrounded Activity captures a real, running instance to act through:
+
+```javascript
+Java.perform(() => {
+    const Activity = Java.use('android.app.Activity');
+    let current = null;
+
+    Activity.onResume.implementation = function () {
+        current = this;
+        return this.onResume();
+    };
+
+    // expose it for the next step once the app is in the foreground
+    globalThis.getCurrentActivity = () => current;
+});
+```
+
+### Building and firing the explicit intent
+
+```javascript
+function launchHidden(className) {
+    const Intent = Java.use('android.content.Intent');
+    const activity = getCurrentActivity();
+    if (!activity) {
+        console.log('no live Activity yet — bring the app to the foreground first');
+        return;
+    }
+    const pkg = activity.getPackageName();
+    const intent = Intent.$new();
+    intent.setClassName(pkg, className);
+    activity.startActivity(intent);
+}
+
+// example:
+// launchHidden('com.app.target.AdminPanelActivity');
+```
+
+An explicit intent (built with the target class name directly, via `setClassName`) does not need an `<intent-filter>` to resolve, which matters because a hidden Activity usually has none.
+
+### Passing extras the Activity expects
+
+Some hidden Activities branch on an extra that the normal UI would have set before navigating there. Supply it the same way the app would:
+
+```javascript
+function launchHiddenWithExtra(className, key, value) {
+    const Intent = Java.use('android.content.Intent');
+    const activity = getCurrentActivity();
+    const intent = Intent.$new();
+    intent.setClassName(activity.getPackageName(), className);
+    intent.putExtra(key, value);
+    activity.startActivity(intent);
+}
+```
+
+Read the target Activity's `onCreate()`/`getIntent()` calls in a decompile first to know which extras it reads and what it does when one is missing, rather than guessing.
+
+## How to recognise it in an authorized lab
+
+1. Confirm from the decompiled manifest which Activities exist and are not reachable through the app's normal navigation.
+2. Attach Frida to the running app (spawn-gate with `-f` for full control from process start, or attach to an already-running instance).
+3. Capture a live `Activity` reference through a lifecycle hook, since `startActivity()` is an instance method that needs a `Context`.
+4. Build an explicit `Intent` naming the target class and fire it through the live `Activity`'s `startActivity()`.
+5. Supply any extras the target Activity's `onCreate()` expects, discovered by reading the decompiled code rather than trial and error.
+6. Observe what the Activity does once reached, and note separately whether reaching it required defeating any other check (for example, an instrumentation-detection gate) first.
+
+## Common mistakes and false assumptions
+
+### "This needs the app's own source code"
+
+It needs the class name and package name, both readable from a decompiled APK, and knowledge of expected extras from reading `onCreate()`. No source access or rebuild is required.
+
+### "An implicit intent will also work"
+
+Usually not, because a non-exported Activity commonly has no `<intent-filter>` for the system to match against. An explicit intent built with `setClassName()` bypasses filter resolution entirely and is the reliable approach here.
+
+### "You need a currently visible Activity of the exact right type"
+
+Any live `Activity` instance in the target process works as the `Context` for `startActivity()`. It does not need to be related to the target Activity; it only needs to exist and be attached to a running window so the system accepts the call.
+
+## Impact
+
+This is the mechanism, not the finding. The actual severity depends on what the reached Activity does: a benign debug screen is low impact, while an Activity that mints a privileged token, approves a transaction, or exposes data meant to be access-controlled is high impact, because it is reachable without going through whatever checks the normal UI flow enforces first.
+
+## How developers prevent it
+
+- Do not rely on reachability (export status) as the only gate on a sensitive Activity; verify authorization inside it, ideally against server-held state.
+- Treat any Activity's `onCreate()` as attacker-reachable code once the app can be instrumented, and validate extras defensively rather than trusting that only the app's own UI supplies them.
+- Where possible, require a fresh server round-trip to authorize the action the Activity performs, so reaching the screen does not itself grant the capability.
+
+## Related labs
+
+Apply this technique after studying it:
+
+- [Nexawallet](/labs/nexawallet)
+
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+
+## FAQ
+
+### Does this require root or a jailbroken-style environment?
+
+No. It requires an emulator or device where Frida can attach to the target process, which on a standard development/test emulator does not require root.
+
+### Is this specific to Frida, or does the underlying issue apply more broadly?
+
+The underlying issue (non-export is not an in-process boundary) applies to any tooling that can execute code in the target process. Frida is the common practical tool for doing so during an authorized assessment.
+
+### What stops this from working on every app?
+
+Nothing about `startActivity()` itself. What varies is what the reached Activity requires to do anything useful (extras, prior app state) and whether other in-process defenses, such as instrumentation detection, must be defeated first to get a stable attach.

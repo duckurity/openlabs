@@ -177,9 +177,36 @@ def normalize_inline_html(text: str, line_number: int) -> str:
     return "`".join(parts)
 
 
+LONG_RUN_RE = re.compile(r"[0-9A-Za-z]{13,}")
+LONG_RUN_CHUNK = 8
+
+
+def _break_long_run(match: re.Match[str]) -> str:
+    """Give a long run of plain alphanumerics (a hash, a digest) break points.
+
+    `/`, `-`, and `_` already get \\allowbreak{} below, so a filename or
+    flag wraps fine. A bare hex digest (a SHA-256 in backticks, say) has no
+    such separator at all: one \\texttt{} of 64 characters cannot be split
+    by TeX and overflows its column. Chunking it is the fallback for that
+    case; it never fires on short, already-breakable tokens.
+    """
+    run = match.group(0)
+    chunks = [run[i:i + LONG_RUN_CHUNK] for i in range(0, len(run), LONG_RUN_CHUNK)]
+    return r"\allowbreak{}".join(chunks)
+
+
 def render_inline_code(text: str) -> str:
     """Render inline code verbatim while allowing a line break at separators."""
-    escaped = escape_latex_inline(text)
+    parts: list[str] = []
+    cursor = 0
+    for match in LONG_RUN_RE.finditer(text):
+        parts.append(escape_latex_inline(text[cursor:match.start()]))
+        chunks = [match.group(0)[i:i + LONG_RUN_CHUNK]
+                  for i in range(0, len(match.group(0)), LONG_RUN_CHUNK)]
+        parts.append(r"\allowbreak{}".join(escape_latex_inline(c) for c in chunks))
+        cursor = match.end()
+    parts.append(escape_latex_inline(text[cursor:]))
+    escaped = "".join(parts)
     escaped = escaped.replace("/", r"/\allowbreak{}")
     escaped = escaped.replace("-", r"-\allowbreak{}")
     escaped = escaped.replace(r"\_", r"\_\allowbreak{}")

@@ -1,0 +1,118 @@
+# Validation report — NexaWallet
+
+## Status: author-verified end-to-end; fully closed
+
+The full solve chain has now been run end-to-end by the author against a
+freshly rebuilt APK, recovering the correct flag. This report tracks
+what has been independently verified and what (small) items remain open,
+consistent with how this catalog's other binary-track lab (`dual-check`)
+was tracked.
+
+## What was verified in this authoring environment
+
+- **Flag format:** `duck{...}` matches
+  `^duck\{[a-z0-9_]{16,40}\}$` — checked with Python's `re` module.
+- **`flag_hash` correctness:** SHA-256 of the exact flag string equals
+  `17166ae75476ab1231632df6a4e7d3648d7f2d9453839e885f576eebc4dfd4eb`,
+  matching `lab.yml` — checked with Python's `hashlib`.
+- **The obfuscated constant round-trips correctly:** the `ENCODED_FLAG`
+  Base64 string in `TransferAuthorizer.kt`, XOR'd with `0x5A` byte-by-byte,
+  decodes to exactly the flag above — verified independently in Python
+  before the Kotlin was written, and re-verified against the final
+  committed source.
+- **The fix does not reintroduce the original non-determinism bug:**
+  `mintClearanceToken()` no longer reads `username`, `amount`, or
+  `System.currentTimeMillis()` — confirmed by reading the final source
+  (it ignores both parameters entirely and returns the same decoded
+  constant every time).
+- **`check.py` logic:** matches the pattern already validated for
+  `dual-check`'s checker (stdlib-only, reads `flag_hash` from `lab.yml`,
+  enforces the format regex before hashing) — same script structure,
+  adapted paths/values only.
+
+## What the author verified locally (this authoring environment has no
+Android SDK, so these steps had to happen on the author's own machine)
+
+1. **Rebuilt the APK** from the fixed `TransferAuthorizer.kt`
+   (`./gradlew assembleDebug` per `src/BUILD_INSTRUCTIONS.md`). ✅
+2. **Ran the full documented solve chain** (`official-solution.mdx`,
+   "Full narrated walkthrough", Parts 0–4) against the rebuilt APK on-device, and confirmed the
+   on-device UI displayed `duck{...}` after
+   completing both gates — matching `lab.yml`'s `flag_hash`
+   (`17166ae75476ab1231632df6a4e7d3648d7f2d9453839e885f576eebc4dfd4eb`,
+   re-confirmed independently with Python's `hashlib`). ✅
+3. **Computed and recorded the release APK's SHA-256** in
+   `operations.mdx`: `a80baaf41745df20240a9c65992439cca2457e3e7de4fbd15058d6d791e38fac`
+   (`Get-FileHash` on Windows). ✅
+
+## Remaining open items (now closed)
+
+- ~~**Environment-dependent false positive/negative check**~~ — resolved
+  on an API 29 emulator by the maintainer (`0xyouzv`), live:
+  - **Negative case:** `frida-server` was found running (PID 12457,
+    root), killed (`adb root` + `kill -9`), confirmed gone from
+    `ps -A`, and the app was relaunched clean. With no Frida attached,
+    the app did **not** false-positive-block — a normal transfer of
+    EGP 100 went through successfully.
+  - **Positive case:** `frida-server` was then re-attached on the same
+    emulator/API image, and `IntegrityGate` correctly blocked as
+    expected — confirming the detection logic still fires when it
+    should, not just when it shouldn't.
+  - API 34 parity was intentionally **not** re-tested (reviewer/author
+    judgment call: one full positive+negative pair on a tested image is
+    accepted as sufficient; this is noted here rather than silently
+    dropped). If a maintainer wants API 34 parity confirmed too, it's
+    the same two-step procedure above on an API 34 image.
+- ~~**`frida-tools`/`frida-server` version pinning**~~ — resolved. Per
+  maintainer request, one pinned pair is now recorded: `frida-tools
+  17.22.0` on the host, `frida-server-17.22.0-android-x86` on the device
+  (x86 emulator image). See `operations.mdx`'s BYOD matrix.
+- ~~**Exact `minSdk`**~~ — resolved. Cross-checked directly against the
+  live `app/build.gradle` in `Mobile CTF Challenge (v2 Design)/app/`
+  (the project `src/README.md` points to as this lab's real source
+  tree): `minSdk = 24`, `compileSdk = 34`, `targetSdk = 34`. Both BYOD
+  matrix-tested emulator images (API 29, API 34) are at or above
+  `minSdk 24`, so neither tested image falls outside the app's declared
+  support range — no gap found. `operations.mdx`'s BYOD matrix row
+  updated to record the actual value instead of "as declared".
+
+## The accepted static-shortcut trade-off
+
+As documented in `challenge-design.mdx` and `official-solution.mdx`: a
+sufficiently determined static reader who locates
+`TransferAuthorizer.ENCODED_FLAG` and its `XOR_KEY` can decode the flag
+offline, without running the app or defeating either gate. This was
+weighed deliberately, not discovered as an afterthought:
+
+- The flag **must** be fixed (one value, one `flag_hash`) — a hard
+  catalog requirement, confirmed with the author via an explicit
+  three-way choice (fixed flag / document as a known limitation / hybrid
+  design); the author chose a fixed flag.
+- A **fixed** value embedded in client-side code is, by the same
+  principle this catalog's `dual-check` lab's own technique pages teach
+  (`aes-key-derivation-from-split-secrets.mdx`,
+  `chained-byte-transform-reversing.mdx`), always statically recoverable
+  by a sufficiently motivated reader — no obfuscation scheme changes that
+  fact, only the effort required.
+- Given that, the chosen design (XOR+Base64, not plaintext) at minimum
+  defeats a trivial `strings`/quick-read scan, which was judged
+  sufficient given the catalog-wide, already-established norm that
+  client-side protections raise cost rather than prevent extraction.
+
+**Recommendation for the maintainer review:** accept this as a documented
+trade-off consistent with the rest of the catalog's binary-track design
+philosophy, rather than requiring a server-side component be added solely
+to close it (which would change this lab's delivery model from BYOD
+artifact to a hosted service, a larger scope change than this submission
+is intended to make).
+
+## Sign-off
+
+Core validation complete: APK rebuilt from current source, full solve
+chain run end-to-end, flag and `flag_hash` confirmed matching, release
+APK SHA-256 recorded, `minSdk` cross-checked directly against source,
+and the negative/positive false-positive check run live on an API 29
+emulator (clean device transfers normally; Frida re-attached is still
+correctly blocked). No open items remain from this validation pass. This
+lab is ready to move out of `status: experimental` in `lab.yml`, pending
+the maintainer's own review of the three sub-issues together.

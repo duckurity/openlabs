@@ -157,7 +157,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **19 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -746,6 +746,135 @@ python3 ../../../scripts/check.py .
 Practise in this lab:
 - [Broken object-level authorization (IDOR)](/technique/idor)
 
+## Nexawallet
+
+Source: https://openlabs.duckurity.com/labs/nexawallet
+
+**Participant:** yousef elsayed
+**Domain:** Mobile Application Security / Reverse Engineering (Android)
+**Difficulty:** Hard
+**Flag:** `duck{...}`
+## Brief
+A custom-built Android crackme (NexaWallet) that simulates a digital wallet with a maximum transfer limit. Defeat an anti-instrumentation layer and a hidden, non-exported Activity, entirely in-process with Frida, to approve a transfer above the limit and mint the flag.
+## Setup
+```bash
+adb install bin/NexaWallet-debug.apk
+```
+Requires an Android emulator/device, adb, and a Frida stack (see docs/operations.mdx for the tested version matrix). No server-side component — this is a BYOD artifact lab.
+## Goal
+Approve and confirm a transfer above the wallet's limit using dynamic instrumentation, then recover the minted flag. Verify with:
+```bash
+python3 check.py "duck{...}"
+```
+## What this is
+A custom-built Android crackme (**NexaWallet**), designed and built from scratch for this task, then solved end-to-end to validate it and produce the evidence below.
+The app simulates a digital wallet with a maximum transfer limit. The player's goal is to get the app to approve and confirm a money transfer **above** that limit, using dynamic instrumentation (Frida) rather than static patching — the app actively detects and blocks common tampering/analysis attempts.
+## Repo layout
+```
+.
+│
+├── lab.yml                      ← openlabs catalog metadata (flag_hash, track, difficulty)
+├── check.py                     ← stdlib-only flag checker (reads flag_hash from lab.yml)
+│
+├── bin/                        ← the installable, playable challenge file
+│   └── NexaWallet-debug.apk    (placeholder — see bin/README.md)
+│
+├── docs/                        ← all written evidence/report + maintainer docs,
+│   │                               staged for openlabs (sub-issue #161's "seven-
+│   │                               document pattern" checklist item, plus a
+│   │                               player-facing briefing and the screenshots)
+│   ├── README.md
+│   ├── player-briefing.mdx     ← player-facing description (no spoilers)
+│   ├── challenge-design.mdx
+│   ├── official-solution.mdx   ← full spoiler solve, including the narrated,
+│   │                               screenshot-illustrated walkthrough
+│   ├── operations.mdx
+│   ├── remediation.mdx
+│   ├── security-report.mdx
+│   ├── validation-report.mdx
+│   └── images/                 ← screenshots referenced from official-solution.mdx
+│
+├── techniques/                  ← technique pages staged for openlabs
+│   ├── README.md
+│   ├── frida-framework-level-hooking-past-art-inlining.mdx
+│   ├── non-exported-activity-is-not-an-access-boundary.mdx
+│   ├── in-process-activity-launch-with-frida.mdx
+│   └── client-side-authorization-decisions.mdx
+│
+└── src/                         ← pointer to the full source (private — never ship to participants)
+    ├── BUILD_INSTRUCTIONS.md   ← how to open/build the APK from source
+    └── README.md               ← where the actual Android Studio project lives in this repo
+```
+## Where to start
+| If you want to... | Go to |
+|---|---|
+| Understand what the challenge is testing | `docs/challenge-design.mdx` ("Skills exercised") |
+| See the player-facing description (no spoilers) | `docs/player-briefing.mdx` |
+| Reproduce the full solve, step by step, with screenshots | `docs/official-solution.mdx` ("Full narrated walkthrough") |
+| Understand the security root cause being demonstrated | `docs/security-report.mdx` ("Root cause analysis") |
+| See mitigation recommendations for real-world systems | `docs/remediation.mdx` |
+| Rebuild the APK from source | `src/BUILD_INSTRUCTIONS.md` |
+| See the catalog-facing challenge design summary | `docs/challenge-design.mdx` |
+| Check a candidate flag | `check.py "duck{...}"` |
+| See what's verified vs. still pending local confirmation | `docs/validation-report.mdx` |
+## Delivery model (BYOD artifact)
+This lab ships as a single installable APK plus documentation — there is
+no server-side component the solve depends on. The player supplies their
+own Android emulator/device, `adb`, and Frida stack (host `frida-tools`
++ a matching `frida-server` on the device). See `docs/operations.mdx`
+for the full BYOD matrix (tested API levels, decompiler, Frida version
+pinning).
+`docker-compose.yml` and `lab.yml`'s `port: 8090` exist only to
+satisfy the catalog's general `docker-compose.yml`/`validate.py`
+requirement — they run a distribution-only HTTP server for the APK and
+docs, and nothing in the intended solve path ever touches that service.
+See `docs/operations.mdx`, "Docker role."
+## Anti-analysis spec (summary — full table in `docs/challenge-design.mdx`)
+Three deterministic instrumentation-detection checks (Frida loopback
+port, `/proc/self/maps` injected-library scan, live thread-name scan),
+plus a non-exported hidden Activity and a liveness-checked clearance
+flag. All four are intentionally, individually bypassable — see
+`docs/challenge-design.mdx` for which bypasses are in-scope (the intended
+solve path) versus out-of-scope for this submission.
+## CI scope
+Only static checks (`lab.yml` schema, `check.py` against the known
+flag/hash pair) can run in CI — the actual solve requires a live
+emulator/device with Frida attached, which is manual evidence, not
+automatable here. See `docs/operations.mdx`, "CI scope."
+## Flag design note
+The flag is fixed (one value, one `flag_hash`, per catalog requirement)
+and shipped as an XOR+Base64-obfuscated constant decoded only at
+`mintClearanceToken()` runtime — not a plaintext string, but also not
+immune to a sufficiently determined static reader. This trade-off is
+documented and was an explicit author decision; see
+`docs/challenge-design.mdx` ("Why the flag design changed during
+review") and `docs/validation-report.mdx` ("The accepted static-shortcut
+trade-off") for the full reasoning.
+## Design summary
+NexaWallet is a single Android app (Kotlin, View Binding, OkHttp). There is no real backend — balances and limits are stored locally for the purposes of this challenge — so the entire security boundary the player must defeat lives **inside the APK itself**, enforced at runtime.
+Two independent gates stand between the player and the flag:
+1. **Integrity Gate** — a unified, fully deterministic check for active dynamic instrumentation (Frida): a loopback port probe, a scan of the process's own memory map for injected-library signatures, and a scan of live thread names for Frida's own runtime threads. Any one of the three tripping blocks the player with a "Security Check Failed" screen. Hooking the app's own top-level check function directly does **not** work here — see `docs/official-solution.mdx` (full walkthrough) and `docs/security-report.mdx` ("Root cause analysis") for why, and what the player has to pivot to instead.
+2. **Review Clearance** — even after Gate 1 is defeated, a transfer above the limit still requires a separate, independent "clearance" flag to be set. That flag is granted only by a screen that is never reachable from any button, menu, or link in the app's normal flow, and is declared non-exported in the manifest, so it can't be opened externally either. The player has to discover it exists by reading the decompiled code/manifest, then trigger it from inside the running process.
+Only when **both** gates are satisfied does the app mint and display the flag — nothing is ever hidden as a plain string in the APK.
+## Evidence status
+- [x] Challenge designed and built (Kotlin/Android, Gradle/AGP, View Binding)
+- [x] Flag redesigned to be fixed/deterministic (catalog requirement), obfuscated, and verified correct by hash/round-trip (see `docs/validation-report.mdx`)
+- [x] `lab.yml`, `check.py`, and all maintainer + player-facing docs (`docs/`), and technique pages (`techniques/`) completed
+- [x] Full walkthrough, objective/skills, player briefing, root-cause and mitigation documentation completed/updated for the current flag design
+- [x] **APK rebuilt from the updated source** by the author, locally (Android SDK isn't available in the authoring environment, so this step had to happen outside it)
+- [x] **Full solve chain re-run end-to-end on the rebuilt APK** — author confirmed the jadx static analysis + Frida dynamic-instrumentation chain in `docs/official-solution.mdx` against the rebuilt APK and recovered the correct flag, matching `lab.yml`'s `flag_hash` (see `docs/validation-report.mdx` for the check, not the flag itself)
+- [x] Release APK SHA-256 recorded in `docs/operations.mdx` (`a80baaf41745df20240a9c65992439cca2457e3e7de4fbd15058d6d791e38fac`)
+- [x] **No environment-dependent false positives** — confirmed live on an API 29 emulator: clean device (no Frida) does not block a normal transfer, and re-attaching Frida still blocks as intended (see `docs/validation-report.mdx`)
+- [x] `frida-tools`/`frida-server` versions pinned: `frida-tools 17.22.0` / `frida-server-17.22.0-android-x86` (see `docs/operations.mdx`)
+See `docs/validation-report.mdx` for the full sign-off and the two
+remaining minor open items.
+## Techniques
+Practise in this lab:
+- [Framework-level Frida hooking past ART inlining](/technique/frida-framework-level-hooking-past-art-inlining)
+- [A non-exported Activity is not an access boundary](/technique/non-exported-activity-is-not-an-access-boundary)
+- [Launching an Activity in-process with Frida](/technique/in-process-activity-launch-with-frida)
+- [Client-side authorization decisions](/technique/client-side-authorization-decisions)
+
 ## Nexora platform
 
 Source: https://openlabs.duckurity.com/labs/nexora-platform
@@ -1164,6 +1293,72 @@ No. Access control (like IDOR) is about authorization after you're already authe
 **Do I need special tooling?**
 A GraphQL client or `curl` is enough. Read [how to play](/play) for the loop.
 
+## Client-side authorization decisions
+
+Source: https://openlabs.duckurity.com/technique/client-side-authorization-decisions
+
+## Overview
+A client-side authorization decision is any check that decides whether an action is allowed, running entirely in code the user's own device executes, with the result trusted without independent server-side verification. Common shapes: a transfer-limit check in app code before calling an API, a feature flag read from local state, a role check in JavaScript before showing or hiding a button, or a licence check performed entirely on-device.
+The client is attacker-controlled hardware running attacker-reachable code. Any decision made there can be observed, patched, or skipped by someone with the right access to that device or app process. This is not a mobile-specific or Frida-specific issue; it is the same failure whether the client is a native app, a browser, or a desktop binary. What changes by platform is how easy the client is to inspect and alter.
+> **Authentication proves identity. It does not relocate authorization.**
+>
+> A client that correctly identifies its user has told the server who is asking. Whether that user may perform the requested action is a decision the server must still make, using its own state, every time.
+## Examples
+### A limit enforced only on-device
+```kotlin
+// TransferViewModel.kt
+fun onConfirmTransfer(amount: Long) {
+    if (amount > wallet.maxTransferLimit) {
+        showError("Amount exceeds your limit")
+        return
+    }
+    api.submitTransfer(amount) // server trusts the amount it receives
+}
+```
+If the server endpoint behind `submitTransfer` accepts any amount the client sends and only the app's own `if` statement enforces the limit, patching that check (or calling the endpoint directly, bypassing the app's UI entirely) removes the limit completely. The server received a number; it never independently decided whether that number was allowed.
+### A role flag trusted from local state
+```javascript
+// Trusting a client-stored flag instead of a server-verified session claim.
+if (localStorage.getItem('role') === 'admin') {
+    renderAdminPanel();
+    callAdminApi(); // the API must still check the caller's real role server-side
+}
+```
+Hiding a button is a UI convenience. If `callAdminApi()` does not independently verify the caller's role on the server, setting `localStorage.role = 'admin'` is sufficient to reach it.
+### A check defeated by patched logic, not patched data
+In a compiled app, the equivalent of editing `localStorage` is hooking or patching the method that performs the check, so it always returns the permissive branch. The data sent to the server can look entirely legitimate; only the decision that produced it was tampered with.
+## How to recognise it in an authorized lab
+1. Identify every action that has a value threshold, role, or entitlement gating it (a limit, an admin feature, a paywalled capability).
+2. Trace where the gating decision is made: client code only, or client code followed by an independent server-side check using its own state.
+3. If only the client decides, attempt to reach the server-side effect while skipping or altering the client-side decision: call the API directly, patch the client's check with a hook, or modify the value the client was about to send after its check already passed.
+4. Confirm the server performs the privileged action anyway. That confirms the authorization decision lived entirely client-side.
+5. Distinguish this from input validation: a value out of range being silently clamped by the server is a different (and better) outcome than the server performing the action with the attacker-supplied value unchanged.
+## Common mistakes and false assumptions
+### "Obfuscation or anti-tampering makes the client check sufficient"
+Obfuscation raises the cost of reading or patching client code. It does not change where the decision is made. A sufficiently motivated attacker, or a lab built to practice exactly this, still reaches the server endpoint with the check skipped.
+### "The mobile app can't be scripted the way a browser can"
+Instrumentation frameworks give an attached process the same reach into app logic that browser developer tools give into a web page's JavaScript. The platform differs; the trust boundary problem is identical.
+### "We validate input types and lengths server-side, so we're covered"
+Type and length validation is necessary but answers a different question than authorization. The server can correctly accept a well-formed request for an amount, a role, or an action that it should have rejected because the requester was not entitled to it.
+## Impact
+The impact scales with what the bypassed check was protecting: a transfer limit becomes unenforced, a paywalled feature becomes free, an admin action becomes available to any authenticated user, or in the most severe case, any user at all. Because the request the server receives can be well-formed, these bypasses often leave no obvious trace at the input-validation layer.
+## How developers prevent it
+- Re-verify every authorization-relevant decision server-side, using server-held state (the stored balance, the user's actual role from the database, the real entitlement), never a value or flag the client supplied.
+- Treat client-side checks as UX only: they may prevent an honest user from submitting an invalid request, but they must never be the only gate on a privileged action.
+- For mobile specifically, assume any on-device check can be read, hooked, or patched by someone with physical or instrumented access to the device, and design the server contract accordingly.
+- Log and alert on server-side rejections of requests that an honest client should never have produced, since they are a strong signal of a bypassed client check.
+## Related labs
+Apply this technique after studying it:
+- [Nexawallet](/labs/nexawallet)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+## FAQ
+### Is this the same as broken object-level authorization (IDOR)?
+They are related failures in the same family. IDOR is about the server failing to check *which object* a request may touch. Client-side authorization is about the server failing to independently decide *whether an action is allowed at all*, having delegated that decision to the client.
+### Does HTTPS prevent this?
+No. Transport encryption protects the request in transit. It does nothing about whether the request itself should have been honoured once it arrives.
+### Can rate limiting replace server-side authorization?
+No. Rate limiting constrains how often a request can be made, not whether a given request was authorized. Both can be relevant; neither substitutes for the other.
+
 ## Command injection
 
 Source: https://openlabs.duckurity.com/technique/command-injection
@@ -1181,6 +1376,84 @@ Browse all [labs](/labs) when it is solved.
 Same family of flaw — unsanitized input reaching an interpreter — but the interpreter here is the OS shell, not a database engine.
 **Do I need special tooling?**
 A browser or `curl` is enough to start. Read [how to play](/play) for the loop.
+
+## Framework-level Frida hooking past ART inlining
+
+Source: https://openlabs.duckurity.com/technique/frida-framework-level-hooking-past-art-inlining
+
+## Overview
+A Frida script that calls `Java.use('com.app.Checker').check.implementation = ...` assumes every call to `check()` passes through one callable method entry point. The Android Runtime (ART) does not guarantee that. When a method is small, final, or otherwise provably safe to inline, ART's ahead-of-time (AOT) compiler or JIT can inline its body directly into the caller. The call instruction disappears. A hook installed on the method's entry point never fires, because execution never reaches that entry point at runtime.
+This is not an anti-Frida trick by itself. It is a standard compiler optimization that happens to defeat a hooking technique built on the assumption that a method call is a call.
+## Examples
+### The hook that never fires
+```java
+// Checker.java
+final class Checker {
+    static boolean isDebuggerOrFridaPresent() {
+        return Debug.isDebuggerConnected() || hasFridaPort();
+    }
+}
+```
+```javascript
+// Looks correct. Often does nothing.
+Java.perform(() => {
+    const Checker = Java.use('com.app.Checker');
+    Checker.isDebuggerOrFridaPresent.implementation = () => false;
+});
+```
+If the caller and `Checker` are compiled in the same dex and `isDebuggerOrFridaPresent` is small enough, ART's optimizing compiler can fold the entire check into the caller at AOT-compile time on the device (`dex2oat`) or at JIT time. The overwritten `implementation` sits on a method object that the running code no longer calls.
+### Forcing the call to exist
+Frida's Java bridge exposes a way to tell ART to stop inlining and run everything through the interpreter, where every call is a real call and every hook is reachable:
+```javascript
+Java.perform(() => {
+    Java.deoptimizeEverything(); // interpreter-only, slow, but hooks become reliable
+    const Checker = Java.use('com.app.Checker');
+    Checker.isDebuggerOrFridaPresent.implementation = () => false;
+});
+```
+`Java.deoptimizeEverything()` is blunt: it disables JIT and treats every method as interpreted for the rest of the process's life, which is slow but removes inlining as a variable while you confirm a hook's logic. `Java.deoptimizeBoundMethod()` narrows the same idea to one already-bound method, at lower cost once you know which call site matters.
+### Hooking below the method, not at it
+When a target is inlined everywhere it is used, hooking the Java method is the wrong layer. Hooking the native call it eventually reaches (a JNI boundary, a libc function like `ptrace` or `readlink`, or an ART internal such as the interpreter's method-invocation entry point) catches every inlined copy at once, because the native layer those copies all route through was never inlined away.
+```javascript
+const ptrace = Process.getModuleByName('libc.so').getExportByName('ptrace');
+Interceptor.attach(ptrace, {
+    onEnter(args) {
+        // PTRACE_TRACEME is request 0; a self-trace call is a common
+        // debugger/Frida-presence probe implemented in native code.
+    },
+});
+```
+## How to recognise it in an authorized lab
+1. Hook a method you expect to run, then confirm with a visible side effect (a log line, a thrown exception) that it actually ran at all.
+2. If the hook is silent while the app's behaviour still reflects the original logic, suspect inlining before suspecting a typo in the class or method name.
+3. Decompile the installed APK (jadx is enough) and check whether the target method is `private`, `final`, `static`, or trivially short — all favour inlining.
+4. Re-test with `Java.deoptimizeEverything()` active. If the hook now fires, inlining was the cause.
+5. Once confirmed, decide whether to keep deoptimization on (simplest, slowest) or move the hook to a native or framework-level choke point that every inlined copy still passes through.
+## Common mistakes and false assumptions
+### "The hook installed without an error, so it is active"
+Frida's `Java.use(...).method.implementation = fn` succeeds as a JavaScript assignment regardless of whether the runtime ever calls that method object again. A clean script run proves the hook was installed, not that it intercepts anything.
+### "Deoptimizing everything is always the fix"
+It works, but it is expensive and changes timing-sensitive behaviour. Treat it as a diagnostic step first, and move to a narrower native-layer hook for anything long-running.
+### "This only happens with obfuscation"
+Inlining is a plain `dex2oat`/JIT optimization. It happens in ordinary release builds with no obfuscator involved, which is why a hook that worked on a debug build can silently stop working on a release one.
+## Impact
+A defeated hook is invisible by design: the script reports success, the process keeps running, and only the absence of the expected side effect reveals the gap. In an instrumentation-detection gate, this means a player can believe a check is patched while the original, un-hooked logic is still the one deciding the outcome.
+## How developers prevent it
+Inlining helps attackers avoid detection logic the same way it hides detection logic from legitimate instrumentation, so treat anti-tamper checks as a defense that must not rely on one single call site:
+- Duplicate a security-relevant check at more than one layer (Java and native) so defeating one hook point is not sufficient.
+- Avoid assuming a single Java-level check is unreachable to native inspection; pair it with native integrity checks that do not depend on a specific compiled call shape.
+- Expect that a sufficiently equipped attacker can reach any single in-process check eventually, and do not treat client-side detection as a substitute for server-side verification of anything that grants value.
+## Related labs
+Apply this technique after studying it:
+- [Nexawallet](/labs/nexawallet)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+## FAQ
+### Does this mean Frida cannot hook final or private methods?
+No. Frida can still install the hook. The issue is whether the compiled code still calls that method object at the inlined call site, not whether Frida can reach it.
+### Is `Java.deoptimizeEverything()` safe to leave on for a whole engagement?
+It is safe but slow, and it changes timing. Use it to confirm a hypothesis, then narrow to a targeted hook once you understand which call site needs it.
+### Does this only affect security checks?
+No. It affects any Java-layer hook on a method short or final enough to inline, including ordinary logic you are instrumenting for analysis rather than bypass.
 
 ## Broken object-level authorization (IDOR)
 
@@ -1275,6 +1548,91 @@ No. It can reduce casual guessing, but it cannot decide whether the requester ma
 Either can be valid. Many APIs return `404` for an inaccessible object to reduce existence disclosure. The important control is that the server does not return or modify an unauthorized object.
 ### What should I keep in a lab writeup?
 Keep the baseline request, the single changed reference, the response evidence, and a concise statement of the crossed authorization boundary.
+
+## Launching an Activity in-process with Frida
+
+Source: https://openlabs.duckurity.com/technique/in-process-activity-launch-with-frida
+
+## Overview
+Starting an Activity normally means sending an `Intent` through the Android system, which checks export rules, intent filters, and permissions along the way. Those checks arbitrate access between processes. When Frida is attached to the target app's own process, the same `startActivity()` call can be issued directly from code already running inside that process, which is a different code path from a cross-app launch and is not subject to the same system-level gate.
+This page is the practical companion to [non-exported Activity is not an access boundary](/technique/non-exported-activity-is-not-an-access-boundary): that page explains why this works, this page walks through how to do it.
+## Examples
+### Getting a live Activity reference
+The most reliable live `Activity` instance is one the app already created. Hooking a lifecycle method such as `onResume()` on the currently foregrounded Activity captures a real, running instance to act through:
+```javascript
+Java.perform(() => {
+    const Activity = Java.use('android.app.Activity');
+    let current = null;
+    Activity.onResume.implementation = function () {
+        current = this;
+        return this.onResume();
+    };
+    // expose it for the next step once the app is in the foreground
+    globalThis.getCurrentActivity = () => current;
+});
+```
+### Building and firing the explicit intent
+```javascript
+function launchHidden(className) {
+    const Intent = Java.use('android.content.Intent');
+    const activity = getCurrentActivity();
+    if (!activity) {
+        console.log('no live Activity yet — bring the app to the foreground first');
+        return;
+    }
+    const pkg = activity.getPackageName();
+    const intent = Intent.$new();
+    intent.setClassName(pkg, className);
+    activity.startActivity(intent);
+}
+// example:
+// launchHidden('com.app.target.AdminPanelActivity');
+```
+An explicit intent (built with the target class name directly, via `setClassName`) does not need an `<intent-filter>` to resolve, which matters because a hidden Activity usually has none.
+### Passing extras the Activity expects
+Some hidden Activities branch on an extra that the normal UI would have set before navigating there. Supply it the same way the app would:
+```javascript
+function launchHiddenWithExtra(className, key, value) {
+    const Intent = Java.use('android.content.Intent');
+    const activity = getCurrentActivity();
+    const intent = Intent.$new();
+    intent.setClassName(activity.getPackageName(), className);
+    intent.putExtra(key, value);
+    activity.startActivity(intent);
+}
+```
+Read the target Activity's `onCreate()`/`getIntent()` calls in a decompile first to know which extras it reads and what it does when one is missing, rather than guessing.
+## How to recognise it in an authorized lab
+1. Confirm from the decompiled manifest which Activities exist and are not reachable through the app's normal navigation.
+2. Attach Frida to the running app (spawn-gate with `-f` for full control from process start, or attach to an already-running instance).
+3. Capture a live `Activity` reference through a lifecycle hook, since `startActivity()` is an instance method that needs a `Context`.
+4. Build an explicit `Intent` naming the target class and fire it through the live `Activity`'s `startActivity()`.
+5. Supply any extras the target Activity's `onCreate()` expects, discovered by reading the decompiled code rather than trial and error.
+6. Observe what the Activity does once reached, and note separately whether reaching it required defeating any other check (for example, an instrumentation-detection gate) first.
+## Common mistakes and false assumptions
+### "This needs the app's own source code"
+It needs the class name and package name, both readable from a decompiled APK, and knowledge of expected extras from reading `onCreate()`. No source access or rebuild is required.
+### "An implicit intent will also work"
+Usually not, because a non-exported Activity commonly has no `<intent-filter>` for the system to match against. An explicit intent built with `setClassName()` bypasses filter resolution entirely and is the reliable approach here.
+### "You need a currently visible Activity of the exact right type"
+Any live `Activity` instance in the target process works as the `Context` for `startActivity()`. It does not need to be related to the target Activity; it only needs to exist and be attached to a running window so the system accepts the call.
+## Impact
+This is the mechanism, not the finding. The actual severity depends on what the reached Activity does: a benign debug screen is low impact, while an Activity that mints a privileged token, approves a transaction, or exposes data meant to be access-controlled is high impact, because it is reachable without going through whatever checks the normal UI flow enforces first.
+## How developers prevent it
+- Do not rely on reachability (export status) as the only gate on a sensitive Activity; verify authorization inside it, ideally against server-held state.
+- Treat any Activity's `onCreate()` as attacker-reachable code once the app can be instrumented, and validate extras defensively rather than trusting that only the app's own UI supplies them.
+- Where possible, require a fresh server round-trip to authorize the action the Activity performs, so reaching the screen does not itself grant the capability.
+## Related labs
+Apply this technique after studying it:
+- [Nexawallet](/labs/nexawallet)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+## FAQ
+### Does this require root or a jailbroken-style environment?
+No. It requires an emulator or device where Frida can attach to the target process, which on a standard development/test emulator does not require root.
+### Is this specific to Frida, or does the underlying issue apply more broadly?
+The underlying issue (non-export is not an in-process boundary) applies to any tooling that can execute code in the target process. Frida is the common practical tool for doing so during an authorized assessment.
+### What stops this from working on every app?
+Nothing about `startActivity()` itself. What varies is what the reached Activity requires to do anything useful (extras, prior app state) and whether other in-process defenses, such as instrumentation detection, must be defeated first to get a stable attach.
 
 ## Mass assignment
 
@@ -1376,6 +1734,74 @@ No. The server must reject or ignore the field. A client can edit a request outs
 Use your own authorized test object, preserve a normal request, add one low-impact candidate property, and verify the stored result. Do not send broad property lists.
 ### Can PATCH be secure?
 Yes. PATCH is safe when the server allowlists paths and applies authorization and validation to every supported property.
+
+## A non-exported Activity is not an access boundary
+
+Source: https://openlabs.duckurity.com/technique/non-exported-activity-is-not-an-access-boundary
+
+## Overview
+`android:exported="false"` on an `<activity>` tells the Android package manager to refuse an intent that originates from another application's process. It is an inter-process access control, enforced at the point where the system would otherwise hand a cross-app Intent to your component. It says nothing about code that is already running inside your own process.
+Treating a non-exported Activity as hidden from the player misreads what the flag protects. A debugger, a Frida agent, or any native code attached to the running app's own process is not "another app" from the system's point of view. It is the app. Code with that vantage point can call `startActivity()` the same way the app's own code would, because it is making the call from inside the same process the Activity belongs to.
+> **Process boundary, not code boundary**
+>
+> `exported="false"` stops Android's inter-process intent-resolution path. It does not create a privilege boundary between different pieces of code sharing one process.
+## Examples
+### What `exported="false"` actually stops
+```xml
+<activity
+    android:name=".AdminPanelActivity"
+    android:exported="false" />
+```
+Another installed app sending an explicit intent for `AdminPanelActivity` is rejected by the system before the component ever starts:
+```java
+// From a different app's process — refused by the OS.
+Intent i = new Intent();
+i.setClassName("com.app.target", "com.app.target.AdminPanelActivity");
+startActivity(i); // SecurityException: not exported
+```
+### What it does not stop
+From inside the target app's own process — which is exactly where an attached Frida agent executes — the same call succeeds, because the system sees it as the app launching its own component:
+```javascript
+Java.perform(() => {
+    const Activity = Java.use('android.app.Activity');
+    const Intent = Java.use('android.content.Intent');
+    const currentActivity = /* obtain a live Activity instance, e.g. via Activity.onResume hook */;
+    const intent = Intent.$new();
+    intent.setClassName('com.app.target', 'com.app.target.AdminPanelActivity');
+    currentActivity.startActivity(intent);
+});
+```
+No manifest check runs here that would reject an in-process caller, because the manifest-level export check exists to arbitrate between processes, and this call never crosses a process boundary.
+## How to recognise it in an authorized lab
+1. Decompile the APK and list every `<activity>` with `android:exported="false"` or no `android:exported` attribute at all (the default depends on whether the Activity declares an intent-filter).
+2. Check whether the hidden Activity's `onCreate()` performs the sensitive action directly, or only after further checks (a PIN, a role flag, a server round-trip). The export flag alone tells you reachability, not what happens once reached.
+3. From an attached Frida session in the target process, obtain a live `Activity`, `Context`, or `Application` reference and issue an explicit intent naming the hidden Activity's class.
+4. Confirm the Activity starts and observe what it exposes once reached — note that reaching it is a separate finding from any further logic flaw inside it.
+## Common mistakes and false assumptions
+### "It's not exported, so it's not reachable"
+Exported controls who outside the app can start it. It does not hide the component from code already running inside the app's own process, including instrumentation attached to that process.
+### "Hiding the entry point is a mitigation"
+An unreachable-from-outside Activity still ships inside the APK and still runs with the app's full in-process privileges once reached. It reduces the number of ways in, not the value of reaching it.
+### "This requires root"
+It does not. It requires the ability to attach to the target process (Frida's `-f`/spawn-gate or an attach to a debuggable or otherwise instrumentable process), which on a development or test device does not require root.
+## Impact
+Any sensitive action gated purely by non-export status — an admin panel, a debug menu, a privileged settings screen, a flag-granting state — is reachable by anything that can execute in the app's own process. The severity depends on what the Activity does once started, not on whether it was reachable from another app.
+## How developers prevent it
+- Treat `exported="false"` as process isolation, never as a user- or capability-level permission boundary.
+- Gate sensitive actions by server-verified state, not by which component the client happened to launch.
+- If an in-app debug or admin surface must exist, remove it from release builds entirely rather than relying on it being merely non-exported.
+- Pair any in-process-reachable sensitive action with its own authorization check that does not assume only the "front door" (the exported entry point) leads to it.
+## Related labs
+Apply this technique after studying it:
+- [Nexawallet](/labs/nexawallet)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+## FAQ
+### Does setting exported to false do anything useful at all?
+Yes. It correctly blocks other installed apps from launching the component via an intent, which matters for components that should only ever be reached from inside your own app's normal navigation flow.
+### Is this the same issue as an insecure deep link?
+They are related but distinct. A deep link issue is usually about an *exported* component accepting unsafe input from outside. This technique is about a *non-exported* component being reachable from inside the same process regardless of export status.
+### Does enabling `android:permission` on the Activity fix this?
+A custom permission still gates the inter-process path the same way export does. It does not add a check against code already running in-process, since in-process calls never go through the permission-checked IPC path.
 
 ## SQL injection
 
