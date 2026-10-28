@@ -1,0 +1,126 @@
+<%- include('partials/head') %>
+<% title = 'ElectroMart — Store' %>
+<%- include('partials/nav-auth') %>
+<main class="page">
+  <div class="container container--top">
+    <%- include('partials/flash') %>
+
+    <%# Phase 1.3 promotion banner — name from promo_ctx, and the discount % from
+        promo_ctx_val. The promo name is rendered RAW (unescaped EJS echo) below so
+        the lab's reflected XSS can execute; this is one of the two DESIGNATED
+        vulnerable lab locations. (A literal EJS tag must not appear inside this
+        comment — the stray % in it would otherwise break template compilation.) %>
+    <section class="promo-banner" role="note" aria-label="Current promotion">
+      <div class="promo-banner__inner">
+        <span class="promo-banner__title" aria-hidden="true">🔥</span>
+        <span class="promo-banner__name"><%- promotion.promoContext %></span>
+        <span class="promo-banner__off">Up to <%= promotion.promoValue %>% off</span>
+      </div>
+    </section>
+
+    <% if (preference && preference !== 'none') { %>
+    <p class="muted pref-hint">Showing <strong><%= preference %></strong> products first, based on your preference. <a href="/preferences=none">Reset</a></p>
+    <% } %>
+
+    <section class="greeting">
+      <div>
+        <h1>Good to see you, <%= greetingName %> 👋</h1>
+        <p class="muted">Browse our full catalog of premium electronics — phones, TVs, appliances and more.</p>
+      </div>
+    </section>
+
+    <section class="store-controls" aria-label="Store search and filters">
+      <form method="GET" action="/home" class="store-controls-form">
+        <div class="store-controls-row">
+          <div class="search-field">
+            <label class="sr-only" for="product-search">Search products</label>
+            <input class="input" id="product-search" name="q" type="search" placeholder="Search products, brands, or models…" value="<%= activeQ %>">
+          </div>
+          <div class="select-field">
+            <label class="sr-only" for="category-filter">Filter by category</label>
+            <select class="input" id="category-filter" name="category">
+              <option value="all">All categories</option>
+              <% categories.forEach((category) => { %>
+              <option value="<%= category.id %>" <%= activeCategory === category.id ? 'selected' : '' %>><%= category.label %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="select-field">
+            <label class="sr-only" for="price-sort">Sort by price</label>
+            <select class="input" id="price-sort" name="sort">
+              <option value="">Sort: Default</option>
+              <option value="price-asc" <%= activeSort === 'price-asc' ? 'selected' : '' %>>Price: Low to High</option>
+              <option value="price-desc" <%= activeSort === 'price-desc' ? 'selected' : '' %>>Price: High to Low</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Apply</button>
+          <a href="/home" class="btn btn-ghost">Clear</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="catalog-section" aria-label="Product catalog">
+      <h2 class="section-title">Our catalog <span class="muted">(<%= total %> products)</span></h2>
+      <div class="product-grid">
+        <% if (products.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-icon" aria-hidden="true">🔍</div>
+          <h3>No products found</h3>
+          <p>
+            <% if (activeQ) { %>No products match "<%= activeQ %>". Try a different search term or clear your filters.<% } else { %>No products match the selected filters. Try clearing the filters to see all products.<% } %>
+          </p>
+          <a href="/home" class="btn btn-primary" style="margin-top:16px">Clear filters</a>
+        </div>
+        <% } else { %>
+        <% products.forEach((product) => { %>
+        <a class="product-card" href="/product/<%= product.slug %>" title="<%= product.name %>">
+          <div class="product-card__img">
+            <img src="/images/<%= product.image %>" alt="<%= product.name %>" loading="lazy" width="280" height="200">
+            <span class="product-card__category"><%= product.categoryLabel %></span>
+          </div>
+          <div class="product-card__body">
+            <h3 class="product-card__name"><%= product.name %></h3>
+            <p class="product-card__brand muted"><%= product.brand %> · <%= product.model %></p>
+            <div class="product-card__row">
+              <span class="product-card__price"><%= product.price.toLocaleString() %> EGP</span>
+              <% if (product.avgRating > 0) { %>
+              <span class="product-card__rating">
+                <span class="stars" aria-label="<%= product.avgRating %> out of 5">
+                  <% for (let s = 1; s <= 5; s++) { %><span class="<%= s <= Math.round(product.avgRating) ? 'star star--full' : 'star' %>">★</span><% } %>
+                </span>
+                <span class="muted">(<%= product.reviewCount %>)</span>
+              </span>
+              <% } %>
+            </div>
+            <% if (product.stock > 0) { %>
+            <span class="product-card__stock"><%= product.stock %> in stock</span>
+            <% } else { %>
+            <span class="product-card__stock product-card__stock--out">Out of stock</span>
+            <% } %>
+          </div>
+        </a>
+        <% }) %>
+        <% } %>
+      </div>
+    </section>
+  </div>
+</main>
+
+<%# ===== Phase 1.3 — VULNERABLE SINK #1 (home promo banner) =================
+     The promo context is embedded in an inline <script> with NO JavaScript
+     string escaping. promo_ctx is attacker-controllable (see the documented
+     cookie-parser flaw), so a crafted cookie value can break out of the string
+     literal and execute arbitrary JavaScript in the ElectroMart origin.
+     This is the second (final) place the lab intentionally allows that — the
+     other is the login page. Do NOT add other raw-echo-into-JS sites.
+     (A literal EJS tag must not appear inside this comment — the stray % in
+     it would otherwise break template compilation.) =================
+========================================================================== %>
+<script>
+  window.electroMart = {
+    promoContext: "<%- promotion.promoContext %>",
+    promoValue: <%= promotion.promoValue %>
+  };
+</script>
+
+<%- include('partials/footer') %>

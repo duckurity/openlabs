@@ -1,0 +1,26 @@
+{
+  "name": "electromart",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ElectroMart — an educational e-commerce application (Phase 1: Foundation & Authentication)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/seed.js",
+    "reset": "node src/reset.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "connect-mongo": "^5.1.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "mongoose": "^8.9.0"
+  }
+}

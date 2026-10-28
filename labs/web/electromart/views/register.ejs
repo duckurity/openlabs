@@ -1,0 +1,72 @@
+<%- include('partials/head') %>
+<%- include('partials/nav-guest') %>
+<main class="page page-auth">
+  <div class="container">
+    <div class="auth-card auth-card--wide">
+      <div class="auth-heading">
+        <h1>Create your account</h1>
+        <p class="muted">Join ElectroMart and get ready for the full electronics lineup.</p>
+      </div>
+
+      <%- include('partials/flash') %>
+
+      <% if (typeof generalError !== 'undefined' && generalError) { %>
+        <div class="general-error" role="alert"><%= generalError %></div>
+      <% } %>
+
+      <form class="form" action="/register" method="POST" data-validate="register" novalidate>
+        <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+
+        <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.username) ? ' field--invalid' : '' %>">
+          <label for="username">Username</label>
+          <input class="input" type="text" id="username" name="username" placeholder="e.g. tech_omar" autocomplete="username" required minlength="3" maxlength="30" value="<%= typeof values !== 'undefined' && values.username ? values.username : '' %>">
+          <p class="hint">3–30 characters: letters, numbers, or underscores.</p>
+          <% if (typeof fieldErrors !== 'undefined' && fieldErrors.username) { %>
+            <p class="field-error"><%= fieldErrors.username %></p>
+          <% } %>
+        </div>
+
+        <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.email) ? ' field--invalid' : '' %>">
+          <label for="email">Email address</label>
+          <input class="input" type="email" id="email" name="email" placeholder="name@example.com" autocomplete="email" required maxlength="254" value="<%= typeof values !== 'undefined' && values.email ? values.email : '' %>">
+          <% if (typeof fieldErrors !== 'undefined' && fieldErrors.email) { %>
+            <p class="field-error"><%= fieldErrors.email %></p>
+          <% } %>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="first_name">First name <span class="optional">(optional)</span></label>
+            <input class="input" type="text" id="first_name" name="first_name" maxlength="100" autocomplete="given-name" value="<%= typeof values !== 'undefined' && values.first_name ? values.first_name : '' %>">
+          </div>
+          <div class="field">
+            <label for="last_name">Last name <span class="optional">(optional)</span></label>
+            <input class="input" type="text" id="last_name" name="last_name" maxlength="100" autocomplete="family-name" value="<%= typeof values !== 'undefined' && values.last_name ? values.last_name : '' %>">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.password) ? ' field--invalid' : '' %>">
+            <label for="password">Password</label>
+            <input class="input" type="password" id="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" required minlength="8" maxlength="72">
+            <% if (typeof fieldErrors !== 'undefined' && fieldErrors.password) { %>
+              <p class="field-error"><%= fieldErrors.password %></p>
+            <% } %>
+          </div>
+          <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.confirm_password) ? ' field--invalid' : '' %>">
+            <label for="confirm_password">Confirm password</label>
+            <input class="input" type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter your password" autocomplete="new-password" required minlength="8" maxlength="72">
+            <% if (typeof fieldErrors !== 'undefined' && fieldErrors.confirm_password) { %>
+              <p class="field-error"><%= fieldErrors.confirm_password %></p>
+            <% } %>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Create account</button>
+      </form>
+
+      <p class="auth-alt muted">Already have an account? <a href="/login">Log in instead</a></p>
+    </div>
+  </div>
+</main>
+<%- include('partials/footer') %>

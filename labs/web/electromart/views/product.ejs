@@ -1,0 +1,134 @@
+<%- include('partials/head') %>
+<% title = product.name + ' — ElectroMart' %>
+<%- include('partials/nav-auth') %>
+<main class="page">
+  <div class="container container--top">
+    <%- include('partials/flash') %>
+
+    <a href="/home" class="back-link">← Back to catalog</a>
+
+    <div class="product-detail">
+      <div class="product-detail__image-wrap">
+        <img src="/images/<%= product.image %>" alt="<%= product.name %>" class="product-detail__image" width="480" height="360">
+      </div>
+
+      <div class="product-detail__info">
+        <span class="product-detail__category"><%= product.categoryLabel %></span>
+        <h1 class="product-detail__name"><%= product.name %></h1>
+        <p class="product-detail__model muted"><%= product.brand %> · Model: <%= product.model %></p>
+
+        <div class="product-detail__meta">
+          <span class="product-detail__price"><%= product.price.toLocaleString() %> EGP</span>
+          <% if (product.stock > 0) { %>
+          <span class="stock-badge stock-badge--available"><%= product.stock %> in stock</span>
+          <% } else { %>
+          <span class="stock-badge stock-badge--out">Out of stock</span>
+          <% } %>
+        </div>
+
+        <% if (product.rating > 0) { %>
+        <div class="product-detail__rating">
+          <span class="stars" aria-label="<%= product.rating %> out of 5">
+            <% for (let s = 1; s <= 5; s++) { %><span class="<%= s <= Math.round(product.rating) ? 'star star--full' : 'star' %>">★</span><% } %>
+          </span>
+          <span class="muted"><%= product.rating %>/5</span>
+        </div>
+        <% } %>
+
+        <div class="product-detail__desc">
+          <p><%= product.description %></p>
+        </div>
+
+        <% if (product.stock > 0) { %>
+        <form class="add-to-cart-form" method="POST" action="/product/<%= product.slug %>/add-to-cart">
+          <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+          <input type="hidden" name="quantity" value="1">
+          <div class="add-to-cart-row">
+            <div class="qty-control">
+              <button type="button" class="qty-btn" data-qty-action="dec" aria-label="Decrease quantity">−</button>
+              <input type="number" name="quantity" value="1" min="1" max="<%= Math.min(99, product.stock) %>" class="qty-input" aria-label="Quantity">
+              <button type="button" class="qty-btn" data-qty-action="inc" aria-label="Increase quantity">+</button>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+          </div>
+        </form>
+        <% } else { %>
+        <div class="out-of-stock-notice">
+          <p>Sorry, this item is currently unavailable. Please check back later.</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (product.specs.length > 0) { %>
+    <section class="specs-section" aria-label="Technical specifications">
+      <h2>Technical Specifications</h2>
+      <div class="specs-table">
+        <% product.specs.forEach(function(spec, i) { %>
+        <div class="specs-table__row<%= i % 2 === 1 ? ' specs-table__row--alt' : '' %>">
+          <dt><%= spec.label %></dt>
+          <dd><%= spec.value %></dd>
+        </div>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <section class="reviews-section" aria-label="Customer reviews">
+      <h2>Customer Reviews</h2>
+
+      <% if (reviews && reviews.length > 0) { %>
+        <div class="reviews-list">
+          <% reviews.forEach(function(review) { %>
+          <article class="review-item">
+            <div class="review-item__header">
+              <span class="review-item__author"><%= review.author %></span>
+              <span class="stars" aria-label="<%= review.rating %> out of 5">
+                <% for (let s = 1; s <= 5; s++) { %><span class="<%= s <= review.rating ? 'star star--full' : 'star' %>">★</span><% } %>
+              </span>
+              <time class="review-item__date" datetime="<%= review.createdAt.toISOString().split('T')[0] %>"><%= review.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></time>
+            </div>
+            <p class="review-item__comment"><%- renderReviewComment(review.comment) %></p>
+          </article>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="muted" style="margin-bottom:16px">No reviews yet. Be the first to share your experience!</p>
+      <% } %>
+
+      <div class="review-form-wrap" id="review-form">
+        <h3>Write a Review</h3>
+        <% if (reviewErrors && reviewErrors.rating || reviewErrors && reviewErrors.comment) { %>
+          <div class="general-error">
+            <% if (reviewErrors.rating) { %><span><%= reviewErrors.rating %></span><% } %>
+            <% if (reviewErrors.comment) { %><span><%= reviewErrors.comment %></span><% } %>
+          </div>
+        <% } %>
+        <form method="POST" action="/product/<%= product.slug %>/reviews" class="form review-form" data-validate="review">
+          <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+          <div class="form-row">
+            <div class="field<%= reviewErrors && reviewErrors.rating ? ' field--invalid' : '' %>">
+              <label for="review-rating">Rating *</label>
+              <select class="input" id="review-rating" name="rating" required>
+                <option value="">Select…</option>
+                <option value="5" <%= typeof submittedRating !== 'undefined' && submittedRating === '5' ? 'selected' : '' %>>★★★★★ — Excellent</option>
+                <option value="4" <%= typeof submittedRating !== 'undefined' && submittedRating === '4' ? 'selected' : '' %>>★★★★☆ — Very Good</option>
+                <option value="3" <%= typeof submittedRating !== 'undefined' && submittedRating === '3' ? 'selected' : '' %>>★★★☆☆ — Good</option>
+                <option value="2" <%= typeof submittedRating !== 'undefined' && submittedRating === '2' ? 'selected' : '' %>>★★☆☆☆ — Fair</option>
+                <option value="1" <%= typeof submittedRating !== 'undefined' && submittedRating === '1' ? 'selected' : '' %>>★☆☆☆☆ — Poor</option>
+              </select>
+              <% if (reviewErrors && reviewErrors.rating) { %><p class="field-error"><%= reviewErrors.rating %></p><% } %>
+            </div>
+          </div>
+          <div class="field<%= reviewErrors && reviewErrors.comment ? ' field--invalid' : '' %>">
+            <label for="review-comment">Your Comment *</label>
+            <textarea class="input textarea" id="review-comment" name="comment" rows="4" placeholder="Share your experience with this product…"><%= typeof submittedComment !== 'undefined' ? submittedComment : '' %></textarea>
+            <% if (reviewErrors && reviewErrors.comment) { %><p class="field-error"><%= reviewErrors.comment %></p><% } %>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+      </div>
+    </section>
+  </div>
+</main>
+<%- include('partials/footer') %>

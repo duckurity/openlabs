@@ -1,0 +1,76 @@
+<%- include('partials/head') %>
+<% title = 'Cart — ElectroMart' %>
+<%- include('partials/nav-auth') %>
+<main class="page">
+  <div class="container container--top">
+    <%- include('partials/flash') %>
+
+    <section class="greeting">
+      <h1>Shopping Cart</h1>
+      <p class="muted"><%= totalItems %> item<%= totalItems !== 1 ? 's' : '' %> in your cart</p>
+    </section>
+
+    <% if (items.length === 0) { %>
+    <div class="empty-state" style="max-width:500px;margin:40px auto">
+      <div class="empty-icon" aria-hidden="true">🛒</div>
+      <h3>Your cart is empty</h3>
+      <p>Browse our catalog and add products to get started.</p>
+      <a href="/home" class="btn btn-primary" style="margin-top:16px">Browse Products</a>
+    </div>
+    <% } else { %>
+    <div class="cart-layout">
+      <div class="cart-items">
+        <% items.forEach(function(item) { %>
+        <article class="cart-item">
+          <a href="/product/<%= item.productSlug %>" class="cart-item__img">
+            <img src="/images/<%= item.image %>" alt="<%= item.name %>" width="96" height="72">
+          </a>
+          <div class="cart-item__info">
+            <a href="/product/<%= item.productSlug %>" class="cart-item__name"><%= item.name %></a>
+            <p class="muted" style="font-size:0.85rem"><%= item.brand %></p>
+            <p class="cart-item__price"><%= item.price.toLocaleString() %> EGP each</p>
+          </div>
+          <div class="cart-item__actions">
+            <form method="POST" action="/cart/update" class="cart-qty-form">
+              <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+              <input type="hidden" name="slug" value="<%= item.productSlug %>">
+              <div class="qty-control">
+                <button type="button" class="qty-btn" data-qty-action="dec" aria-label="Decrease">−</button>
+                <input type="number" name="quantity" value="<%= item.quantity %>" min="1" max="99" class="qty-input" aria-label="Quantity">
+                <button type="button" class="qty-btn" data-qty-action="inc" aria-label="Increase">+</button>
+              </div>
+              <button type="submit" class="btn btn-ghost btn-sm">Update</button>
+            </form>
+            <p class="cart-item__subtotal"><strong><%= (item.price * item.quantity).toLocaleString() %> EGP</strong></p>
+            <form method="POST" action="/cart/remove">
+              <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+              <input type="hidden" name="slug" value="<%= item.productSlug %>">
+              <button type="submit" class="btn btn-ghost btn-sm cart-item__remove">Remove</button>
+            </form>
+          </div>
+        </article>
+        <% }) %>
+      </div>
+
+      <aside class="cart-summary">
+        <h2>Order Summary</h2>
+        <div class="cart-summary__row">
+          <span>Subtotal</span>
+          <span><%= subtotal.toLocaleString() %> EGP</span>
+        </div>
+        <div class="cart-summary__row">
+          <span>Shipping</span>
+          <span class="muted">Calculated at checkout</span>
+        </div>
+        <hr>
+        <div class="cart-summary__row cart-summary__row--total">
+          <span>Total</span>
+          <span><%= subtotal.toLocaleString() %> EGP</span>
+        </div>
+        <a href="/home" class="btn btn-ghost btn-block" style="margin-top:16px">Continue Shopping</a>
+      </aside>
+    </div>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/footer') %>

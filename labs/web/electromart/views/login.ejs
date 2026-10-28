@@ -1,0 +1,71 @@
+<%- include('partials/head') %>
+<%- include('partials/nav-guest') %>
+<main class="page page-auth">
+  <div class="container">
+    <%# Phase 1.3 promotional text on the login page (guests have no cookies →
+        defaults "summer_sale"/30). The promo name is rendered RAW from the same
+        stored promo_ctx as the Home banner, so any value — including a crafted
+        one — is reflected here too (VULNERABLE SINK #2). Do not swap this for
+        promotion.promoTitle: that value is clamped to the safe default and would
+        hide the real promo_ctx (e.g. "hello" would still show "Summer Sale"). %>
+    <div class="promo-banner promo-banner--login" role="note" aria-label="Promotion">
+      <div class="promo-banner__inner">
+        <span class="promo-banner__title" aria-hidden="true">🔥</span>
+        <span class="promo-banner__text">Check out the <%- promotion.promoContext %></span>
+        <span class="promo-banner__off">Up to <%= promotion.promoValue %>% off in all categories</span>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-heading">
+        <h1>Welcome back</h1>
+        <p class="muted">Log in to your ElectroMart account to continue.</p>
+      </div>
+
+      <%- include('partials/flash') %>
+
+      <% if (typeof generalError !== 'undefined' && generalError) { %>
+        <div class="general-error" role="alert"><%= generalError %></div>
+      <% } %>
+
+      <form class="form" action="/login" method="POST" data-validate="login" novalidate>
+        <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+
+        <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.username) ? ' field--invalid' : '' %>">
+          <label for="username">Username</label>
+          <input class="input" type="text" id="username" name="username" placeholder="your username" autocomplete="username" required minlength="3" maxlength="30" value="<%= typeof values !== 'undefined' && values.username ? values.username : '' %>">
+          <% if (typeof fieldErrors !== 'undefined' && fieldErrors.username) { %>
+            <p class="field-error"><%= fieldErrors.username %></p>
+          <% } %>
+        </div>
+
+        <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.password) ? ' field--invalid' : '' %>">
+          <label for="password">Password</label>
+          <input class="input" type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+          <% if (typeof fieldErrors !== 'undefined' && fieldErrors.password) { %>
+            <p class="field-error"><%= fieldErrors.password %></p>
+          <% } %>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Log in</button>
+      </form>
+
+      <p class="auth-alt muted">New to ElectroMart? <a href="/register">Create an account</a></p>
+    </div>
+  </div>
+</main>
+
+<%# ===== Phase 1.3 — VULNERABLE SINK #2 (login page promo text) ============
+     Same unescaped inline-JS reflection as the home page. A crafted promo_ctx
+     cookie value breaks out of the string literal and runs in the ElectroMart
+     origin — before any account is authenticated. See README → "The intended
+     vulnerability". This is one of the two designated vulnerable lab sites.
+========================================================================== %>
+<script>
+  window.electroMart = {
+    promoContext: "<%- promotion.promoContext %>",
+    promoValue: <%= promotion.promoValue %>
+  };
+</script>
+
+<%- include('partials/footer') %>

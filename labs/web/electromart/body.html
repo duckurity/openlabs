@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ElectroMart</title>
+  <meta name="description" content="ElectroMart — a modern, educational electronics store.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="/js/main.js" defer></script>
+</head>
+<body>
+
+<!-- Guest header: welcome, login and registration pages. No store navbar. -->
+<header class="site-header">
+  <div class="container nav-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">⚡</span>
+      <span class="brand-name">Electro<span class="brand-accent">Mart</span></span>
+    </a>
+    <nav class="guest-actions" aria-label="Account">
+      <a class="btn btn-ghost" href="/login">Log in</a>
+      <a class="btn btn-primary" href="/register">Create account</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page page-auth">
+  <div class="container">
+    <div class="auth-card">
+      <div class="auth-heading">
+        <h1>Welcome back</h1>
+        <p class="muted">Log in to your ElectroMart account to continue.</p>
+      </div>
+
+      
+
+
+      
+
+      <form class="form" action="/login" method="POST" data-validate="login" novalidate>
+        <input type="hidden" name="csrf_token" value="f4fcebb9e1a444bf6e3b3baf4a1a3d9e5a9241897aad5d30f1843c23593fc39c">
+
+        <div class="field">
+          <label for="username">Username</label>
+          <input class="input" type="text" id="username" name="username" placeholder="your username" autocomplete="username" required minlength="3" maxlength="30" value="">
+          
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input class="input" type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+          
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Log in</button>
+      </form>
+
+      <p class="auth-alt muted">New to ElectroMart? <a href="/register">Create an account</a></p>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p class="footer-brand">
+      <span class="brand-mark brand-mark--sm" aria-hidden="true">⚡</span>
+      <span>ElectroMart</span>
+    </p>
+    <p class="muted footer-note">An educational e-commerce application · Phase 1: Foundation &amp; Authentication</p>
+  </div>
+</footer>
+</body>
+</html>
+

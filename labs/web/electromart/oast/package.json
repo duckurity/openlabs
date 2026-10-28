@@ -1,0 +1,17 @@
+{
+  "name": "electromart-oast",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lightweight Out-of-Band Application Security Testing callback service for the ElectroMart XSS lab",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "4.21.2"
+  }
+}

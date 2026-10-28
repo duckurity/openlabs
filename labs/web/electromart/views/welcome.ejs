@@ -1,0 +1,66 @@
+<%- include('partials/head') %>
+<%- include('partials/nav-guest') %>
+<main class="page">
+  <div class="container container--top">
+    <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+      <div class="flash flash--info" role="status">You're signed in as <strong><%= currentUser.username %></strong>. <a href="/home">Continue to the store →</a></div>
+    <% } else if (typeof notice !== 'undefined' && notice === 'logged_out') { %>
+      <div class="flash flash--success" role="status">You have been logged out successfully.</div>
+    <% } %>
+  </div>
+
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="hero-kicker">Premium electronics · One clean store</p>
+      <h1>The electronics store that keeps it <span class="accent">simple</span></h1>
+      <p class="hero-lede">
+        ElectroMart brings next-gen smartphones, big-screen TVs, smart home appliances, and
+        premium audio together in one fast, focused online store — no clutter, no noise,
+        just the gear you want.
+      </p>
+      <div class="hero-actions">
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+          <a class="btn btn-primary btn-lg" href="/home">Enter the store</a>
+          <a class="btn btn-ghost btn-lg" href="/profile">Your profile</a>
+        <% } else { %>
+          <a class="btn btn-primary btn-lg" href="/register">Create account</a>
+          <a class="btn btn-ghost btn-lg" href="/login">Log in</a>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <section class="benefits" aria-label="Why shop at ElectroMart">
+    <div class="container benefits-grid">
+      <article class="benefit">
+        <div class="benefit-icon" aria-hidden="true">🛡️</div>
+        <h3>Built to be trusted</h3>
+        <p>Accounts are protected with strong credential hashing, safe sessions, and per-form security tokens.</p>
+      </article>
+      <article class="benefit">
+        <div class="benefit-icon" aria-hidden="true">⚡</div>
+        <h3>Fast by design</h3>
+        <p>A lightweight, modern storefront — pages load in a blink and browsing feels instant.</p>
+      </article>
+      <article class="benefit">
+        <div class="benefit-icon" aria-hidden="true">📦</div>
+        <h3>Curated devices</h3>
+        <p>Smartphones, TVs, audio, and appliances — chosen for real-world specs and fair value.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="coming-soon">
+    <div class="container coming-soon-inner">
+      <div>
+        <h2>The shelves are almost stocked</h2>
+        <p class="muted">
+          ElectroMart's full product catalog is on its way. In the next phase the store opens
+          with search, categories, and a complete range of devices.
+        </p>
+      </div>
+      <a class="btn btn-primary btn-lg" href="/register">Create an account now</a>
+    </div>
+  </section>
+</main>
+<%- include('partials/footer') %>

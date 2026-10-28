@@ -1,0 +1,181 @@
+name: electromart
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-electromart}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?Set MONGO_INITDB_ROOT_PASSWORD in .env (copy .env.example)}
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    # Chromium refuses plain HTTP for the bare name "app" because .app is an
+    # HSTS-preloaded TLD. The bot therefore uses the internal alias "app.test".
+    networks:
+      default:
+        aliases:
+          - app.test
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      MONGO_HOST: mongo
+      MONGO_PORT: "27017"
+      MONGO_DB: electromart
+      MONGO_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-electromart}
+      MONGO_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?Set MONGO_INITDB_ROOT_PASSWORD in .env (copy .env.example)}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env (copy .env.example)}
+      SESSION_MAX_AGE: ${SESSION_MAX_AGE:-604800000}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      # Every container boot wipes all non-victim accounts/carts/reviews and
+      # restores the pristine victim. Passed explicitly so the behaviour cannot
+      # be lost between the host .env and the container environment.
+      LAB_RESET_ON_BOOT: ${LAB_RESET_ON_BOOT:-true}
+      # The Compose lab is HTTP-only. Helmet's default CSP directive
+      # upgrade-insecure-requests would rewrite subresources/forms to https://
+      # on non-loopback hosts (e.g. the internal app.test alias).
+      CSP_UPGRADE_INSECURE_REQUESTS: ${CSP_UPGRADE_INSECURE_REQUESTS:-false}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # OAST callback service (Phase 3)
+  # ---------------------------------------------------------------------------
+  # Lightweight Burp-Collaborator-style observer. It is reachable only on the
+  # Compose network through the lab hostname `attckerserver.local`, plus an
+  # optional localhost-only host binding for troubleshooting. No Docker socket,
+  # no added capabilities, read-only root filesystem.
+  oast:
+    build:
+      context: ./oast
+      dockerfile: Dockerfile
+      # Always produce a fresh OAST image (see the build-id marker in the
+      # Dockerfile). This forces Compose to recreate the container and clears
+      # the in-memory interaction history on every `up --build`.
+      no_cache: true
+    restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    networks:
+      default:
+        aliases:
+          - attckerserver.local
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      OAST_PUBLIC_URL: ${OAST_PUBLIC_URL:-http://attckerserver.local:4000}
+      OAST_MAX_INTERACTIONS: ${OAST_MAX_INTERACTIONS:-1000}
+      OAST_DASHBOARD_LIMIT: ${OAST_DASHBOARD_LIMIT:-100}
+      OAST_MAX_BODY_BYTES: ${OAST_MAX_BODY_BYTES:-16384}
+      OAST_REQUEST_TIMEOUT_MS: ${OAST_REQUEST_TIMEOUT_MS:-10000}
+      OAST_SHUTDOWN_TIMEOUT_MS: ${OAST_SHUTDOWN_TIMEOUT_MS:-8000}
+      OAST_LOG_LEVEL: ${OAST_LOG_LEVEL:-info}
+    ports:
+      # Dashboard/API only on the host loopback by default. Remove or change the
+      # bind address explicitly if a different local workflow needs it.
+      - "127.0.0.1:${OAST_HOST_PORT:-4000}:4000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Persistent Victim Bot (Phase 2)
+  # ---------------------------------------------------------------------------
+  # Runs Playwright + Chromium against the internal app service, repeats the
+  # victim browsing workflow indefinitely, and only stops when Docker stops the
+  # container. `depends_on: service_healthy` is the first readiness gate; the
+  # bot itself also polls /api/health before every cycle so app restarts and
+  # temporary outages are handled without manual intervention.
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    init: true
+    depends_on:
+      app:
+        condition: service_healthy
+      oast:
+        condition: service_healthy
+    environment:
+      ELECTROMART_BASE_URL: ${ELECTROMART_BASE_URL:-http://app.test:3000}
+      BOT_READY_PATH: ${BOT_READY_PATH:-/api/health}
+      # Internal OAST callback service (Docker DNS alias, never localhost).
+      OAST_BASE_URL: ${OAST_BASE_URL:-http://attckerserver.local:4000}
+      BOT_OAST_READY_PATH: ${BOT_OAST_READY_PATH:-/health}
+      # One isolated proof-of-execution check per bot process, separate from the
+      # normal victim browsing cycle. Set false only to disable that check.
+      BOT_XSS_CHECK_ENABLED: ${BOT_XSS_CHECK_ENABLED:-true}
+      BOT_XSS_CHECK_TIMEOUT_MS: ${BOT_XSS_CHECK_TIMEOUT_MS:-15000}
+      BOT_XSS_CHECK_NEGATIVE_WAIT_MS: ${BOT_XSS_CHECK_NEGATIVE_WAIT_MS:-2000}
+      VICTIM_USERNAME: ${VICTIM_USERNAME:-victim}
+      VICTIM_EMAIL: ${VICTIM_EMAIL:-victimEmail@gmail.com}
+      # Empty/unset falls back inside the bot to the documented lab password.
+      VICTIM_PASSWORD: ${VICTIM_PASSWORD:-}
+      BOT_CYCLE_INTERVAL_MS: ${BOT_CYCLE_INTERVAL_MS:-60000}
+      BOT_TIMEOUT_MS: ${BOT_TIMEOUT_MS:-30000}
+      BOT_MAX_RETRIES: ${BOT_MAX_RETRIES:-3}
+      BOT_RETRY_BASE_DELAY_MS: ${BOT_RETRY_BASE_DELAY_MS:-1000}
+      BOT_HEADLESS: ${BOT_HEADLESS:-true}
+      BOT_SCREENSHOTS_ON_FAILURE: ${BOT_SCREENSHOTS_ON_FAILURE:-false}
+      BOT_SCREENSHOT_DIR: /app/bot-artifacts/screenshots
+      # Empty = discover and visit every product card on /home. Set an explicit
+      # comma-separated list to restrict the cycle to a known subset.
+      BOT_PRODUCT_PATHS: ${BOT_PRODUCT_PATHS:-}
+      BOT_READY_TIMEOUT_MS: ${BOT_READY_TIMEOUT_MS:-120000}
+      BOT_READY_POLL_MS: ${BOT_READY_POLL_MS:-2000}
+      BOT_SHUTDOWN_TIMEOUT_MS: ${BOT_SHUTDOWN_TIMEOUT_MS:-15000}
+      BOT_LOG_LEVEL: ${BOT_LOG_LEVEL:-info}
+      # Review-comment internal-link observation (enabled by default).
+      BOT_COMMENT_LINKS_ENABLED: ${BOT_COMMENT_LINKS_ENABLED:-true}
+      # Extra origins are optional; the configured app origin is always allowed.
+      BOT_ALLOWED_LINK_ORIGINS: ${BOT_ALLOWED_LINK_ORIGINS:-}
+      # 0 = run forever. A positive value is a test-only bounded run.
+      BOT_MAX_CYCLES: ${BOT_MAX_CYCLES:-0}
+    volumes:
+      - bot-artifacts:/app/bot-artifacts
+    # Chromium needs more shared memory than Docker's default. init:true reaps
+    # child processes; Node still receives SIGTERM and shuts down gracefully.
+    shm_size: "1gb"
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  mongo-data:
+  bot-artifacts:
+

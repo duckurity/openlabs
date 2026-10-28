@@ -1,0 +1,115 @@
+<%- include('partials/head') %>
+<%- include('partials/nav-auth') %>
+<main class="page page-profile">
+  <div class="container container--narrow container--top">
+    <%- include('partials/flash') %>
+
+    <section class="page-head">
+      <h1>Your profile</h1>
+      <p class="muted">Manage your account details and your security settings.</p>
+    </section>
+
+    <section class="card">
+      <h2>Account details</h2>
+      <dl class="summary" aria-label="Account summary">
+        <div>
+          <dt>Username</dt>
+          <dd>@<%= user.username %></dd>
+        </div>
+        <div>
+          <dt>Member since</dt>
+          <dd><%= new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) %></dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd class="status-active">● Active</dd>
+        </div>
+      </dl>
+
+      <% if (typeof generalError !== 'undefined' && generalError) { %>
+        <div class="general-error" role="alert"><%= generalError %></div>
+      <% } %>
+
+      <form class="form" action="/profile" method="POST" data-validate="profile" novalidate>
+        <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+
+        <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.email) ? ' field--invalid' : '' %>">
+          <label for="email">Email address</label>
+          <input class="input" type="email" id="email" name="email" autocomplete="email" required maxlength="254" value="<%= user.email %>">
+          <% if (typeof fieldErrors !== 'undefined' && fieldErrors.email) { %>
+            <p class="field-error"><%= fieldErrors.email %></p>
+          <% } %>
+        </div>
+
+        <div class="form-row">
+          <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.first_name) ? ' field--invalid' : '' %>">
+            <label for="first_name">First name</label>
+            <input class="input" type="text" id="first_name" name="first_name" autocomplete="given-name" maxlength="100" value="<%= user.firstName || '' %>">
+            <% if (typeof fieldErrors !== 'undefined' && fieldErrors.first_name) { %>
+              <p class="field-error"><%= fieldErrors.first_name %></p>
+            <% } %>
+          </div>
+          <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.last_name) ? ' field--invalid' : '' %>">
+            <label for="last_name">Last name</label>
+            <input class="input" type="text" id="last_name" name="last_name" autocomplete="family-name" maxlength="100" value="<%= user.lastName || '' %>">
+            <% if (typeof fieldErrors !== 'undefined' && fieldErrors.last_name) { %>
+              <p class="field-error"><%= fieldErrors.last_name %></p>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="field<%= (typeof fieldErrors !== 'undefined' && fieldErrors.address) ? ' field--invalid' : '' %>">
+          <label for="address">Delivery address</label>
+          <textarea class="input textarea" id="address" name="address" rows="3" maxlength="500" placeholder="Street, city, region, postal code"><%= user.address %></textarea>
+          <% if (typeof fieldErrors !== 'undefined' && fieldErrors.address) { %>
+            <p class="field-error"><%= fieldErrors.address %></p>
+          <% } %>
+        </div>
+
+        <div class="form-action">
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Change password</h2>
+      <p class="muted card-lede">For your security, we always ask for your current password before updating it.</p>
+
+      <form class="form" action="/profile/password" method="POST" data-validate="password" novalidate>
+        <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+
+        <div class="field<%= (typeof passwordErrors !== 'undefined' && passwordErrors.current_password) ? ' field--invalid' : '' %>">
+          <label for="current_password">Current password</label>
+          <input class="input" type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+          <% if (typeof passwordErrors !== 'undefined' && passwordErrors.current_password) { %>
+            <p class="field-error"><%= passwordErrors.current_password %></p>
+          <% } %>
+        </div>
+
+        <div class="form-row">
+          <div class="field<%= (typeof passwordErrors !== 'undefined' && passwordErrors.new_password) ? ' field--invalid' : '' %>">
+            <label for="new_password">New password</label>
+            <input class="input" type="password" id="new_password" name="new_password" autocomplete="new-password" required minlength="8" maxlength="72">
+            <p class="hint">At least 8 characters.</p>
+            <% if (typeof passwordErrors !== 'undefined' && passwordErrors.new_password) { %>
+              <p class="field-error"><%= passwordErrors.new_password %></p>
+            <% } %>
+          </div>
+          <div class="field<%= (typeof passwordErrors !== 'undefined' && passwordErrors.new_password_confirmation) ? ' field--invalid' : '' %>">
+            <label for="new_password_confirmation">Confirm new password</label>
+            <input class="input" type="password" id="new_password_confirmation" name="new_password_confirmation" autocomplete="new-password" required minlength="8" maxlength="72">
+            <% if (typeof passwordErrors !== 'undefined' && passwordErrors.new_password_confirmation) { %>
+              <p class="field-error"><%= passwordErrors.new_password_confirmation %></p>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="form-action">
+          <button type="submit" class="btn btn-primary">Update password</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,13 @@
+contract_version: 1
+name: electromart
+track: web
+difficulty: hard
+description: an e-commeric application that has vulnerability in its new feature.
+flag_hash: 11aef57cbace496f231853b8086a889c55efb9f4a44792d58a8e1e6956c4ec50
+status: experimental
+techniques: [xss]
+# Optional v1 fields (see contracts/lab.schema.json):
+# checkpoint_flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+# port: 8080
+# Add slugs that have pages under content/technique/, for example:
+# techniques: [idor]

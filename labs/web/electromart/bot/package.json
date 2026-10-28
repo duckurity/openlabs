@@ -1,0 +1,22 @@
+{
+  "name": "electromart-victim-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Persistent Playwright victim bot for the ElectroMart XSS account-takeover lab",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test:config": "node --test test/config.test.js",
+    "test:comment-links": "node --test test/comment-links.test.js",
+    "test:unit": "node --test test/config.test.js test/comment-links.test.js",
+    "test:acceptance": "node --test test/acceptance.test.js",
+    "test:xss-callback": "node --test test/xss-callback.test.js",
+    "verify:cycles": "node src/index.js"
+  },
+  "dependencies": {
+    "playwright": "1.64.1"
+  }
+}

@@ -1,0 +1,24 @@
+<!-- Authenticated header: store navigation, cart, profile icon, logout. -->
+<header class="site-header">
+  <div class="container nav-inner">
+    <a class="brand" href="/home">
+      <span class="brand-mark" aria-hidden="true">⚡</span>
+      <span class="brand-name">Electro<span class="brand-accent">Mart</span></span>
+    </a>
+    <nav class="store-nav" aria-label="Store">
+      <a class="nav-link<%= path === '/home' ? ' is-active' : '' %>" href="/home">Store</a>
+      <a class="nav-link nav-link--cart" href="/cart">
+        <span aria-hidden="true">🛒</span> Cart
+        <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %><span class="cart-badge"><%= cartCount %></span><% } %>
+      </a>
+      <a class="nav-link<%= path === '/profile' ? ' is-active' : '' %>" href="/profile">Profile</a>
+    </nav>
+    <div class="auth-actions">
+      <a class="avatar" href="/profile" title="View your profile" aria-label="View your profile"><%= avatarInitial %></a>
+      <form class="logout-form" action="/logout" method="POST">
+        <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+        <button type="submit" class="btn btn-ghost btn-sm">Log out</button>
+      </form>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,15 @@
+<%- include('partials/head') %>
+<%- include('partials/nav-guest') %>
+<main class="page page-auth">
+  <div class="container">
+    <div class="auth-card auth-alert">
+      <p class="error-code"><%= typeof code !== 'undefined' && code ? code : 'Error' %></p>
+      <h1>Something went wrong</h1>
+      <p class="muted"><%= typeof message !== 'undefined' && message ? message : 'Please go back and try again.' %></p>
+      <div class="error-actions">
+        <a class="btn btn-primary" href="/">Back to ElectroMart</a>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('partials/footer') %>

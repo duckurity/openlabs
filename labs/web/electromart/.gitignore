@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# OAST service dependencies (built inside its own image)
+oast/node_modules/
+
+# Environment (keep the real secret out of git)
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Bot diagnostic output (local runs; Compose uses a named volume)
+bot-artifacts/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
