@@ -1,0 +1,4 @@
+Operations File Exchange
+------------------------
+Anonymous access is intentionally read-only for this training scenario.
+Maintenance artifacts have been retained under pub/ during a migration.

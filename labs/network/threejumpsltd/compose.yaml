@@ -1,0 +1,119 @@
+name: network-pentest-hard-v2
+
+services:
+  router:
+    build: ./router
+    container_name: hardv2-router
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      edge:
+        ipv4_address: 172.28.10.254
+      corporate:
+        ipv4_address: 172.28.20.254
+      data:
+        ipv4_address: 172.28.30.254
+    healthcheck:
+      test: ["CMD-SHELL", "iptables -S FORWARD | grep -q -- '-P FORWARD DROP'"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+    restart: unless-stopped
+
+  attacker:
+    build: ./attacker
+    container_name: hardv2-attacker
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      router:
+        condition: service_healthy
+      jump01:
+        condition: service_healthy
+    entrypoint: ["/usr/local/bin/attacker-entrypoint.sh"]
+    command: ["sleep", "infinity"]
+    networks:
+      edge:
+        ipv4_address: 172.28.10.10
+    restart: unless-stopped
+
+  jump01:
+    build: ./jump01
+    hostname: jump01
+    container_name: hardv2-jump01
+    depends_on:
+      router:
+        condition: service_healthy
+    networks:
+      edge:
+        ipv4_address: 172.28.10.20
+      corporate:
+        ipv4_address: 172.28.20.10
+    healthcheck:
+      test: ["CMD-SHELL", "ss -lnt | grep -Eq ':21[[:space:]]' && ss -lnt | grep -Eq ':22[[:space:]]'"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  app01:
+    build: ./app01
+    hostname: app01
+    container_name: hardv2-app01
+    depends_on:
+      router:
+        condition: service_healthy
+    networks:
+      corporate:
+        ipv4_address: 172.28.20.20
+      data:
+        ipv4_address: 172.28.30.10
+    healthcheck:
+      test: ["CMD-SHELL", "ss -lnt | grep -Eq ':22[[:space:]]' && curl -fsS http://127.0.0.1:8080/ >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  db01:
+    build: ./db01
+    hostname: db01
+    container_name: hardv2-db01
+    depends_on:
+      router:
+        condition: service_healthy
+    networks:
+      data:
+        ipv4_address: 172.28.30.20
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 && ss -lnt | grep -Eq ':22[[:space:]]'"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    restart: unless-stopped
+
+networks:
+  edge:
+    name: hardv2-edge
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.28.10.0/24
+  corporate:
+    name: hardv2-corporate
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.28.20.0/24
+  data:
+    name: hardv2-data
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.28.30.0/24

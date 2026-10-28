@@ -1,0 +1,1 @@
+dbops ALL=(root) NOPASSWD: /usr/local/sbin/db-maintenance

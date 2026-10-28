@@ -1,0 +1,13 @@
+contract_version: 1
+name: threejumpsltd
+track: network
+difficulty: hard
+description: company with services internaly and your goul is to access the database but there is a firewall.
+flag_hash: 261e49d711217039da14aa624129abcdc42fc69d827f19a9726a5d61b28e9e1f
+status: experimental
+techniques: []
+# Optional v1 fields (see contracts/lab.schema.json):
+# checkpoint_flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+# port: 8080
+# Add slugs that have pages under content/technique/, for example:
+# techniques: [idor]

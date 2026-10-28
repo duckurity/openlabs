@@ -1,0 +1,14 @@
+OPS HANDOVER - INTERNAL TRAINING COPY
+=====================================
+This export belongs to a retired account named backupsvc. It is not the current
+interactive account.
+
+Migration record:
+- The current maintenance SSH account on jump01 is named labuser.
+- During the migration, the account reused the operations password represented
+  by the historical hash in shadow.bak.
+- password-candidates.txt was retained for recovery validation.
+
+After obtaining a shell, document the host's network interfaces. The bastion
+was also used for legacy network diagnostics; the Corporate subnet contains the
+current inventory application service.
