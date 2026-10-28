@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bulk imports · MarketNest</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" href="/dashboard"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6M3 19h18"/></svg></span><span><span class="brand-name">MarketNest</span><span class="brand-caption">Retail operations</span></span></a>
+        <nav class="nav-section" aria-label="Main navigation"><p class="nav-label">Workspace</p><ul class="nav-list"><li><a class="nav-link" href="/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg> Overview</a></li><li><a class="nav-link active" href="/import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><path d="M8 12h8M12 8v8"/></svg> Bulk imports</a></li></ul></nav>
+        <div class="sidebar-bottom"><div class="user-mini"><span class="avatar" th:text="${#strings.substring(username, 0, 1).toUpperCase()}">R</span><div><strong th:text="${username}">retailer</strong><span>Workspace owner</span></div></div><form class="logout-form" method="post" action="/logout"><input type="hidden" name="_csrf" th:value="${csrfToken}"><button class="logout" type="submit">Sign out</button></form></div>
+    </aside>
+    <main class="main">
+        <header class="topbar"><span class="breadcrumb">Workspace <span>/</span> <strong>Bulk imports</strong></span><div class="topbar-actions"><span class="status-pill"><span class="status-dot"></span> Import service ready</span></div></header>
+        <section class="content"><div class="import-card">
+            <div class="import-intro"><div><p class="eyebrow">Catalog operations</p><h1>Bulk import your products</h1><p>Bring your entire catalog into MarketNest in one upload. We’ll validate every row and show you the calculated selling price before you continue.</p></div><a class="template-link" href="/static/templates/bulk_import_sample.csv">Download CSV template ↓</a></div>
+            <form class="panel" method="post" action="/import" enctype="multipart/form-data">
+                <input type="hidden" name="_csrf" th:value="${csrfToken}">
+                <div class="upload-zone"><div><div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></div><h2>Choose your catalog CSV</h2><p>Drop a file here or browse from your computer</p><input class="file-input" type="file" name="file" accept=".csv" required></div></div>
+                <div class="panel-body"><button class="button" type="submit">Upload &amp; preview <span aria-hidden="true">→</span></button><div class="formula-note"><span>✦</span><span><strong>Pricing formulas supported.</strong> Include a <code>priceFormula</code> column for rules such as <code>basePrice * 0.9</code> or <code>basePrice + 2</code>. Your formulas are evaluated in the preview.</span></div></div>
+            </form>
+        </div></section>
+    </main>
+</div>
+</body>
+</html>

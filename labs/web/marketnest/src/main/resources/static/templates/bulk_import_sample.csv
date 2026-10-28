@@ -1,0 +1,4 @@
+name,basePrice,stock,priceFormula
+Widget,10.00,120,basePrice*0.9
+Gadget,25.00,45,basePrice*0.8
+Doohickey,5.50,300,basePrice-1

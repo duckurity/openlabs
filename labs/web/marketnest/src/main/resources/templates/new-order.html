@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>New order - MarketNest</title><link rel="stylesheet" href="/css/app.css"></head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" href="/dashboard"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6M3 19h18"/></svg></span><span><span class="brand-name">MarketNest</span><span class="brand-caption">Retail operations</span></span></a>
+        <nav class="nav-section" aria-label="Main navigation"><p class="nav-label">Workspace</p><ul class="nav-list"><li><a class="nav-link" href="/dashboard">Overview</a></li><li><a class="nav-link" href="/catalog">Catalog</a></li><li><a class="nav-link active" href="/orders">Orders</a></li><li th:if="${isAdmin}"><a class="nav-link" href="/import">Pricing studio</a></li></ul></nav>
+        <div class="sidebar-bottom"><div class="user-mini"><span class="avatar" th:text="${#strings.substring(username, 0, 1).toUpperCase()}">R</span><div><strong th:text="${username}">retailer</strong><span>Workspace owner</span></div></div><form class="logout-form" method="post" action="/logout"><input type="hidden" name="_csrf" th:value="${csrfToken}"><button class="logout" type="submit">Sign out</button></form></div>
+    </aside>
+    <main class="main"><header class="topbar"><span class="breadcrumb">Workspace <span>/</span> <strong>New order</strong></span><div class="topbar-actions"><span class="status-pill"><span class="status-dot"></span> Order feed connected</span></div></header>
+        <section class="content"><div class="page-heading"><div><p class="eyebrow">Customer activity</p><h1>Create an order</h1><p>Record a customer purchase and reserve the requested stock.</p></div><a class="button secondary" href="/orders">Back to orders</a></div>
+            <section class="panel" style="max-width: 720px">
+                <div class="panel-head"><div><h2>Order details</h2><p>The order will start in Processing.</p></div></div>
+                <div class="panel-body">
+                    <div th:if="${error}" class="alert" th:text="${error}">Unable to create order</div>
+                    <form class="form-stack" method="post" action="/orders">
+                        <input type="hidden" name="_csrf" th:value="${csrfToken}">
+                        <div class="field"><label for="customer">Customer or business name</label><input id="customer" type="text" name="customer" placeholder="e.g. Oak Street Market" maxlength="80" autocomplete="organization" required><span class="field-hint">Use the name shown on the customer’s order.</span></div>
+                        <div class="field"><label for="sku">Product</label><select id="sku" name="sku" required><option value="" selected disabled>Choose a catalog product</option><option th:each="item : ${catalog}" th:value="${item.sku}" th:text="${item.name + ' - $' + #numbers.formatDecimal(item.price, 1, 2) + ' (' + item.stock + ' available)'}">House Blend Coffee - $14.50 (86 available)</option></select></div>
+                        <div class="field"><label for="quantity">Quantity</label><input id="quantity" type="number" name="quantity" min="1" max="999" value="1" required><span class="field-hint">The order cannot exceed the available stock.</span></div>
+                        <button class="button" type="submit">Create order <span aria-hidden="true">-&gt;</span></button>
+                    </form>
+                </div>
+            </section>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Catalog - MarketNest</title><link rel="stylesheet" href="/css/app.css"></head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" href="/dashboard"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6M3 19h18"/></svg></span><span><span class="brand-name">MarketNest</span><span class="brand-caption">Retail operations</span></span></a>
+        <nav class="nav-section" aria-label="Main navigation"><p class="nav-label">Workspace</p><ul class="nav-list"><li><a class="nav-link" href="/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg> Overview</a></li><li><a class="nav-link active" href="/catalog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 7 8-4 8 4-8 4z"/><path d="m4 12 8 4 8-4M4 17l8 4 8-4"/></svg> Catalog</a></li><li><a class="nav-link" href="/orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 6h14v14H5z"/><path d="M8 4v4M16 4v4M5 10h14"/><path d="M9 14h2M13 14h2M9 17h2"/></svg> Orders</a></li><li th:if="${isAdmin}"><a class="nav-link" href="/import">Pricing studio</a></li></ul></nav>
+        <div class="sidebar-bottom"><div class="user-mini"><span class="avatar" th:text="${#strings.substring(username, 0, 1).toUpperCase()}">R</span><div><strong th:text="${username}">retailer</strong><span>Workspace owner</span></div></div><form class="logout-form" method="post" action="/logout"><input type="hidden" name="_csrf" th:value="${csrfToken}"><button class="logout" type="submit">Sign out</button></form></div>
+    </aside>
+    <main class="main"><header class="topbar"><span class="breadcrumb">Workspace <span>/</span> <strong>Catalog</strong></span><div class="topbar-actions"><span class="status-pill"><span class="status-dot"></span> Catalog synced</span></div></header>
+        <section class="content"><div class="page-heading"><div><p class="eyebrow">Product operations</p><h1>Catalog</h1><p>Manage the products, prices, and stock levels in your retail workspace.</p></div><span class="status-pill" th:text="${#lists.size(catalog) + ' products'}">6 products</span></div>
+            <section class="panel table-card"><div class="panel-head"><div><h2>All products</h2><p>Updated from your connected product source</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Units available</th><th>Stock status</th></tr></thead><tbody><tr th:each="item : ${catalog}"><td><span class="item-name" th:text="${item.name}">House Blend Coffee</span><span class="secondary-text" th:text="${item.sku}">BRW-1042</span></td><td th:text="${item.category}">Beverages</td><td class="table-number" th:text="${'$' + #numbers.formatDecimal(item.price, 1, 2)}">$14.50</td><td th:text="${item.stock}">86</td><td><span class="stock-badge" th:classappend="${item.stock < 20 ? ' low' : (item.stock < 50 ? ' warning' : '')}" th:text="${item.stockLabel}">In stock</span></td></tr></tbody></table></div></section>
+        </section>
+    </main>
+</div>
+</body>
+</html>
