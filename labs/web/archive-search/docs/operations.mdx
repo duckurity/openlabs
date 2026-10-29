@@ -1,0 +1,59 @@
+# Operations
+
+## Requirements
+
+Docker Engine with the Docker Compose plugin.
+
+## Start
+
+From the repository root:
+
+```sh
+cd labs/web/archive-search
+docker compose up --build -d
+docker compose ps
+```
+
+The web service is available at `http://127.0.0.1:8080/`. Compose exposes only the loopback host address.
+
+## Health and logs
+
+Check the Compose health status with:
+
+```sh
+docker compose ps
+```
+
+View recent application logs with:
+
+```sh
+docker compose logs --tail=100 web
+```
+
+The health endpoint is `http://127.0.0.1:8080/health`.
+
+## Reset
+
+From the lab directory, reset the starter data with:
+
+```sh
+docker compose stop web
+docker compose run --rm --no-deps web python manage.py reset
+docker compose up -d
+```
+
+## Stop and remove local data
+
+Stop the service and retain its named volume:
+
+```sh
+docker compose down
+```
+
+Remove the containers and the lab's persisted volume:
+
+```sh
+docker compose down -v
+```
+
+The second command removes the local database state. A fresh `docker compose up --build -d` initializes a clean lab.

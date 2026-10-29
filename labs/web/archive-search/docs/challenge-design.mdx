@@ -1,0 +1,30 @@
+# Challenge Design
+
+## Summary
+
+Archive Search is a medium-difficulty web lab about an authenticated catalog search that can expose an internal archived record.
+
+## Learning objective
+
+Recognize and report SQL injection in a search feature, and explain why parameterized queries and appropriate data-access controls prevent the exposure.
+
+## Intended player flow
+
+1. Start the lab and sign in with the supplied training account.
+2. Explore the catalog search feature and its normal results.
+3. Identify the protected archived record exposed through search.
+4. Submit the returned challenge proof to the platform.
+
+There is no purchase, wallet, or balance economy.
+
+## Intended flaw
+
+The authenticated search path uses a SQLite query that does not safely separate search input from query syntax. The intended flaw class is UNION-based SQL injection in the catalog search.
+
+## Flag delivery
+
+The challenge proof is returned with the protected record. The flag value belongs only in the lab service files; `lab.yml` contains its SHA-256 hash. Do not copy the plaintext flag into public documentation or issue comments.
+
+## Runtime boundaries
+
+The lab uses Flask, Gunicorn, and SQLite in one Docker Compose `web` service. It binds one host port, `127.0.0.1:8080`, and has no external runtime service dependency.
