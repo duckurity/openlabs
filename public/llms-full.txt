@@ -1211,6 +1211,11 @@ See the [dns-exfil](/labs/dns-exfil) lab, where a compromised host leaks data th
 DNS traffic is rarely blocked, so data hidden in query names can leave a network even when other outbound traffic is filtered.
 ### How can defenders spot it?
 Look for unusually long or high-entropy subdomains, many queries to a single unfamiliar domain, and regular query patterns that do not match normal browsing.
+## FAQ
+### Why do attackers use DNS for exfiltration?
+DNS traffic is rarely blocked, so data hidden in query names can leave a network even when other outbound traffic is filtered.
+### How can defenders spot it?
+Look for unusually long or high-entropy subdomains, many queries to a single unfamiliar domain, and regular query patterns that do not match normal browsing.
 
 ## Broken object-level authorization (IDOR)
 
