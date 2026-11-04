@@ -2,7 +2,7 @@
 
 Auditable M0 completion record for [#72](https://github.com/duckurity/openlabs/issues/72) (M0-09). Use it before enabling branch protection on `main`. Depends on [#71](https://github.com/duckurity/openlabs/issues/71) (**CI required**).
 
-Reviewed on `2026-10-22`. Regenerate with `python3 scripts/baseline_report.py --write-wiki wiki/M0-Baseline-Evidence.md`. Write `--json` when you need the reviewed git commit and full inventory snapshot.
+Reviewed on `2026-10-24`. Regenerate with `python3 scripts/baseline_report.py --write-wiki wiki/M0-Baseline-Evidence.md`. Write `--json` when you need the reviewed git commit and full inventory snapshot.
 
 ## Catalog manifest
 
@@ -65,6 +65,7 @@ Run the script locally or read CI artifacts; this report does not start containe
 - `labs/web/nexora-platform` (validates)
 - `labs/web/parcelpoint` (validates)
 - `labs/web/shopvault` (validates)
+- `labs/web/shopx-dep-confusion` (validates)
 - `labs/web/snapconnect` (validates)
 - `labs/web/snapsync` (validates)
 - `labs/web/switf01-hit3` (validates)

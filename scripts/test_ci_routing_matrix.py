@@ -28,9 +28,15 @@ REQUIRED_KEYS = frozenset(
 )
 CONTRACT_PATHS = (
     "scripts/test_contract.py",
+    "scripts/test_track_registry.py",
+    "scripts/tracks.py",
     "scripts/test_m2.py",
     "scripts/openlabs_contract.py",
+    "lib/tracks.ts",
+    "source.config.ts",
+    ".github/ISSUE_TEMPLATE/lab-idea.yml",
     "contracts/lab.schema.json",
+    "contracts/tracks.json",
     "contracts/diagnostics.json",
     "contracts/cli-v1.md",
 )

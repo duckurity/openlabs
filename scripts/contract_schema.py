@@ -12,12 +12,14 @@ import re
 from pathlib import Path
 from typing import Any
 
+from tracks import TRACK_SLUG_SET
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "contracts" / "lab.schema.json"
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 HASH_RE = re.compile(r"^[0-9a-f]{64}$")
-TRACKS = frozenset({"web", "binary", "crypto", "network", "osint"})
+TRACKS = TRACK_SLUG_SET
 DIFFICULTIES = frozenset({"easy", "medium", "hard", "insane"})
 STATUSES = frozenset({"experimental", "supported"})
 REQUIRED = (
