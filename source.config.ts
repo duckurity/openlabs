@@ -8,15 +8,14 @@ import {
 } from 'fumadocs-mdx/config'
 
 import { transformers } from './lib/mdx'
+import { TRACKS } from './lib/tracks'
 import { cn } from '@/lib/utils'
 
 export const docs = defineDocs({
   dir: 'content',
   docs: {
     schema: frontmatterSchema.extend({
-      track: z
-        .enum(['web', 'binary', 'crypto', 'network', 'osint'])
-        .optional(),
+      track: z.enum(TRACKS).optional(),
       difficulty: z
         .enum(['easy', 'medium', 'hard', 'insane'])
         .optional(),

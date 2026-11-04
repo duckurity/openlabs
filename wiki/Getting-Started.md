@@ -59,7 +59,9 @@ labs/
 ├── binary/
 ├── crypto/
 ├── network/
-└── osint/
+├── osint/
+├── forensics/
+└── misc/
 ```
 
 Run `./openlabs lab list` for catalog status and blockers. Only `duck-cross` is

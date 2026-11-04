@@ -77,7 +77,9 @@ def _glob_to_regex(pattern: str) -> re.Pattern[str]:
 
 
 def path_matches_pattern(path: str, pattern: str) -> bool:
-    normalized = path.replace("\\", "/").lstrip("./")
+    normalized = path.replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
     if pattern.endswith("/**"):
         prefix = pattern[: -len("/**")]
         if normalized == prefix or normalized.startswith(prefix + "/"):

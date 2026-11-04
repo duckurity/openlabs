@@ -21,23 +21,14 @@ body:
     id: track
     attributes:
       label: Track
-      description: Which cybersecurity domain does this lab belong to?
+      description: Which track does the lab belong to?
       options:
         - web
-        - api
-        - android
-        - ios
-        - network
-        - windows
-        - linux
         - binary
-        - reverse-engineering
         - crypto
+        - network
         - osint
         - forensics
-        - malware-analysis
-        - dfir
-        - llm
         - misc
     validations:
       required: true

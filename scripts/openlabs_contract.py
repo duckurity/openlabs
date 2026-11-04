@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from contract_schema import validate_lab_record
+from tracks import TRACK_SLUG_SET
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -469,7 +470,7 @@ def legacy_string_map(record: LabMetadataRecord) -> dict[str, str]:
     return data
 
 
-TRACKS = frozenset({"web", "binary", "crypto", "network", "osint"})
+TRACKS = TRACK_SLUG_SET
 
 PLAYER_HASH_LINE_RE = re.compile(r"^(flag_hash|checkpoint_flag_hash): ([0-9a-f]{64})$")
 PLAYER_HASH_PREFIX_RE = re.compile(r"^[ \t]*(flag_hash|checkpoint_flag_hash)\b")
