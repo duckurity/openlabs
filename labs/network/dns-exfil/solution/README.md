@@ -1,7 +1,6 @@
 # Solution: DNS Exfiltration
 
 ## Flag
-FLAG{dns_3xf1ltr4t10n_1s_fun}
 
 ## Steps
 1. Open dns_exfil.pcap in Wireshark or use tshark.
