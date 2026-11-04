@@ -1,0 +1,9 @@
+contract_version: 1
+name: duckleak
+track: binary
+difficulty: easy
+port: 8080
+description: An internal vault app that keeps its PIN and promo code inside the APK.
+flag_hash: 511e0d554da2334361aecb271b8d429424b28d7c0bf5251648550c0d621f90eb
+status: experimental
+techniques: [hardcoded-secrets]

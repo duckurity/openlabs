@@ -44,7 +44,7 @@ published on the [M2 release evidence](M2-Release-Evidence) page.
 
 ## Experimental labs
 
-The catalog lists **19 experimental** labs. They appear in `lab list` with
+The catalog lists **20 experimental** labs. They appear in `lab list` with
 status and blockers. OpenLabs does **not** guarantee `lab setup`, `start`,
 `verify`, `reset`, or `stop` for them. Mutations return `OL-0039` when the lab
 status or compose safety rules block the operation.

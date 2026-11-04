@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">NestGuard</string>
+
+    <!-- Pin screen -->
+    <string name="vault_title">Secret Vault</string>
+    <string name="pin_prompt">Input your PIN</string>
+    <string name="pin_hint">There is useful information in the application\'s string resources.</string>
+    <string name="unlock_button">Unlock Secret Folder</string>
+    <string name="pin_wrong">Try again</string>
+
+    <!-- Hardcoded PIN -->
+    <string name="vault_pin">7394</string>
+
+    <!-- Secret Folder screen -->
+    <string name="folder_title">Secret Folder</string>
+    <string name="folder_documents">Documents</string>
+    <string name="folder_discount">Employee Discount</string>
+    <!-- Promo screen -->
+    <string name="promo_title">Employee Discount</string>
+    <string name="promo_prompt">Enter your promo code</string>
+    <string name="promo_button">Apply Code</string>
+    <!-- Flag screen -->
+    <string name="flag_title">Access Granted!</string>
+    <string name="flag_message">Discount applied. Here is your flag:</string>
+</resources>
