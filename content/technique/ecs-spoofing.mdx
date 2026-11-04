@@ -1,0 +1,55 @@
+---
+title: EDNS Client Subnet (ECS) spoofing
+description: The resolver trusts a client-supplied subnet to decide what you're allowed to see, instead of checking who actually sent the packet.
+type: technique
+key: technique-ecs-spoofing
+slug: technique/ecs-spoofing
+intent: Learn how EDNS Client Subnet can be abused for access-control bypass and which labs exercise it.
+keywords:
+  primary: EDNS client subnet bypass
+  secondary:
+    - DNS access control bypass
+    - ECS spoofing lab
+linksTo:
+  - labs/dns-ecs-bypass
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+EDNS Client Subnet (RFC 7871) lets a resolver's client declare which network
+it is querying from, so the resolver can return geographically relevant
+answers. The field is just part of the query the client sends — nothing
+authenticates it. A server that uses it to decide whether a zone is
+"internal-only" is trusting data the client wrote itself.
+
+## Examples
+
+Look for a DNS service that refuses a plain query but behaves differently
+once an EDNS Client Subnet option is attached (for example with
+`dig +subnet=<cidr>`). A `REFUSED` baseline followed by a successful answer
+once a specific subnet is declared is the tell.
+
+## Related labs
+
+Practise on a live target:
+
+- [Dns ecs bypass](/labs/dns-ecs-bypass) — a DNS zone gated on a client-declared subnet instead of the real source IP.
+
+Browse all [labs](/labs) when it is solved.
+
+## FAQ
+
+**Is this the same as IP spoofing?**
+
+No. Real IP spoofing forges the packet's source address and usually can't
+complete a UDP round trip back to the attacker. ECS spoofing forges a field
+*inside* a normal, correctly-addressed query — the response comes straight
+back, no packet-level tricks needed.
+
+**Do I need special tooling?**
+
+No. `dig` and `nmap` are enough. Read [how to play](/play) for the loop.

@@ -1,0 +1,40 @@
+# Challenge design — dns-ecs-bypass
+
+## Vector
+
+The lab ships a minimal authoritative DNS resolver on UDP/5353. A protected
+zone is gated on the EDNS Client Subnet (ECS) option (RFC 7871) instead of
+the real UDP source address. ECS is attacker-controlled and unauthenticated,
+so declaring the trusted subnet in the query is enough to pass the check.
+
+## Intended path
+
+1. `dig flag.ctf.local` with no ECS → `REFUSED`. This is the signal that
+   access is restricted by something other than the zone simply not
+   existing.
+2. `dig flag.ctf.local +subnet=10.10.10.0/24` → accepted, response is a
+   `CNAME` to an internal-looking name.
+3. Query the CNAME target with the same ECS option → `TXT` record,
+   base64-encoded.
+4. Decode the TXT value → flag.
+
+## Why medium
+
+- No off-the-shelf tool or known CVE solves it directly; the player has to
+  reason about what field the resolver is trusting.
+- Multi-step: bypass → follow CNAME → decode base64. Each step gates the
+  next.
+- All tooling needed (`dig`, `base64`) ships with any standard Linux
+  install; no custom exploit code required.
+
+## Root cause
+
+CWE-290, Authentication Bypass by Spoofing. Client-supplied metadata (ECS)
+is used for an authorization decision that should be based on the verified
+network path.
+
+## Scope boundaries
+
+- Single service, no chained CVEs, no privilege escalation beyond reading
+  the protected record.
+- No runtime network calls outside the lab's own isolated bridge.
