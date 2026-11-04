@@ -173,15 +173,14 @@
   "experimental_count": 21,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 28,
-    "uncatalogued_count": 6,
+    "directory_count": 27,
+    "uncatalogued_count": 5,
     "uncatalogued_paths": [
-      "labs/binary/nexawallet",
-      "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",
       "labs/web/duckcorp-savegame",
       "labs/web/duckdesk",
       "labs/web/duckfleet",
-      "labs/web/duckmarket"
+      "labs/web/duckmarket",
+      "labs/web/Sayed_Khashana_REST_API_IDOR_CTF"
     ]
   },
   "supported": [
