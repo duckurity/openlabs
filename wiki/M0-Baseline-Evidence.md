@@ -65,6 +65,7 @@ Run the script locally or read CI artifacts; this report does not start containe
 - `labs/web/invoiceportal` (validates)
 - `labs/web/nexora-platform` (validates)
 - `labs/web/shopvault` (validates)
+- `labs/web/shopx-dep-confusion` (validates)
 - `labs/web/snapconnect` (validates)
 - `labs/web/snapsync` (validates)
 - `labs/web/switf01-hit3` (validates)

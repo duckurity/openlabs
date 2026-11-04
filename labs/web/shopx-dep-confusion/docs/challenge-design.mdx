@@ -1,0 +1,157 @@
+# Challenge design
+
+**shopx-dep-confusion · Designer edition**
+
+> **Design status:** Implemented and tested end to end on a real Docker host
+> (Kali, Docker 29.7.2, Compose v5.5.0). See the
+> [validation report](validation-report.mdx) for dated evidence.
+
+[Design brief](#design-brief) · [Architecture](#architecture-and-trust-boundaries) · [Stage graph](#intended-chain) · [npm details](#appendix-a-npm-registry-details) · [SSRF scope](#appendix-b-ssrf-scope)
+
+## Design brief
+
+| Attribute | Decision |
+|---|---|
+| Scenario | ShopX, a fictional retailer mid-migration to a scoped npm registry |
+| Primary family | Supply-chain / dependency confusion |
+| Secondary weakness | SSRF (local-read variant), broken access control (header-gated static files) |
+| Difficulty | Hard |
+| Player starting point | Unauthenticated, public storefront only |
+| Required skills | HTTP recon, content-discovery tooling (`ffuf`/`gobuster`), npm registry/scope semantics, basic Node.js reading |
+| Prerequisites | Docker, Compose v2+, `npm`/`node` on the player's own machine, a content-discovery wordlist |
+| Completion proof | One runtime-fixed `duck{...}` value, read via the CI log endpoint |
+
+## Learning objective
+
+Demonstrate that npm dependency confusion is not "the resolver compares
+versions across two registries and keeps the higher one" (that framing
+describes other package managers, e.g. pip). npm's scope-to-registry mapping
+is exclusive: a package name either carries a scope and resolves against that
+scope's registry, or it carries no scope and resolves against the default
+registry - never both. The lesson is that an unscoped legacy dependency name
+routes entirely around a correctly configured private registry, not that any
+version comparison across sources happens at all.
+
+## Intended chain
+
+```text
+1. Recon            /, /health, /docs - learn a CI/CD pipeline exists
+2. Content discovery /products page links /static/js/main.js - comment names
+                     "shopx-utils" and hints at leftover backup files,
+                     without naming their path
+3. Fuzzing           common.txt against /static/ finds "backup" (singular,
+                     matches the stock wordlist entry); a small file-name
+                     list then finds pipeline.yml.bak and npmrc.bak inside it
+4. SSRF (local-read) /static/asset?url=... with a trailing-slash /static/
+                     target reads local directory listings instead of
+                     making a real network request; non-local hosts on the
+                     fetch branch are rejected - see Appendix B
+5. Header-gated file /static/js/*.bak requires X-Internal: build-mirror-2024,
+                     leaked in pipeline.yml.bak
+6. Scope misrouting  npmrc.bak shows @shopx:registry -> private,
+                     default registry -> public; main.js already named the
+                     unscoped package "shopx-utils"
+7. Publish           player publishes a same-named, higher-version
+                     "shopx-utils" to the registry reachable through
+                     /registry/ (proxied to registry-public)
+8. CI install        ci-runner deletes node_modules and any generated
+                     package-lock.json every cycle (no committed lockfile)
+                     and reinstalls; cycle interval is CI_CYCLE_SECONDS,
+                     25 seconds by default
+9. Trojanized export ci-runner's own "test" stage requires the resolved
+                     package and calls its exported healthcheck() - this is
+                     where attacker code executes, not an install-time hook
+10. Flag             healthcheck() makes one fixed HTTP GET to
+                     internal-service:5000/internal/data, logs the
+                     response, which ci-runner appends to a shared log file
+                     that web-app serves read-only at /api/ci/last-log
+```
+
+## Architecture and trust boundaries
+
+```text
+Internet / player
+      |
+      v
+  gateway (nginx, :8080 - the only published port)
+      |
+      +--> web-app (Express storefront + local-read/SSRF asset proxy)
+      |
+      +--> registry-public (Verdaccio, open/anonymous publish)
+                 |
+                 | (internal Docker network only, from here down -
+                 |  internal: true, no outbound internet access)
+                 v
+            ci-runner (Node, non-root) ---> registry-public (unscoped resolution)
+                 |                    \\
+                 |                     `-> registry-private (Verdaccio, scoped-only, unused by this bug)
+                 v
+        internal-service ("billing-service", holds the flag)
+```
+
+| Boundary | Intended behavior | Deliberate exception |
+|---|---|---|
+| Player to web-app | Normal storefront recon, no auth | Static dotfile-free asset proxy exists for "incident response convenience" |
+| web-app to registry-public | Reverse-proxied publish/read, `/registry/` only | None beyond the proxy itself |
+| web-app to internal network | No membership on the `internal` Docker network | Asset-proxy fetch branch rejects non-local hosts before calling `fetch()` |
+| ci-runner to registries | Resolves `shopx-utils` per `.npmrc`; scope exclusive | The unscoped name was never going to reach `registry-private`, regardless of that registry's own correctness |
+| ci-runner to internet | None - `internal` network is Docker `internal: true` | N/A |
+| ci-runner to internal-service | One fixed, logged GET from inside a resolved package's `healthcheck()` | This is the intended path to the flag |
+
+## Difficulty rationale
+
+Hard, because the solve requires: real content-discovery tooling against a
+non-handed-to-you path; understanding a genuinely non-obvious trailing-slash
+quirk in the asset proxy before it behaves as intended; a second, header-gated
+tier of recon; correctly reasoning about npm's scope-exclusive routing (a
+commonly misunderstood mechanism, and explicitly not "highest version wins");
+crafting and publishing a package including the non-obvious client-side
+`_authToken` requirement npm enforces even against an anonymous-publish
+registry; and waiting out and correlating output from an asynchronous,
+interleaved CI log. There are at least two genuine dead ends: assuming the
+vulnerability is "pick the highest version across two registries" (it is
+not), and assuming the asset-proxy SSRF reaches the internal network directly
+(it does not - verified by testing, not by code reading alone).
+
+## Appendix A. npm registry details
+
+| Item | Value |
+|---|---|
+| Internal package name | `shopx-utils` (unscoped - this is the bug) |
+| Correctly-scoped form (not used by this dependency) | `@shopx/shopx-utils` |
+| Legit version | `1.4.2` |
+| Dependency range in `ci-runner/project/package.json` | `"shopx-utils": "^1.4.2"` (accepts any `1.x.x >= 1.4.2 < 2.0.0`) |
+| `registry-private` URL (internal only, never reachable by the player) | `http://registry-private:4873/` |
+| `registry-public` URL (reachable via the gateway's `/registry/` proxy) | `http://registry-public:4873/` |
+| Seed mechanism | `ci-runner` retries `npm publish` of the legit package to `registry-public` at container startup (legacy, pre-scope-migration location) |
+| Player publish command | `npm publish --registry http://localhost:8080/registry/` after `npm pack`/building a same-named package, with a dummy auth token set in `.npmrc` (`//localhost:8080/registry/:_authToken="anything"`) - required by the npm CLI itself even though the registry accepts anonymous publish server-side |
+| CI cycle interval | `CI_CYCLE_SECONDS` environment variable on `ci-runner`, default `25` seconds |
+
+## Appendix B. SSRF scope
+
+The `/static/asset?url=<url>` endpoint on `web-app` has two code paths:
+
+- If the `url` parameter contains the literal substring `/static/`, it does
+  **not** make a network request. It extracts whatever follows `/static/`,
+  joins it to the local static directory, and reads that local path
+  directly (directory listing or, for `.bak` files outside `js/`, raw file
+  content). This is a local path-read, not SSRF.
+- Otherwise, it may make a real `fetch(url)`, but only when the hostname is
+  `localhost` or `127.0.0.1`. Any other host returns `403`.
+
+**Allowed (intended):** `url=http://localhost:8080/static/` (trailing slash
+required to hit the local-read path) - returns a directory listing of the
+static tree, which is how a player discovers the `backup` and `js`
+subdirectories without needing a lucky wordlist hit on both levels at once.
+
+**Blocked:** non-local hosts (including Docker service names such as
+`internal-service`) are rejected before `fetch`. External SSRF is not part
+of the intended chain; the endpoint's value to a player is the local
+directory-listing behavior.
+
+**Intended bypass, and only this one:** none. There is no outbound-fetch
+path that reaches the internal network from `web-app`.
+
+---
+
+[Documentation index](README.md) · [Operations](operations.mdx) · [Security report](security-report.mdx) · [Validation and acceptance](validation-report.mdx)

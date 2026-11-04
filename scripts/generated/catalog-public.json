@@ -114,6 +114,14 @@
       "track": "web"
     },
     {
+      "description": "an npm scope mapping gap sends an internal package name to the wrong registry",
+      "difficulty": "hard",
+      "name": "shopx-dep-confusion",
+      "path": "labs/web/shopx-dep-confusion",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
       "description": "SnapConnect is a small social app with profiles and avatars, served by a GraphQL API.",
       "difficulty": "easy",
       "name": "snapconnect",

@@ -3,6 +3,10 @@
 Machine-readable definitions for the OpenLabs lab metadata contract and related
 interfaces. Human decisions live in `wiki/M1-Contract-Decisions.md`.
 
+`tracks.json` is the canonical track registry. Python consumers load it through
+`scripts/tracks.py`. Standalone JSON Schema and TypeScript enums remain explicit.
+`scripts/test_track_registry.py` enforces parity across those consumers.
+
 ## Lab metadata v1 (`lab.schema.json`)
 
 JSON Schema 2020-12 describes the **structural** shape of a v1 lab record after
@@ -15,7 +19,7 @@ prove repository layout by itself.
 |:---|:---|
 | `contract_version` | Integer `1` only in M1 |
 | `name` | Lowercase hyphenated slug pattern |
-| `track` | One of five track enums |
+| `track` | One of seven track enums |
 | `difficulty` | One of four difficulty enums |
 | `description` | Non-empty string |
 | `flag_hash` | 64 lowercase hex digits |
@@ -45,10 +49,15 @@ frozen in `wiki/M1-09-Contract-v1-Freeze.md`. Parsing lives in
 `scripts/openlabs_contract.py`. Catalogued labs on `main` declare
 `contract_version: 1`.
 
+The additive `forensics` and `misc` enum expansion is approved in
+`wiki/M1-10-Track-Expansion.md`. It does not change the flat YAML shape or the
+contract marker.
+
 ### Validation command
 
 ```bash
 python3 scripts/test_contract.py
+python3 scripts/test_track_registry.py
 python3 scripts/test_contract_schema.py
 python3 scripts/test_diagnostic_registry.py
 ```

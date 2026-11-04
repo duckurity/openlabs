@@ -13,6 +13,7 @@ SCRIPTS = REPO_ROOT / "scripts"
 STEPS = (
     "test_m2.py",
     "test_openlabs_contract.py",
+    "test_track_registry.py",
     "test_contract_schema.py",
 )
 

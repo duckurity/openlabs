@@ -22,6 +22,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 - [Invoiceportal](https://openlabs.duckurity.com/labs/invoiceportal): InvoicePortal is a SaaS platform for managing company invoices.
 - [Nexora platform](https://openlabs.duckurity.com/labs/nexora-platform): Nexora is a deliberately vulnerable B2B SaaS CTF that simulates a realistic Blind SSRF attack using GraphQL, O
 - [Shopvault](https://openlabs.duckurity.com/labs/shopvault): An e-commerce REST API whose authentication, lockout, and JWT signing weaknesses chain into manager-level acce
+- [Shopx dep confusion](https://openlabs.duckurity.com/labs/shopx-dep-confusion): an npm scope mapping gap sends an internal package name to the wrong registry
 - [Snapconnect](https://openlabs.duckurity.com/labs/snapconnect): SnapConnect is a small social app with profiles and avatars, served by a GraphQL API.
 - [Snapsync](https://openlabs.duckurity.com/labs/snapsync): A staff photo tool where a forged token and a hidden internal route reach the flag.
 - [Switf01 hit3](https://openlabs.duckurity.com/labs/switf01-hit3): A task-management platform with a chained REST, GraphQL, and gRPC attack path.
@@ -33,7 +34,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 
 - [Open source security labs](https://openlabs.duckurity.com): Run a real service. Find the flag. Verify the solve.
 - [How to play](https://openlabs.duckurity.com/play): Clone, run, solve. Verify each flag from the repo root.
-- [Tracks](https://openlabs.duckurity.com/tracks): Five lab families. Start with web.
+- [Tracks](https://openlabs.duckurity.com/tracks): Seven lab families. Start with web.
 - [Techniques](https://openlabs.duckurity.com/technique): Vulnerability classes, defined once and exercised across labs.
 - [API version enumeration](https://openlabs.duckurity.com/technique/api-version-enumeration): Learn how to map versioned API surfaces and spot legacy endpoints that no longer meet the current security pol
 - [Authentication bypass](https://openlabs.duckurity.com/technique/auth-bypass): The server trusts a client-supplied field instead of verifying identity against a real credential check.
