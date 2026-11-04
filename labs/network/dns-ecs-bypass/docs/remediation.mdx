@@ -1,0 +1,27 @@
+# Remediation — dns-ecs-bypass
+
+## Fix
+
+- Never use EDNS Client Subnet, or any other client-supplied field, as the
+  basis for an authorization decision. It carries no guarantee of
+  authenticity.
+- Enforce internal-only zones using the real network path: firewall/ACL
+  rules on the actual source address, a split-horizon resolver that only
+  internal infrastructure can reach, or authenticated zone transfer/query
+  mechanisms such as TSIG.
+- If ECS is not needed for legitimate use (geolocation-aware answers),
+  disable or ignore it entirely on resolvers that don't require it.
+
+## Detection
+
+- Log ECS values alongside the real source IP on every query. A query
+  whose ECS subnet does not match the network the real source IP belongs
+  to is a strong signal of spoofing attempts.
+- Alert on repeated `REFUSED` responses followed by a query that adds an
+  ECS option for a known-internal subnet from an external source.
+
+## Verification after fix
+
+- Re-run the lab's baseline and bypass queries from `docs/solution.mdx`
+  against the patched resolver: the bypass query should now also return
+  `REFUSED` unless it genuinely originates from the internal network.

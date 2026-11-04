@@ -1,0 +1,16 @@
+services:
+  dns:
+    build: .
+    ports:
+      - "127.0.0.1:5353:5353/udp"
+    networks:
+      ctfnet:
+        ipv4_address: 10.10.10.50
+    restart: "no"
+
+networks:
+  ctfnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24

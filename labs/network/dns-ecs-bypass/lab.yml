@@ -1,0 +1,6 @@
+name: dns-ecs-bypass
+track: network
+difficulty: medium
+description: An internal DNS zone trusts the client-supplied subnet instead of the real source IP.
+flag_hash: 61db9e3cd17e6dc725cda62e787b3073cc482aaee76f0c17617dd70781fc4f78
+techniques: [ecs-spoofing]

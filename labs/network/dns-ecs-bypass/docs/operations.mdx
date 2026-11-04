@@ -1,0 +1,36 @@
+# Operations — dns-ecs-bypass
+
+## Deploy
+
+```bash
+cd labs/network/dns-ecs-bypass
+docker compose up -d --build
+```
+
+## Resource footprint
+
+- Single container, `python:3.12-slim`-based image.
+- No persistent volumes, no state written to disk.
+- Negligible CPU/memory at idle; the service only responds to inbound
+  UDP/5353 queries.
+
+## Networking
+
+- One host port: `127.0.0.1:5353/udp`.
+- Dedicated bridge network (`10.10.10.0/24`), not shared with other labs.
+- No outbound calls from the container at runtime.
+
+## Teardown
+
+```bash
+docker compose down
+```
+
+Removes the container and the lab's bridge network. No cleanup beyond that
+is required; nothing persists outside the container.
+
+## Rebuilding
+
+If the base image digest is ever rotated, update the `FROM` line in
+`Dockerfile` and re-run `docker compose up -d --build`. Re-run
+`scripts/validate.py --compose` after any Dockerfile or compose change.

