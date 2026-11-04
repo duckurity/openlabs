@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}The Last Reel Archive{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='interaction.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark" aria-hidden="true">LR</span><span>LAST REEL<span class="brand-caption">FILM RESTORATION ARCHIVE</span></span></a>
+    <nav aria-label="Main navigation"><a href="{{ url_for('index') }}">Public catalogue</a><span class="status"><span aria-hidden="true">●</span> Archive online</span></nav>
+  </header>
+  <main id="main">{% block content %}{% endblock %}</main>
+  <footer><span>LAST REEL ARCHIVE</span><span>A fictional collection. Restoring stories, one frame at a time.</span></footer>
+</body>
+</html>

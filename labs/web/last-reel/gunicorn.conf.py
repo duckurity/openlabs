@@ -1,0 +1,16 @@
+bind = "0.0.0.0:8000"
+workers = 2
+threads = 2
+worker_class = "gthread"
+timeout = 10
+graceful_timeout = 5
+keepalive = 2
+worker_tmp_dir = "/tmp"
+limit_request_line = 2048
+limit_request_fields = 32
+limit_request_field_size = 2048
+max_requests = 1000
+max_requests_jitter = 50
+accesslog = None
+errorlog = "-"
+loglevel = "warning"

@@ -1,0 +1,87 @@
+---
+title: Last reel
+description: A film restoration archive with a restricted release-clearance record.
+track: web
+difficulty: easy
+port: "8080"
+type: lab
+key: lab-last-reel
+slug: labs/last-reel
+intent: Solve an easy web lab in Docker.
+keywords:
+  primary: Last reel web security lab docker
+  secondary:
+    - easy web practice
+    - openlabs last-reel
+verified: true
+score: 100
+score_grade: A
+status: experimental
+linksTo:
+  - technique/sqli
+author_name: "ziadelboshy"
+author_url: "https://github.com/ziadelboshy"
+author_avatar: "https://github.com/ziadelboshy.png"
+author_date: "2026-10-12"
+ogImage: /og/labs-last-reel.png
+---
+
+{/* Generated from labs/web/last-reel/lab.yml and README.md. Do not edit by hand. Run scripts/sync_site_content.py. */}
+
+A fictional film-restoration archive has published its public catalogue. The archive team keeps release-clearance records separately while a restoration is still awaiting release.
+
+## Brief
+
+Last Reel is an **easy Web** lab. The public search page accepts film titles. Your goal is to retrieve the runtime flag from the restricted release-clearance record for the unreleased restoration.
+
+The scenario, films, people, and records are fictional. Use only the supplied local lab instance.
+
+## Setup
+
+Prerequisites:
+
+- Docker Desktop using Linux containers, or Docker Engine on Linux, with Docker Compose `v2.17.0` or later.
+- Python 3.10 or later on the host for hash synchronization, reset, and the local checker; no additional Python packages are required.
+- A browser or an HTTP client, and an available local port `8080`.
+- The first build requires internet access to download the pinned base image and Python packages. The running lab needs no external service.
+
+Run the commands from this lab directory. Substitute `python3` for `python` if needed.
+
+```text
+docker compose up -d --build --wait
+python scripts/sync_flag_hash.py
+```
+
+Open `http://127.0.0.1:8080`.
+
+The only published host port is `127.0.0.1:8080`. The application and its SQLite archive are not published directly.
+
+To reset the instance and refresh the checker digest:
+
+```text
+python reset.py
+```
+
+The reset creates a new runtime flag. Any flag captured before reset will no longer be valid.
+
+## Goal
+
+Find the current final flag in the form `duck{...}` through the local web interface or an HTTP client. Check it from this directory:
+
+```text
+python ../../../scripts/check.py .
+```
+
+The checker stores and compares only the SHA-256 digest in `lab.yml`.
+
+## Notes
+
+- This lab is intentionally vulnerable. Do not apply the technique to systems you do not own or have permission to test.
+- The reset script operates only on the `last-reel` Compose project. It does not pull images or rebuild during reset.
+- In hosted delivery, only the assigned HTTP(S) endpoint is in scope. Host, Docker, database, image, source, and reset controls belong to the operator and are not player-accessible assets.
+## Techniques
+
+Practise in this lab:
+
+- [SQL injection](/technique/sqli)
+

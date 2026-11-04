@@ -18,7 +18,7 @@
   </picture>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-dark.svg?v=4bc78f54">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-light.svg?v=ea7e09f4" alt="labs: 20 experimental" height="20">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-light.svg?v=ea7e09f4" alt="labs: 21 experimental" height="20">
   </picture>
 <!-- catalog-public:badges-end -->
   <picture>
@@ -79,5 +79,5 @@ Open `http://localhost:8377`. Verify a solve with
 [Report a broken lab](https://github.com/Duckurity/openlabs/issues)
 
 <!-- catalog-public:start -->
-Catalog totals: **1 supported**, **20 experimental**. Experimental labs are not guaranteed supported. See [[Lab catalog status](Lab-Catalog-Status)] and [[Lab triage inventory](Lab-Triage-Inventory)].
+Catalog totals: **1 supported**, **21 experimental**. Experimental labs are not guaranteed supported. See [[Lab catalog status](Lab-Catalog-Status)] and [[Lab triage inventory](Lab-Triage-Inventory)].
 <!-- catalog-public:end -->

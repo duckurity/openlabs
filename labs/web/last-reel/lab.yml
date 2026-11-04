@@ -1,0 +1,12 @@
+contract_version: 1
+name: last-reel
+track: web
+difficulty: easy
+description: A film restoration archive with a restricted release-clearance record.
+# SHA-256 of the current instance's flag; the plaintext flag stays inside the lab.
+# Initialize once with scripts/sync_flag_hash.py after startup; reset.py refreshes the hash.
+# Compare a captured flag with ../../../scripts/check.py .; it reads the hash only.
+flag_hash: 29afc30da036b7e3abec24d5d689b10b2380a999f4977b0f3be2c71415eeecf9
+status: experimental
+techniques: [sqli]
+port: 8080

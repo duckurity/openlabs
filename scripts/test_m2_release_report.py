@@ -42,6 +42,9 @@ def main() -> int:
     if "lab reset" not in steps or "lab start" not in steps:
         print("m2_release_evidence: must include reset and second start steps")
         failures += 1
+    if not any("{experimental_count}" in item for item in data.get("known_limitations", [])):
+        print("m2_release_evidence: experimental lab count must come from the catalog ({experimental_count})")
+        failures += 1
     if hosted.get("hosted_ci_run_url") != url:
         print("m2_tier1_hosted_evidence: CI URL must match release fixture")
         failures += 1
