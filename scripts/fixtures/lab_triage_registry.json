@@ -117,6 +117,12 @@
       "blocker": "",
       "follow_up_title": ""
     },
+    "labs/web/shopx-dep-confusion": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
     "labs/web/snapconnect": {
       "action": "maintain",
       "owner": "maintainers",

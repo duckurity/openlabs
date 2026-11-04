@@ -1,0 +1,58 @@
+---
+title: Shopx dep confusion
+description: an npm scope mapping gap sends an internal package name to the wrong registry
+track: web
+difficulty: hard
+port: "8080"
+type: lab
+key: lab-shopx-dep-confusion
+slug: labs/shopx-dep-confusion
+intent: Solve a hard web lab in Docker.
+keywords:
+  primary: Shopx dep confusion web security lab docker
+  secondary:
+    - hard web practice
+    - openlabs shopx-dep-confusion
+verified: true
+score: 90
+score_grade: A
+status: experimental
+linksTo:
+  - technique/ssrf
+ogImage: /og/labs-shopx-dep-confusion.png
+---
+
+{/* Generated from labs/web/shopx-dep-confusion/lab.yml and README.md. Do not edit by hand. Run scripts/sync_site_content.py. */}
+
+`HARD` · `web`
+
+## Brief
+
+ShopX moved its storefront build pipeline to npm earlier this year. You
+have been handed access to the public storefront ahead of a security
+assessment. Nothing else. Investigate the surface, follow what it tells
+you, and reach the protected flag.
+
+## Setup
+
+
+Open `http://localhost:8080`.
+
+Everything the lab needs runs inside the compose network. Nothing reaches
+outside it.
+
+## Goal
+
+Retrieve the flag held by ShopX's internal billing service.
+
+Check a solve from the repository root:
+
+```bash
+python3 scripts/check.py labs/web/shopx-dep-confusion
+```
+## Techniques
+
+Practise in this lab:
+
+- [Server-side request forgery (SSRF)](/technique/ssrf)
+

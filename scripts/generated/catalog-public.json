@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 21,
+  "catalogued_count": 22,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -106,6 +106,14 @@
       "track": "web"
     },
     {
+      "description": "an npm scope mapping gap sends an internal package name to the wrong registry",
+      "difficulty": "hard",
+      "name": "shopx-dep-confusion",
+      "path": "labs/web/shopx-dep-confusion",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
       "description": "SnapConnect is a small social app with profiles and avatars, served by a GraphQL API.",
       "difficulty": "easy",
       "name": "snapconnect",
@@ -162,12 +170,13 @@
       "track": "web"
     }
   ],
-  "experimental_count": 20,
+  "experimental_count": 21,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 26,
-    "uncatalogued_count": 5,
+    "directory_count": 28,
+    "uncatalogued_count": 6,
     "uncatalogued_paths": [
+      "labs/binary/nexawallet",
       "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",
       "labs/web/duckcorp-savegame",
       "labs/web/duckdesk",
