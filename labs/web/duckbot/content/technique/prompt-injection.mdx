@@ -1,0 +1,42 @@
+---
+title: Prompt Injection
+description: Learn how crafted user input can override an AI assistant's intended behavior and expose internal instructions or sensitive information.
+type: technique
+key: technique-prompt-injection
+slug: technique/prompt-injection
+intent: Learn what prompt injection is and which labs exercise it.
+keywords:
+  primary: prompt injection practice lab
+  secondary:
+    - prompt injection explained
+    - LLM security lab
+    - system prompt disclosure
+linksTo:
+  - labs/duckbot
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+Prompt injection occurs when crafted input manipulates an AI application into ignoring or overriding its intended instructions. Depending on the application's design, this may cause it to disclose internal instructions or expose information that should remain confidential.
+
+## Examples
+
+See the [duckbot](/labs/duckbot) lab for a self-contained chatbot that demonstrates prompt injection and system prompt disclosure without requiring an external AI service.
+
+## Related labs
+
+- [duckbot](/labs/duckbot)
+
+Browse all [labs](/labs) when it is solved.
+
+## FAQ
+
+### Does prompt injection always expose the system prompt?
+
+No. The impact depends on how the application processes user input and handles sensitive information. Prompt injection may influence application behavior, but system prompt disclosure is only one possible outcome.
+
+Read [how to play](/play) for the usual solve loop.

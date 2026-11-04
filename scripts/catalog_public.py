@@ -42,10 +42,10 @@ def discover_all_lab_dirs() -> list[Path]:
     labs: list[Path] = []
     if not LABS_DIR.is_dir():
         return labs
-    for track in sorted(LABS_DIR.iterdir()):
+    for track in sorted(LABS_DIR.iterdir(), key=lambda path: path.name.casefold()):
         if not track.is_dir() or track.name.startswith((".", "_")):
             continue
-        for lab in sorted(track.iterdir()):
+        for lab in sorted(track.iterdir(), key=lambda path: path.name.casefold()):
             if lab.is_dir() and not lab.name.startswith((".", "_")):
                 labs.append(lab)
     return labs

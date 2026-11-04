@@ -27,6 +27,12 @@
       "blocker": "",
       "follow_up_title": ""
     },
+    "labs/web/duckbot": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
     "labs/web/duck-cross": {
       "action": "maintain",
       "owner": "maintainers",

@@ -1,0 +1,7 @@
+name: duckbot
+track: web
+difficulty: easy
+status: experimental
+description: DuckBot is a lightweight customer-support chatbot that has internal instructions containing a secret flag.
+flag_hash: 428c2d1528ca835572696cdd7809ae42e295daeff758b70be717314c5020e5c4
+techniques: [prompt-injection]

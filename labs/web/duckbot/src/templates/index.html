@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DuckBot</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>🦆 DuckBot</h1>
+    <p class="subtitle">The Helpful Assistant</p>
+
+    <div id="chat" class="chat">
+      <div class="msg bot">
+        <strong>DuckBot:</strong> Hi! I'm DuckBot. How can I help you today?
+      </div>
+    </div>
+
+    <form id="form">
+      <input id="message" autocomplete="off"
+             placeholder="Ask DuckBot something..." maxlength="4000" required>
+      <button type="submit">Send</button>
+    </form>
+  </main>
+
+<script>
+const form = document.getElementById("form");
+const input = document.getElementById("message");
+const chat = document.getElementById("chat");
+
+function addMessage(sender, text, cls) {
+  const div = document.createElement("div");
+  div.className = "msg " + cls;
+  const strong = document.createElement("strong");
+  strong.textContent = sender + ":";
+  div.appendChild(strong);
+  div.appendChild(document.createTextNode(" " + text));
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage("You", message, "user");
+  input.value = "";
+
+  const res = await fetch("/chat", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({message})
+  });
+
+  const data = await res.json();
+  addMessage("DuckBot", data.response || data.error, "bot");
+});
+</script>
+</body>
+</html>
