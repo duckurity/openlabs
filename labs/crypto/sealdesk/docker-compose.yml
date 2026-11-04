@@ -1,0 +1,83 @@
+name: sealdesk
+services:
+  sealdesk:
+    image: sealdesk:local
+    pull_policy: never
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    labels:
+      org.openlabs.lab: sealdesk
+    user: 10001:10001
+    read_only: true
+    init: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /run/sealdesk:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700
+    mem_limit: 256m
+    memswap_limit: 256m
+    cpus: 1.0
+    pids_limit: 64
+    restart: "no"
+    stop_grace_period: 5s
+    logging:
+      driver: json-file
+      options: {max-size: "1m", max-file: "2"}
+    networks: [backend]
+
+  ingress:
+    image: sealdesk-ingress:local
+    pull_policy: never
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.ingress
+    labels:
+      org.openlabs.lab: sealdesk
+    user: 10001:10001
+    read_only: true
+    init: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=10001,gid=10001,mode=0700
+    ports:
+      - "127.0.0.1:8080:8000"
+    mem_limit: 64m
+    memswap_limit: 64m
+    cpus: 0.25
+    pids_limit: 64
+    restart: "no"
+    stop_grace_period: 5s
+    logging:
+      driver: json-file
+      options: {max-size: "1m", max-file: "2"}
+    depends_on:
+      sealdesk:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-B", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 3s
+    networks: [backend, ingress]
+
+networks:
+  backend:
+    name: sealdesk_default
+    driver: bridge
+    internal: true
+    enable_ipv6: false
+    labels:
+      org.openlabs.lab: sealdesk
+  ingress:
+    name: sealdesk_ingress
+    driver: bridge
+    enable_ipv6: false
+    labels:
+      org.openlabs.lab: sealdesk

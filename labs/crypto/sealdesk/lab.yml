@@ -1,0 +1,9 @@
+contract_version: 1
+name: sealdesk
+track: crypto
+difficulty: medium
+description: Recover the access code from an encrypted delivery receipt to open a protected document.
+flag_hash: cb7440853a9d10a86f7f2bd8eaea9823c9b9be879feebe548fb58893adf0805f
+status: experimental
+techniques: [padding-oracle]
+port: 8080

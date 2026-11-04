@@ -1,0 +1,80 @@
+# Remediation guide
+
+**SealDesk · Secure-state guidance · Updated 25 October 2026**
+
+> The lab intentionally uses an unsafe order to demonstrate an oracle. Do not copy that order into an application that handles real data.
+
+## Finding and root cause
+
+`POST /api/receipts/check` decrypts AES-CBC ciphertext and removes PKCS#7 padding before verifying the supplied HMAC. Invalid padding produces one response class. Valid padding followed by failed authentication produces another. That observable discrepancy lets an attacker recover plaintext bytes through chosen ciphertexts even though the HMAC remains unforgeable.[1][6]
+
+The defect is not a break in AES or HMAC. It is an application-level disclosure caused by processing unauthenticated ciphertext before its integrity check. The application returns no plaintext, but the difference between `damaged_envelope` and `untrusted_envelope` is sufficient to expose the padding predicate.
+
+## Primary remediation
+
+For legacy AES-CBC plus HMAC, compute and compare the expected tag over a canonical, length-delimited encoding of every authenticated field before decrypting or unpadding. Include the version, IV, ciphertext, and any authenticated public context. Use independent keys for encryption and authentication. Reject an invalid tag through one external failure path. Only authenticated ciphertext may reach CBC decryption or the padding parser.
+
+```text
+envelope = parse_and_bound(request)
+expected_tag = HMAC_SHA256(mac_key, canonical(version, iv, ciphertext))
+if not hmac.compare_digest(expected_tag, envelope.tag):
+    return generic_authentication_failure
+
+plaintext = AES_CBC_DECRYPT(encryption_key, iv, ciphertext)
+plaintext = PKCS7_UNPAD(plaintext)
+return authorized_application_logic(plaintext)
+```
+
+`parse_and_bound` should reject unsupported versions, non-canonical encodings, missing fields, wrong IV or tag lengths, oversized ciphertext, and ciphertext that is not block-aligned. These checks must happen before cryptographic work. They may produce a bounded format error because no decryption or padding result has been computed. Do not use separate padding errors after authentication.
+
+The ordering is the essential fix. A generic message after unpadding is not enough if invalid padding and valid padding still differ through status, body, redirect, headers, connection behavior, logs, or timing. Error messages should contain only details useful to their intended audience.[1][2] Use a maintained constant-time comparison routine for tags. Do not implement the comparison byte by byte in application code.
+
+## Defense in depth
+
+Prefer a maintained authenticated-encryption API, such as AES-GCM, for new formats. GCM is specified as authenticated encryption with associated data.[3] Authenticated decryption should release plaintext only when the input is authentic. Otherwise it should return one failure result.[4] Follow the selected API's nonce requirements. RFC 5116 requires distinct nonces for distinct operations under a key when non-empty nonces are used.[4]
+
+Additional safeguards:
+
+- Authenticate the version, IV or nonce, ciphertext, and relevant public context as associated data or in the MAC input.
+- Use canonical encodings, strict size bounds, and one parser for validation and cryptographic processing.
+- Keep encryption and authentication keys independent. Rotate them according to policy. Do not log keys, plaintext, or complete sensitive envelopes.
+- Return a uniform rejection for any unauthenticated envelope. Check status, body, headers, redirects, logs, connection behavior, and timing for residual distinctions.
+- Keep authorization separate from receipt validation. A client-controlled verified flag or prior receipt-check result must not authorize document access.
+- Add regression tests proving that a bad tag is rejected before any decrypt or unpad call and that no secret-bearing plaintext is returned on failure.
+- Version new envelope formats. Reject unknown versions without attempting a fallback that changes validation order or error detail.
+- Plan key rotation and old-format retirement. Do not silently accept a weaker legacy format after migration.
+
+Uniform external errors are defense in depth, not a substitute for authenticating before decryption. OWASP recommends integrity verification that leaves only generic success or failure outcomes and no internal error side channel.[1]
+
+## Remediation regression matrix
+
+| Case | Test setup | Expected secure behavior |
+|---|---|---|
+| Valid authenticated envelope | Submit a canonical envelope with a valid tag and authorized context. | Authenticate, decrypt, and return only the authorized application result. |
+| Invalid tag with otherwise valid padding | Modify authenticated bytes but preserve a ciphertext that would have valid padding. | Return the generic authentication failure before decrypt or unpad. |
+| Invalid tag with invalid padding | Modify authenticated bytes so CBC padding would fail. | Return the same failure class as the valid-padding case. |
+| IV modification | Change the IV without a matching valid tag. | Reject authentication before examining decrypted padding. |
+| Previous-block modification | Change a preceding ciphertext block while retaining an invalid tag. | Reject authentication before examining decrypted padding. |
+| Decrypt-order assertion | Instrument the decrypt and unpad calls for every bad-tag case. | Neither call occurs before tag acceptance. |
+| Malformed or non-canonical frame | Use invalid JSON, missing or extra fields, unknown version, invalid Base64URL, or incorrect field lengths. | Apply bounded parser rejection. Do not expose a padding result or exception detail. |
+| Length and block-boundary cases | Try empty, truncated, non-block-aligned, and over-limit ciphertext. | Reject within configured size limits and do not decrypt. |
+| Authenticated but unauthorized content | Submit a valid envelope whose plaintext lacks the authorized context or document identity. | Keep document access denied. Authentication alone does not grant authorization. |
+| Error-channel comparison | Compare status, body, headers, redirects, connection behavior, logs, and timing for rejected envelopes. | No observable difference reveals a padding decision. |
+| New AEAD format | Tamper with nonce, ciphertext, tag, and associated context. | Release no plaintext on authentication failure. Enforce the selected nonce policy. |
+| Key and format rotation | Verify current and retired versions across a controlled migration. | Use only explicitly supported versions and do not fall back to the vulnerable order. |
+
+The matrix tests both the cryptographic order and the externally observable contract. A unit test that checks only an error string cannot establish that a network-visible oracle is gone. Retain a live HTTP regression test for body, status, and header behavior.
+
+## Response if this were a real archive
+
+Treat unauthenticated ciphertext as untrusted input. Preserve request identifiers and sanitized traces without recording raw sensitive envelopes or plaintext. Identify the affected format, code path, and exposure period. Patch the verification order or migrate to a reviewed AEAD format. Invalidate affected sessions or receipts. Rotate relevant keys if exposure cannot be bounded. Verify that old formats fail through one response class and that no fallback reaches the padding parser.
+
+Re-test the deployed network behavior, not only unit-level exceptions. Confirm that logs, error reporting, retries, and proxy behavior do not add a second channel. Document the compatibility plan and the evidence used to retire the vulnerable format. Do not claim remediation from a source change alone.
+
+## Sources
+
+[1] https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography/02-Testing_for_Padding_Oracle (OWASP Web Security Testing Guide: Testing for Padding Oracle)
+[2] https://cwe.mitre.org/data/definitions/209.html (CWE-209: Generation of Error Message Containing Sensitive Information)
+[3] https://csrc.nist.gov/pubs/sp/800/38/d/final (NIST SP 800-38D: GCM and GMAC)
+[4] https://www.rfc-editor.org/rfc/rfc5116.html (RFC 5116: An Interface and Algorithms for Authenticated Encryption)
+[6] https://web.archive.org/web/20260925013739/https://cwe.mitre.org/data/definitions/203.html (CWE-203: Observable Discrepancy, Wayback snapshot, 2026-09-25)

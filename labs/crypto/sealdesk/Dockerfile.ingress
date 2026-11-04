@@ -1,0 +1,20 @@
+FROM python:3.13.16-slim-bookworm@sha256:f040863673aea2570c3ff6a5c3fb4c673a016cbc5375005ad145915922b6b78a
+
+LABEL org.opencontainers.image.title="SealDesk ingress" \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.openlabs.lab="sealdesk"
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /opt/sealdesk
+COPY --chown=10001:10001 ingress_proxy.py ./ingress_proxy.py
+RUN rm -rf /usr/local/bin/pip /usr/local/bin/pip3 \
+    /usr/local/lib/python3.13/ensurepip \
+    /usr/local/lib/python3.13/site-packages/pip \
+    /usr/local/lib/python3.13/site-packages/pip-*.dist-info
+
+USER 10001:10001
+EXPOSE 8000
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["python", "-B", "/opt/sealdesk/ingress_proxy.py"]
