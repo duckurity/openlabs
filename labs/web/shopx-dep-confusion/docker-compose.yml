@@ -1,0 +1,76 @@
+services:
+  gateway:
+    build: ./gateway
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - web-app
+      - registry-public
+    networks:
+      - edge
+    restart: unless-stopped
+
+  web-app:
+    build: ./web-app
+    volumes:
+      - ci-shared:/shared:ro
+    networks:
+      - edge
+    restart: unless-stopped
+
+  registry-public:
+    build: ./registry-public
+    expose:
+      - "4873"
+    networks:
+      - edge
+      - internal
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:4873/-/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+    restart: unless-stopped
+
+  registry-private:
+    build: ./registry-private
+    expose:
+      - "4873"
+    networks:
+      - internal
+    restart: unless-stopped
+
+  ci-runner:
+    build: ./ci-runner
+    volumes:
+      - ci-shared:/shared
+    depends_on:
+      registry-private:
+        condition: service_started
+      registry-public:
+        condition: service_healthy
+      internal-service:
+        condition: service_started
+    networks:
+      - internal
+    restart: unless-stopped
+
+  internal-service:
+    build: ./internal-service
+    expose:
+      - "5000"
+    environment:
+      # Optional override. Unset uses the default baked into internal-service.
+      FLAG: ${FLAG:-}
+    networks:
+      - internal
+    restart: unless-stopped
+
+networks:
+  edge:
+  internal:
+    internal: true
+
+volumes:
+  ci-shared:

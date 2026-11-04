@@ -53,7 +53,7 @@ The brief points at the surface. It does not hand over the solve.
 | Key | Rules |
 |:---:|:---|
 | `name` | matches the directory name, lowercase, hyphens |
-| `track` | one of `web`, `binary`, `crypto`, `network`, `osint` |
+| `track` | one of `web`, `binary`, `crypto`, `network`, `osint`, `forensics`, `misc` |
 | `difficulty` | one of `easy`, `medium`, `hard`, `insane` |
 | `description` | one line, shown in the lab index |
 | `flag_hash` | SHA-256 of the full flag string, 64 lowercase hex |

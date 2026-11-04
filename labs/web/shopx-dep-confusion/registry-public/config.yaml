@@ -1,0 +1,17 @@
+storage: /verdaccio/storage/data
+plugins: /verdaccio/plugins
+
+web:
+  enable: false
+
+uplinks: {}
+
+packages:
+  "**":
+    access: $all
+    publish: $all
+    unpublish: $all
+
+logs: { type: stdout, format: pretty, level: warn }
+
+listen: 0.0.0.0:4873

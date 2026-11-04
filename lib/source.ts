@@ -1,6 +1,9 @@
 import { loader } from 'fumadocs-core/source'
 import { docs } from 'fumadocs-mdx:collections/server'
 import type { InferPageType } from 'fumadocs-core/source'
+import { TRACKS, type Track } from '@/lib/tracks'
+
+export { TRACKS, type Track }
 
 export const source = loader({
   baseUrl: '/',
@@ -32,9 +35,6 @@ export function toLabCardData(page: LabPage): LabCardData {
     port: page.data.port,
   }
 }
-
-export const TRACKS = ['web', 'binary', 'crypto', 'network', 'osint'] as const
-export type Track = (typeof TRACKS)[number]
 
 export const DIFFICULTIES = ['easy', 'medium', 'hard', 'insane'] as const
 export type Difficulty = (typeof DIFFICULTIES)[number]

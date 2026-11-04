@@ -28,7 +28,7 @@
     },
     "track": {
       "type": "string",
-      "enum": ["web", "binary", "crypto", "network", "osint"]
+      "enum": ["web", "binary", "crypto", "network", "osint", "forensics", "misc"]
     },
     "difficulty": {
       "type": "string",

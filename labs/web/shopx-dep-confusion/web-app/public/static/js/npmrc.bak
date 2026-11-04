@@ -1,0 +1,5 @@
+# registry migration, phase 1: new internal packages publish under the
+# @shopx scope. Pre-existing unscoped packages (shopx-utils among them)
+# are still tracked as a follow-up - SHOPX-1421.
+@shopx:registry=http://registry-private:4873/
+registry=http://registry-public:4873/
