@@ -1,0 +1,95 @@
+# Validation report
+
+**shopx-dep-confusion · Evidence baseline**
+
+> **Current status:** Manually validated end to end against a real Docker
+> host by the challenge author. No automated release-validation script or
+> image scanner has been run against this lab; both are recorded as open
+> items below rather than assumed.
+
+## Evidence ledger
+
+| Check | Result | Evidence limit |
+|---|---|---|
+| `python3 scripts/validate.py` (structure/metadata, full repo) | Lab not listed among the 6 failing labs reported | Ran against the whole monorepo; failures were pre-existing, unrelated labs |
+| `python3 scripts/validate.py --compose` | Lab not listed among the 6 failing labs reported | Same run also confirmed `docker-compose.yml` resolves without a missing-variable error - a class of bug this run caught in a different lab (`duckfleet`) that this lab had already fixed |
+| Baseline (pre-exploit) install | `npm install` resolves `shopx-utils@1.4.2`; smoke test returns a clean health object; no flag anywhere in output | Tested directly against the running stack |
+| Full exploit chain, player-perspective | Flag recovered via `/api/ci/last-log` after publishing a malicious `shopx-utils@1.9.9` through `/registry/` on port 8080 only | Performed as an outside player would: no pre-known internal access used |
+| Full reset determinism | `docker compose down -v && docker compose up -d --build`, repeated twice, produced the identical flag both times | No named volume persists registry or CI state; `ci-shared` is the only volume and is removed by `-v` |
+| Direct SSRF to `internal-service` | Fails with a network error (`fetch failed`) | Tested directly: `curl "http://localhost:8080/static/asset?url=http://internal-service:5000/internal/data"` |
+| Local-read asset-proxy path | Returns correct directory listing (`backup`, `js`) with a trailing-slash URL | Tested directly |
+| Header-gated file access | `403` without `X-Internal: build-mirror-2024`; correct content with it | Tested directly |
+| Content-discovery stage, real wordlist | `ffuf` with `SecLists/Discovery/Web-Content/common.txt` against `/static/FUZZ` finds `backup` (singular - confirmed to match the wordlist's literal entry, not a hand-picked guess) | Run against the live instance |
+| Second-stage file discovery | A small, source-derived wordlist against `/static/backup/FUZZ` finds `pipeline.yml.bak` and `npmrc.bak` | Run against the live instance |
+| `ci-runner` non-root execution | PID 1 inside the container is `node`, UID 1000, not root | Confirmed via `/proc/1/status`, not just `docker exec whoami` (which reports the exec session's own default user, not the main process's) |
+| `internal` network outbound restriction | `internal: true` added; full chain re-tested afterward and still passes | Confirmed `ci-runner` can still reach `registry-public`/`registry-private`/`internal-service` (all on the same `internal` network) while losing any default route out |
+| Flag reproducibility without external state | `docker compose exec internal-service env` shows the correct flag with no `.env` file and no exported shell variable present | The flag's fallback default in `docker-compose.yml` was the actual bug source (`FLAG:-duck{PLACEHOLDER_REPLACE_ME}}`) - found by reproducing a fresh `down -v && up` and only fixed after that default was replaced with the real value |
+
+## What was NOT run
+
+- No automated release-validation script equivalent to `validate_release.ps1`
+  exists for this lab; validation above is manual, reproduced twice.
+- No container image scanner (e.g. Docker Scout) has been run against any of
+  the six images in this lab.
+- No independent reviewer (a person other than the author) has completed a
+  clean-environment, README-only solve yet. This is an open item for the
+  maintainer review requested on the tracking issue.
+- Digest pinning is present as a side effect of Docker resolving tags to
+  digests at build time (visible in build logs); base images are not
+  pinned to an explicit digest in the Dockerfiles themselves.
+
+## Bugs found and fixed during this validation pass
+
+Recorded because they are exactly the kind of defect that only surfaces by
+actually running the lab rather than reasoning about the source:
+
+1. **Undiscoverable, not hard.** An early draft had no page linking to
+   `/static/js/main.js`; a player had no organic way to find it or the
+   leaked backup files at all. Fixed by adding the `<script>` tag on
+   `/products`.
+2. **Too easy.** The fix for (1) initially named the exact backup file path
+   in a comment, collapsing the intended content-discovery step into a
+   plain read. Rebalanced to confirm only that backups exist, not where.
+3. **Named for flavor, not derivable.** An intermediate directory name
+   (`.ci-artifacts`) did not actually appear anywhere in accessible page
+   content, so no legitimate recon methodology could derive it. Renamed to
+   `backup`, confirmed to appear both as a literal word in `main.js` and as
+   a stock entry in `SecLists/Discovery/Web-Content/common.txt`.
+4. **Client-side npm auth requirement.** `npm publish` fails with
+   `ENEEDAUTH` against the public registry even though the server accepts
+   anonymous publish, because the npm CLI itself requires a configured auth
+   token. Documented as a required player step rather than treated as a bug.
+5. **Lockfile silently breaking the exploit.** A `package-lock.json`
+   generated by the first `npm install` cycle pinned the legitimate version
+   forever, since `npm install` (unlike `npm ci`) does not re-resolve an
+   already-satisfied, locked dependency. This would have made the lab
+   unsolvable after one cycle. Fixed by deleting any generated lockfile
+   every cycle in `run-pipeline.js`.
+6. **Flag not reproducible from a clean clone.** `docker-compose.yml`'s
+   `FLAG` environment variable fell back to a literal placeholder whenever
+   no `.env` file or exported shell variable supplied the real value -
+   which is the state any fresh clone starts in. Fixed by baking the real
+   flag value into the fallback default itself.
+7. **`ci-runner` running as root.** No `USER` directive existed. Fixed with
+   a standard Dockerfile `USER node` plus pre-chowning `/ci` and `/shared`
+   before the volume is first created, so the non-root user can still write
+   the shared CI log (Docker copies a volume's initial ownership from the
+   image directory it's declared over, on first creation).
+8. **`internal` Docker network had default outbound internet access.**
+   Neither Compose network was marked `internal: true`, so `ci-runner` -
+   the service that executes attacker-supplied code - had an unrestricted
+   default route out. Fixed by marking the `internal` network
+   `internal: true`; re-tested the full chain afterward to confirm
+   inter-container communication on that same network was unaffected.
+
+## Open items before maintainer review
+
+- [ ] Independent (non-author) clean-clone solve.
+- [ ] Explicit digest pins in each Dockerfile's `FROM` line, if the
+      maintainer requires this beyond the tag-resolves-to-digest behavior
+      already observed in build logs.
+- [ ] Image scan (Docker Scout or equivalent) for all six images.
+
+---
+
+[Documentation index](README.md) · [Operations](operations.mdx) · [Challenge design](challenge-design.mdx) · [Security report](security-report.mdx)

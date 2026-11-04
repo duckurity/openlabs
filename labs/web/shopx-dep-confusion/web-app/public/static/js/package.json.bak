@@ -1,0 +1,8 @@
+{
+  "name": "shopx-storefront-build",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "shopx-utils": "^1.4.2"
+  }
+}
