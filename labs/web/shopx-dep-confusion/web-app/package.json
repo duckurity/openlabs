@@ -1,0 +1,8 @@
+{
+  "name": "shopx-storefront",
+  "version": "2.4.0",
+  "private": true,
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

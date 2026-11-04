@@ -1,0 +1,10 @@
+{
+  "contract_version": 1,
+  "name": "forensics-fixture",
+  "track": "forensics",
+  "difficulty": "medium",
+  "description": "Forensics is a supported track enum.",
+  "flag_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "status": "experimental",
+  "techniques": []
+}

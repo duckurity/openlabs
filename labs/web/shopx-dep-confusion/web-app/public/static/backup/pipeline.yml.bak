@@ -1,0 +1,29 @@
+# ShopX storefront build pipeline (legacy, pre-migration)
+# Kept for rollback reference. Do not edit manually.
+#
+# CI runner: ci-runner (see /health)
+# Build status: /api/ci/last-log (on-call only)
+
+install:
+  image: ci-runner
+  script: npm install
+  # scope-to-registry mapping lives in the project's own .npmrc,
+  # do not hardcode it here - see /static/js/npmrc.bak
+
+test:
+  script: node smoke-test.js
+
+deploy:
+  notes: >
+    On-call can check the last run under the storefront's own
+    /api/ci/last-log while the dashboard migration is in progress.
+
+# ---------------------------------------------------------------------
+# Internal access note (audit compliance):
+# Legacy config backups (npmrc.bak, package.json.bak) are gated
+# behind the X-Internal header. Required value:
+#
+#   X-Internal: build-mirror-2024
+#
+# These files live under /static/js/ alongside the frontend bundle.
+# ---------------------------------------------------------------------
