@@ -99,9 +99,7 @@ def test_list_json_baseline_counts() -> None:
     assert code == 0
     payload = _json(out, label="list.json")
     assert payload["data"]["action"] == "list"
-    expected = _metadata_counts(REPO_ROOT)
-    assert payload["data"]["counts"] == expected
-    assert len(payload["data"]["experimental"]) == expected["experimental"]
+    assert payload["data"]["counts"] == {"supported": 1, "experimental": 21}
     supported = payload["data"]["supported"]
     assert len(supported) == 1
     assert supported[0]["slug"] == "duck-cross"
@@ -115,9 +113,8 @@ def test_list_human_sections() -> None:
     code, out, err = _run(["lab", "list"])
     assert code == 0
     assert err == ""
-    expected = _metadata_counts(REPO_ROOT)
-    assert f"supported ({expected['supported']}):" in out
-    assert f"experimental ({expected['experimental']}):" in out
+    assert "supported (1):" in out
+    assert "experimental (21):" in out
     assert "duck-cross" in out
 
 

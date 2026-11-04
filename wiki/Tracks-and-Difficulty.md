@@ -1,6 +1,6 @@
 ## Tracks
 
-Five tracks, each a family of weakness. A lab belongs to exactly one track,
+Seven tracks, each a family of weakness. A lab belongs to exactly one track,
 set in `lab.yml` and mirrored by its directory under `labs/`.
 
 <div align="center">
@@ -12,11 +12,16 @@ set in `lab.yml` and mirrored by its directory under `labs/`.
 | `crypto` | weak primitives, protocol misuse, implementation faults |
 | `network` | protocol abuse, traffic analysis, pivoting |
 | `osint` | recon, source analysis, signature tracing |
+| `forensics` | memory and disk analysis, artifact recovery, anti-forensics |
+| `misc` | constrained environments, escape logic, host-level puzzles |
 
 </div>
 
 Choose the track that names the primary weakness. A lab may touch others,
 but one track leads.
+
+Use `misc` for constrained-environment and escape-style labs. Do not use it as
+a catch-all. Redirect a lab when an existing track names its primary weakness.
 
 ## Difficulty
 
