@@ -1,0 +1,152 @@
+<p align="center">
+  <strong>Created by Ziad Osama El-Boshy</strong><br />
+  <sub>Challenge author and creator</sub>
+</p>
+
+# Validation report
+
+**ParcelPoint · Candidate evidence · Updated 22 October 2026**
+
+> **Release decision:** Ready for pull request review. Images built from this candidate with both Docker builders pass the 34-test application suite and the complete live cycle from clean Windows and WSL exports: start, digest sync, two-stage solve, checker, reset, stale-flag rejection, and re-solve. Repository validation, Linux CI emulation, generated outputs, and the challenge sheet are current, and the human playtest from the player README passed with no issues. Hosted CI and maintainer review follow publication.
+
+[Evidence ledger](#evidence-ledger) · [Coverage](#validation-coverage) · [Reproduction](#reproduction) · [Repository integration](#repository-integration) · [Release decision](#release-decision) · [Independent playtest](#independent-playtest-record)
+
+## Evidence ledger
+
+| Date | Check | Result | Evidence limit |
+|---|---|---|---|
+| 19 Oct 2026 | Application suite in the built test image | **34 passed** | `docker compose --profile test run --build --rm tests` from clean Windows and WSL exports. The test container has no network, a read-only root, and UID `10001:10001`. |
+| 17 Oct 2026 | Medium-path regressions | **Passed within the 34-test suite** | Covers homepage `Link: </api/openapi.json>; rel="service-desc"` discovery, absence of an API explorer in the UI, session-derived reset `email`, and the deterministic Jules-to-Mira courier handoff. The solver validates both stage flags in memory and prints only a completion message. |
+| 17 Oct 2026 | `docker compose config --quiet` | **Passed** | Configuration parsing only; no containers were started. |
+| 19 Oct 2026 | `scripts/validate.py --compose` | **Passed** | No blocking or experimental advisory findings; catalog reports 1 supported and 20 experimental labs. Five uncatalogued directories are outside this lab's scope. |
+| 19 Oct 2026 | `scripts/score_lab.py` | **100/A** | Structure 25, secrets 25, Dockerfile 20, Compose 15, documentation 15. Static scoring, not runtime proof. |
+| 19 Oct 2026 | Linux CI emulation | **All local Python gates passed** | WSL archive emulation for the candidate and generated outputs: Validate, score, site/catalog freshness, M2/triage checks, and secret/path scan (0 hits) passed. Hosted Gitleaks and Trivy are not included. |
+| 19 Oct 2026 | OpenLabs lab discovery gate | **Passed (6 tests)** | Ran from a clean Linux archive of the candidate commit; discovery behavior and registered lab counts pass. |
+| 19 Oct 2026 | Contentbit strict SEO | **0 errors; 0 SEO findings** | `contentbit doctor --strict-seo`: 38 pages. The repository reports 54 warnings and 114 suggestions, including generic non-SEO page diagnostics. |
+| 19 Oct 2026 | Cold image build, both builders | **Passed** | BuildKit `docker compose build --no-cache --pull` on Windows downloaded all 8 hash-pinned wheels; only `WORKDIR` steps reported `CACHED`. The classic builder (`DOCKER_BUILDKIT=0 COMPOSE_BAKE=false docker compose build --no-cache`) on WSL used no cache. The digest-pinned base image was already present locally, so its layers were not re-downloaded. |
+| 19 Oct 2026 | Clean-export README lifecycle | **Passed on Windows and WSL** | From `git archive` exports of the candidate, ran the README commands with `python` on Windows and `python3` on Ubuntu WSL: start, digest sync, wrong flag rejected, evaluator solve with both stages accepted by the shared checker, reset, both pre-reset flags rejected, pre-reset session and account removed, flags rotated, second solve, and `docker compose down` with no containers or networks left. |
+| 19 Oct 2026 | Live runtime controls | **Passed** | Both containers run as `10001:10001` with read-only roots, all capabilities dropped, `no-new-privileges`, PID and memory limits, and no Docker socket mount. Only the ingress publishes `127.0.0.1:8080`; the application has no published port and no outbound access. The homepage `Link` header and `/api/openapi.json` respond as documented, and the UI has no API explorer. |
+| 19 Oct 2026 | Docker Scout image scan | **0 critical, 9 high, 7 medium, 46 low per image** | Scanned the app and ingress images built from this candidate. All findings are in Debian base packages with no fixed version; no Python package is vulnerable. The policies for fixable critical or high and high-profile vulnerabilities pass; the copyleft-license (392 base packages) and supply-chain-attestation policies fail, as expected for local builds. |
+| 19 Oct 2026 | `scripts/make_lab_pdf.py --strict` | **Passed** | Regenerated from the current player README through the repository script: two A4 pages, visually inspected, with no clipping or solution content. The generator titles the sheet "Parcelpoint" from the slug. |
+| 19 Oct 2026 | Generated site content | **Refreshed** | The current ParcelPoint page and `public/llms-full.txt` were regenerated on WSL; the local `sync_site_content --check` passes. |
+| 17 Oct 2026 | Maintainer-document review | **Completed** | All seven `docs/` documents were reviewed against the redesigned routes, payloads, state, and current tests. |
+| 19 Oct 2026 | Documentation links and anchors | **38 local links and anchors passed** | Checked all seven maintainer documents and the player README. |
+| 19 Oct 2026 | Browser review of the redesigned reset path | **Passed** | Chromium against a clean-export deployment: the locker console loads, registration signs in, the reset request shows the signed-in email read-only, and the confirmation form has only code and new-password fields while its request carries the session `email`. An invalid code shows an error and keeps the entered values. No keyboard-only, screen-reader, or cross-browser pass is claimed. |
+| 22 Oct 2026 | Human playtest | **Passed, no issues reported** | Run by the challenge author from a fresh deployment using only the player README; see the [playtest record](#independent-playtest-record). A playtest by a reviewer without prior knowledge of the design has not been performed. |
+| Pending | Hosted CI and maintainer review | **Pending** | No ParcelPoint pull request or hosted checks have been run. |
+
+## Validation coverage
+
+The current 34-test application suite covers:
+
+- public locker listing and detail privacy, health responses, security headers, JSON errors, and request limits;
+- customer registration, login, profile, logout, and session behavior;
+- reset-code delivery, ownership, expiry, single-use consumption, session revocation, unregistered-target recovery, and the intentionally vulnerable target binding;
+- UI and OpenAPI input limits and request-schema accuracy;
+- public OpenAPI discovery through the homepage response header and absence of the API explorer from the application UI;
+- deterministic Jules-to-Mira escalation, courier roles, route assignments, held-locker checks, and both solver stages;
+- seed fixtures, digest-only checker metadata, database handling, operator ownership checks, and reset rotation;
+- frontend labels, ARIA references, CSP-compatible markup, local assets, and text-only rendering.
+
+| Scope | Coverage limit |
+|---|---|
+| Application tests | Evidence for intended flows and selected negative cases; not proof against every unintended behavior |
+| Docker images | Built from this candidate with both builders; base layers came from the local digest-pinned image rather than a fresh registry download |
+| Live runtime | Two clean-export lifecycle runs on Windows and WSL; not a long-running or multi-user deployment |
+| Reset-code boundaries | Normal, invalid, expired, and consumed codes are covered; no production-grade rate limit is established |
+| Ingress | Ordinary forwarding is exercised by every live request; no proxy concurrency or half-close test is claimed |
+| Isolation | Container identity, capabilities, read-only roots, published ports, and application egress were inspected live; no host or kernel escape assurance is claimed |
+| Load and abuse resistance | Registration, reset, mailbox growth, and concurrent requests were not stress-tested |
+| Accessibility | Structural frontend tests only; no full WCAG, keyboard-only, screen-reader, or cross-browser review |
+| Supply chain | Base image pinned by digest and wheels pinned by hash; the Scout scan is a point-in-time result for the candidate images |
+| Independent acceptance | The human playtest was run by the challenge author; it is not replaced by the bundled solver, and maintainer review may add an independent pass |
+
+## Reproduction
+
+From the repository root:
+
+```text
+python3 scripts/validate.py --compose
+python3 scripts/score_lab.py labs/web/parcelpoint --min 70
+python3 scripts/make_lab_pdf.py labs/web/parcelpoint --strict
+```
+
+The PDF must be generated through the repository script; do not invoke LaTeX directly. Inspect the generated sheet for clipping and spoiler content. On native Windows, pass `score_lab.py` an absolute path such as `D:/path/to/openlabs/labs/web/parcelpoint`.
+
+From `labs/web/parcelpoint`:
+
+```text
+docker compose --profile test run --build --rm tests
+docker compose up -d --build --wait
+python3 scripts/sync_flag_hash.py
+python3 solver/solve.py
+python3 reset.py
+python3 solver/solve.py
+docker compose down
+```
+
+The first build requires access to the pinned base image and hash-pinned Python wheels. The Compose test service has no network, uses a read-only root and UID `10001:10001`, and runs tests baked into the `test` target. Use `--build` so the command cannot silently test an older image. The evaluator solver passes captured flags to the shared checker in memory and prints no flag. The manual recovery path is in the spoiler-marked [official solution](official-solution.mdx).
+
+## Repository integration
+
+ParcelPoint raises the experimental catalog from 19 to 20 labs. Three shared repository gates need an entry for every new lab:
+
+| Gate | Shared file | Candidate entry |
+|---|---|---|
+| Lab discovery test | `scripts/test_openlabs_lab_discovery.py` | Experimental count `19` becomes `20` |
+| Triage registry | `scripts/fixtures/lab_triage_registry.json` | `labs/web/parcelpoint` with proposed `maintain` action |
+| Creator fixture | `scripts/fixtures/lab_creator_github.json` | `labs/web/parcelpoint` maps to `ziadelboshy` |
+
+The candidate carries these entries in a separate final commit so maintainers can review, adjust, or drop them independently of the lab. That commit also carries the generated triage row, site creator metadata, and refreshed public full-text feed. No shared generator or workflow was changed. If Last Reel PR #156 merges first, rebase and update the discovery baseline from `20` to `21`, regenerate the derived outputs, and rerun affected gates before publication.
+
+Maintainer questions for the pull request; no change has been made pending their decision:
+
+- The generated ParcelPoint page references `/og/labs-parcelpoint.png`, which the shared image generator has not produced; several existing lab pages share this gap.
+- Shared outputs humanize the slug as “Parcelpoint,” while the product spelling is “ParcelPoint.” Correcting this without changing the slug requires a maintainer decision about shared generator behavior.
+
+## Release decision
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Application suite | **Passed** | 34 tests in the built `test` image from both exports |
+| Repository validation and score | **Passed** | `validate.py --compose`; static score `100/A` |
+| Linux CI emulation | **Passed locally** | All emulated Python job steps and the secret/path scan passed against the candidate tree |
+| Lab discovery gate | **Passed locally** | 6 tests in a clean Linux archive |
+| Strict SEO | **Passed locally** | 38 pages, 0 errors, 0 SEO findings |
+| Image build, both builders | **Passed** | Cold BuildKit build on Windows; classic builder on WSL |
+| Live solve, checker, reset, and runtime controls | **Passed** | Clean-export lifecycle on Windows and WSL; runtime controls inspected live |
+| Image scan | **Recorded** | 0 critical; base-package findings have no fixed version |
+| Documentation and link checks | **Passed** | All seven maintainer documents reviewed; 38 local links and anchors pass |
+| Generated site output | **Passed locally** | Current page and full-text feed regenerated; freshness check passes |
+| Challenge-sheet PDF | **Passed** | Regenerated with `make_lab_pdf.py --strict`; two pages inspected |
+| Clean-export player walkthrough | **Passed** | Windows and WSL runs of the player README commands |
+| Human playtest | **Passed** | Author-run from the player README; no issues reported. See the [record](#independent-playtest-record) |
+| Shared gate registration | **Present in a separate final commit** | See [repository integration](#repository-integration) |
+| Hosted CI and maintainer review | **Pending** | Requires a separately approved pull request |
+
+## Independent playtest procedure
+
+The reviewer receives a fresh checkout and uses only the [player README](../README.md). Do not supply the target account, the vulnerable field, or solution hints.
+
+| Step | Reviewer action | Success condition |
+|---:|---|---|
+| 1 | Build and start the lab from the README | `http://127.0.0.1:8080/health` responds and the locker console loads |
+| 2 | Synchronize the checker digests | `scripts/sync_flag_hash.py` completes |
+| 3 | Solve through the web interface or an HTTP client | The checker prints `checkpoint solved`, then `solved` |
+| 4 | Reset and recheck | Both earlier flags are rejected after `reset.py` |
+| 5 | Record observations | No ambiguity, unintended shortcut, or missing README step |
+
+## Independent playtest record
+
+| Field | Record |
+|---|---|
+| Reviewer | Ziad Osama El-Boshy (challenge author) |
+| Review date | 22 October 2026 |
+| Clean deployment from README | Passed |
+| Unaided solve of both stages | Passed; checkpoint and final flags accepted by the checker |
+| Reset and stale-flag rejection | Passed |
+| Ambiguities or unintended paths | None reported |
+
+## Evidence handling
+
+Keep runtime flags, reset codes, courier passwords, bearer tokens, and database contents out of saved logs, screenshots, and reports. For a material future change, record a fresh clean build, the application suite, a live solve and reset, and a new playtest where practical. The challenge intentionally retains the reset-target flaw described in the [security report](security-report.mdx).

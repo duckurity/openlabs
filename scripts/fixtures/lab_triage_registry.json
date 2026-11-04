@@ -111,6 +111,12 @@
       "blocker": "",
       "follow_up_title": ""
     },
+    "labs/web/parcelpoint": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
     "labs/web/shopvault": {
       "action": "maintain",
       "owner": "maintainers",

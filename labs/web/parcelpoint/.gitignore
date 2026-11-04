@@ -1,0 +1,23 @@
+# Local configuration and runtime artifacts
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.runtime/
+output/
+evidence/
+*.bak
+*.tmp

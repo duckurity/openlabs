@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2144ce">
+  <meta name="description" content="ParcelPoint depot. Explore lockers, manage your account, and coordinate courier dispatch.">
+  <title>Depot · ParcelPoint</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to workspace</a>
+  <aside class="sidebar" aria-label="Workspace navigation">
+    <a class="brand" href="#depot" aria-label="ParcelPoint depot">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 9 16 3l12 6v14l-12 6-12-6Z M4 9l12 6 12-6 M16 15v14 M10 6l12 6v6"/></svg>
+      <span>ParcelPoint<span class="brand-sub">Your neighborhood network</span></span>
+    </a>
+    <nav class="navigation" aria-label="Main">
+      <a href="#depot" data-view="depot" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 12h16 M12 3v18 M8 7v2 M16 7v2 M8 16v2 M16 16v2"/></svg>Locker network</a>
+      <a href="#account" data-view="account"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg>My account</a>
+      <a href="#courier" data-view="courier" id="courier-nav" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h11v12H3Z M14 9h4l3 4v4h-7 M7 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4 M17 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/></svg>Courier dispatch</a>
+    </nav>
+    <div class="sidebar-bottom"><div class="network-symbol" aria-hidden="true"><span></span><span></span><span></span><span></span></div><p>A place for<br>every parcel.</p><span class="lab-note">Synthetic training environment.<br>Fictional people and locations.</span></div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar"><span class="workspace-name">Depot workspace</span><span class="session-label" id="session-label">Public access</span><a class="account-link" href="#account" id="account-link">Sign in <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14 M13 6l6 6-6 6"/></svg></a></header>
+    <main id="main" tabindex="-1">
+      <section id="view-depot" class="view" aria-labelledby="depot-title">
+        <div class="page-heading"><div><h1 id="depot-title">The neighborhood,<br>connected.</h1><p>Find your locker. Follow your parcel.</p></div><button class="button secondary" id="refresh-lockers" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5 M4 17v-5h5 M6 6a8 8 0 0 1 13 4 M18 18A8 8 0 0 1 5 14"/></svg>Refresh network</button></div>
+        <div class="network-summary" aria-label="Network summary"><span><strong id="total-lockers">–</strong> neighborhood lockers</span><span><i class="status-dot available" aria-hidden="true"></i><strong id="available-lockers">–</strong> available</span><span><i class="status-dot held" aria-hidden="true"></i><strong id="held-lockers">–</strong> held for collection</span><span class="data-label" id="network-updated">Waiting for network</span></div>
+        <div class="filter-bar" role="search" aria-label="Filter lockers">
+          <div class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><label class="sr-only" for="locker-search">Search lockers</label><input id="locker-search" type="search" placeholder="Search name, district or locker ID" autocomplete="off"></div>
+          <div class="select-field"><label for="district-filter">District</label><select id="district-filter"><option value="">All districts</option></select></div>
+          <div class="select-field"><label for="status-filter">Status</label><select id="status-filter"><option value="">All statuses</option><option value="available">Available</option><option value="in_transit">In transit</option><option value="held">Held</option></select></div>
+          <button class="text-button" id="clear-filters" type="button">Clear filters</button>
+        </div>
+        <div class="depot-layout">
+          <section class="network-board" aria-labelledby="network-title">
+            <div class="panel-heading"><h2 id="network-title">Locker network</h2><span id="match-count" class="count-label" aria-live="polite">Connecting…</span></div>
+            <div class="bank-frame"><div class="bank-top"><span>PARCELPOINT</span><span>Select a locker to inspect</span></div><div id="locker-bank" class="locker-bank" aria-busy="true"><p class="bank-placeholder">Loading locker network…</p></div><div class="bank-base" aria-hidden="true"><span></span><span></span></div></div>
+            <div class="board-footer"><span><i class="status-dot available" aria-hidden="true"></i>Available</span><span><i class="status-dot in_transit" aria-hidden="true"></i>In transit</span><span><i class="status-dot held" aria-hidden="true"></i>Held</span><span class="live-label">Live API data</span></div>
+          </section>
+          <aside id="locker-detail" class="detail-panel" aria-label="Selected locker" aria-busy="false"><div class="detail-empty"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="15" y="6" width="34" height="52" rx="3"/><path d="M15 30h34 M32 6v52 M25 18v5 M39 18v5 M25 41v5 M39 41v5"/></svg><h2>A closer look</h2><p>Select a locker to see its location, parcel status and latest activity.</p></div></aside>
+        </div>
+      </section>
+      <section id="view-account" class="view" aria-labelledby="account-title" hidden>
+        <div class="page-heading"><div><h1 id="account-title">Your account.</h1><p>One account for your neighborhood network.</p></div></div>
+        <div id="auth-panel" class="auth-layout">
+          <div class="form-panel">
+            <div class="tabs" id="auth-tabs" role="tablist" aria-label="Account access"><button id="login-tab" type="button" role="tab" aria-selected="true" aria-controls="login-panel">Sign in</button><button id="register-tab" type="button" role="tab" aria-selected="false" aria-controls="register-panel" tabindex="-1">Create account</button></div>
+            <div id="login-panel" role="tabpanel" aria-labelledby="login-tab">
+              <form id="login-form" class="stack-form" method="post" action="/api/auth/login">
+                <h2>Welcome back.</h2><p class="form-intro">Sign in to open your account workspace.</p>
+                <div class="field"><label for="login-email">Email address</label><input id="login-email" name="email" type="email" autocomplete="username" required maxlength="254" placeholder="you@example.test"></div>
+                <div class="field"><label for="login-password">Password</label><input id="login-password" name="password" type="password" autocomplete="current-password" maxlength="128" required></div>
+                <button class="button blue" type="submit">Sign in</button><p class="form-feedback" role="status" aria-live="polite" hidden></p>
+              </form>
+            </div>
+            <div id="register-panel" role="tabpanel" aria-labelledby="register-tab" hidden>
+              <form id="register-form" class="stack-form" method="post" action="/api/auth/register">
+                <h2>Make yourself at home.</h2><p class="form-intro">Create a customer account for this lab.</p>
+                <div class="field"><label for="register-name">Full name</label><input id="register-name" name="name" autocomplete="name" required maxlength="80"></div>
+                <div class="field"><label for="register-email">Email address</label><input id="register-email" name="email" type="email" autocomplete="username" required maxlength="254" placeholder="you@example.test"><span class="field-help">Use a fictional address ending in .test.</span></div>
+                <div class="field"><label for="register-password">Password</label><input id="register-password" name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" aria-describedby="register-password-help" required><span id="register-password-help" class="field-help">Use 10 to 128 characters.</span></div>
+                <button class="button blue" type="submit">Create account</button><p class="form-feedback" role="status" aria-live="polite" hidden></p>
+              </form>
+            </div>
+          </div>
+          <aside class="account-welcome"><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="15" y="12" width="70" height="76" rx="3"/><path d="M15 46h70 M49 12v76 M38 26v8 M61 26v8 M38 62v8 M61 62v8"/></svg><h2>Your parcel's<br>next stop.</h2><p>Keep your account, mailbox and password settings in one place.</p><p class="welcome-note">This is a synthetic lab. Do not use a real password or personal information.</p></aside>
+        </div>
+        <div id="profile-panel" hidden>
+          <div class="profile-strip"><div class="avatar" id="profile-avatar" aria-hidden="true">P</div><div><h2 id="profile-name"></h2><p id="profile-email"></p></div><span class="badge" id="profile-role"></span><button class="button secondary" id="logout-button" type="button">Sign out</button></div>
+          <div class="account-grid">
+            <section class="settings-panel" aria-labelledby="password-title"><h2 id="password-title">Password settings</h2><p class="form-intro">Request a reset code, then enter it with your new password.</p>
+              <form id="reset-request-form" class="stack-form compact-form" method="post" action="/api/auth/reset/request"><h3>Request a reset code</h3><div class="field"><label for="request-email">Your account email</label><input id="request-email" name="email" type="email" autocomplete="email" required maxlength="254" readonly></div><button class="button secondary" type="submit">Send reset code</button><p class="form-feedback" role="status" aria-live="polite" hidden></p></form>
+              <form id="reset-confirm-form" class="stack-form compact-form" method="post" action="/api/auth/reset/confirm"><h3>Update your password</h3><div class="field"><label for="reset-code">Reset code</label><input id="reset-code" name="code" maxlength="128" autocomplete="one-time-code" spellcheck="false" required></div><div class="field"><label for="reset-password">New password</label><input id="reset-password" name="new_password" type="password" autocomplete="new-password" minlength="10" maxlength="128" aria-describedby="reset-password-help" required><span class="field-help" id="reset-password-help">Use 10 to 128 characters. Reset codes expire after 10 minutes.</span></div><button class="button blue" type="submit">Update password</button><p class="form-feedback" role="status" aria-live="polite" hidden></p></form>
+            </section>
+            <section class="mailbox-panel" aria-labelledby="mailbox-title"><div class="panel-heading"><div><h2 id="mailbox-title">Lab mailbox</h2><p class="field-help">Messages for your signed-in account.</p></div><button id="refresh-mailbox" type="button" class="button secondary">Refresh</button></div><div id="mailbox-messages" aria-live="polite" aria-busy="false"><p class="empty-message">Your messages will appear here.</p></div></section>
+          </div>
+        </div>
+      </section>
+      <section id="view-courier" class="view" aria-labelledby="courier-title" hidden>
+        <div class="page-heading"><div><h1 id="courier-title">Courier dispatch.</h1><p>Your route. Your next collection.</p></div></div>
+        <div id="courier-content">
+          <div id="courier-gate" class="access-gate"><h2>A workspace for couriers.</h2><p>Sign in with a courier account to view assigned routes and release manifests.</p><a class="button blue" href="#account">Go to sign in</a></div>
+          <div id="courier-workspace" hidden>
+            <div class="dispatch-header"><div><h2 id="courier-name">Courier workspace</h2><p id="courier-email" class="field-help"></p></div><button id="refresh-courier" type="button" class="button secondary">Refresh dispatch</button></div>
+            <div class="network-summary"><span><strong id="courier-assigned">–</strong> assigned lockers</span><span><i class="status-dot held" aria-hidden="true"></i><strong id="courier-held">–</strong> held for collection</span></div>
+            <p id="courier-error" class="inline-notice error" role="status" hidden></p>
+            <div class="dispatch-layout"><section id="route-board" class="route-board" aria-label="Your assigned routes" aria-busy="false"></section><aside class="manifest-panel" aria-labelledby="manifest-title"><div class="panel-heading"><h2 id="manifest-title">Release manifest</h2></div><div id="manifest-content" tabindex="-1" aria-live="polite"><div class="manifest-empty"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M19 9h26l8 8v38H11V9h8 M24 6h16v9H24Z M22 29h20 M22 37h20 M22 45h12"/></svg><h3>Ready when you are.</h3><p>Open a held locker on your route to view its release manifest.</p></div></div></aside></div>
+            <details class="checkpoint-panel"><summary>Courier checkpoint</summary><p class="field-help">Your authenticated courier record.</p><code id="checkpoint-value"></code></details>
+          </div>
+        </div>
+      </section>
+      <div id="status-message" class="status-message" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+      <noscript><p class="inline-notice error">JavaScript is required to load live locker data and use account controls. Enable JavaScript and reload this page.</p></noscript>
+    </main>
+    <footer class="app-footer"><span>ParcelPoint neighborhood logistics</span><span>Synthetic lab · No real deliveries</span></footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+# Remediation guide
+
+**ParcelPoint · Secure-state guidance · Updated 17 October 2026**
+
+> The vulnerable behavior is intentional in the training build. Apply this guidance only to a separate secure comparison branch. Binding the reset to its owner removes the challenge path.
+
+## Finding and root cause
+
+The sole intended weakness is CWE-640 in `POST /api/auth/reset/confirm` (`app/__init__.py`, `confirm_reset`). The handler verifies that the submitted code belongs to the authenticated requester, then selects the password-update target from an independent `email` field in the request body. A customer can therefore use a code from their own mailbox to change a courier's password.
+
+The synthetic mailbox and courier-only handoff note are clue sources, not the root cause. The root cause is that proof of recovery for one account authorizes a change to a different, client-selected account. The verifier, the recovery transaction, and the updated account must all refer to the same immutable server-side account ID.
+
+## Primary remediation
+
+Derive the target from the recovery record and stop accepting a target identity in the confirmation request:
+
+```python
+with connection:
+    recovery = connection.execute(
+        "SELECT id, owner_id FROM reset_codes "
+        "WHERE code_hash = ? AND owner_id = ? AND used = 0 AND expires_at > ?",
+        (token_hash(code), user["id"], time.time()),
+    ).fetchone()
+    if recovery is None:
+        abort(400)
+    claimed = connection.execute(
+        "UPDATE reset_codes SET used = 1 WHERE id = ? AND used = 0", (recovery["id"],)
+    )
+    if claimed.rowcount != 1:
+        abort(400)
+    connection.execute(
+        "UPDATE users SET password_hash = ? WHERE id = ?",
+        (generate_password_hash(new_password), recovery["owner_id"]),
+    )
+    connection.execute("DELETE FROM sessions WHERE user_id = ?", (recovery["owner_id"],))
+```
+
+Remove `email` from the confirmation request schema, the browser form, and the OpenAPI description. If a product keeps an email field for display, compare it to the recovery owner and reject any mismatch; never use it to choose the account. Validating the recovery record before computing the password hash also removes the expensive hashing that invalid codes currently trigger.
+
+Do not treat removal of courier emails from public locker details as a repair while leaving the client-selected target in place. That changes discoverability, not the flaw; bind the recovery transaction to its server-side owner.
+
+## Defense in depth
+
+Retain the controls that limit impact, while treating them as secondary safeguards:
+
+- Deliver codes only through a channel verified before the request, and notify the account through that channel after a change.
+- Store only a hash of a high-entropy, purpose-bound code. Keep a short expiry and consume it once, atomically with the password update.
+- Revoke the account's sessions and refresh tokens after a password change.
+- Return the same response for existing and unknown accounts during recovery, and avoid timing differences that disclose account existence.
+- Rate-limit reset requests and confirmation attempts by account and source. Bound mailbox and audit retention.
+- Do not expose direct account identifiers in public service data when a relay or role-appropriate contact suffices.
+- Never log raw codes, new passwords, or bearer tokens.
+
+## Remediation regression matrix
+
+| Test | Secure-state expectation |
+|---|---|
+| Valid code for account A | Changes A's password only |
+| Confirmation names account B by email or ID | Rejected or ignored; B's password and sessions are unchanged |
+| A's code submitted from B's session | Rejected without state change |
+| Missing, malformed, expired, wrong-purpose, or used code | Rejected without updating any account |
+| Two concurrent uses of one code | At most one transaction succeeds |
+| Successful password change | Existing sessions for that account are revoked |
+| Reset request for an existing and an unknown email | Same public response and a similar processing path |
+| Repeated or high-volume requests | Throttled; stored state stays within its retention bound |
+| Logs, traces, and errors | No password, raw code, bearer token, or unnecessary account data |
+| Courier routes after a customer's own reset | Role, assignment, and held-status checks are unchanged |
+
+The current challenge tests intentionally assert the opposite for the body-selected target and the recoverable unknown-email response. In a secure comparison branch, replace those challenge assertions rather than weakening the session, role, and assignment tests. Add a direct secure-state assertion that a customer's code cannot change a courier's password.
+
+## Response if this were a real courier service
+
+Preserve recovery, login, and session evidence under the organization's incident process. Identify password changes where the updated account differs from the code owner, force a credential reset for those accounts, and revoke their sessions. Review manifest and dispatch access made with affected courier accounts. Deploy the identity-bound repair, verify it with the regression matrix, and monitor recovery volume. Do not include runtime flags, customer records, or credentials in an incident report.
