@@ -2,12 +2,12 @@
 
 Auditable M0 completion record for [#72](https://github.com/duckurity/openlabs/issues/72) (M0-09). Use it before enabling branch protection on `main`. Depends on [#71](https://github.com/duckurity/openlabs/issues/71) (**CI required**).
 
-Reviewed on `2026-10-23`. Regenerate with `python3 scripts/baseline_report.py --write-wiki wiki/M0-Baseline-Evidence.md`. Write `--json` when you need the reviewed git commit and full inventory snapshot.
+Reviewed on `2026-10-26`. Regenerate with `python3 scripts/baseline_report.py --write-wiki wiki/M0-Baseline-Evidence.md`. Write `--json` when you need the reviewed git commit and full inventory snapshot.
 
 ## Catalog manifest
 
 - Supported: **1**
-- Experimental: **20**
+- Experimental: **21**
 - Invalid status: **0**
 - Uncatalogued directories: **5**
 
@@ -65,6 +65,7 @@ Run the script locally or read CI artifacts; this report does not start containe
 - `labs/web/invoiceportal` (validates)
 - `labs/web/nexora-platform` (validates)
 - `labs/web/shopvault` (validates)
+- `labs/web/shopx-dep-confusion` (validates)
 - `labs/web/snapconnect` (validates)
 - `labs/web/snapsync` (validates)
 - `labs/web/switf01-hit3` (validates)
@@ -74,7 +75,7 @@ Run the script locally or read CI artifacts; this report does not start containe
 
 ### Triage follow-ups (from M0-05)
 
-Directories inventoried: **26**. Uncatalogued: **5**.
+Directories inventoried: **27**. Uncatalogued: **5**.
 
 - M0-05 follow-up: L0-L6 review for nexawallet promotion
 - M0-05 follow-up: rename and catalog Sayed Khashana REST IDOR lab

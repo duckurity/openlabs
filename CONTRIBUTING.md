@@ -50,7 +50,7 @@ repository does not ship that command yet. Use `scripts/validate.py` and
 |---|---|
 | `contract_version` | integer `1` (required on `main` after M1-06) |
 | `name` | must match the directory name, lowercase, hyphens |
-| `track` | one of `web`, `binary`, `crypto`, `network`, `osint` |
+| `track` | one of `web`, `binary`, `crypto`, `network`, `osint`, `forensics`, `misc` |
 | `difficulty` | one of `easy`, `medium`, `hard`, `insane` |
 | `description` | one line, shown in the lab index |
 | `flag_hash` | SHA-256 of the full flag string, 64 lowercase hex |
@@ -62,7 +62,8 @@ repository does not ship that command yet. Use `scripts/validate.py` and
 Unknown top-level keys are rejected. Match `contracts/lab.schema.json` and
 `wiki/M1-Contract-Decisions.md`.
 
-See [M1-09 contract v1 freeze](wiki/M1-09-Contract-v1-Freeze.md) and
+See [M1-09 contract v1 freeze](wiki/M1-09-Contract-v1-Freeze.md),
+[M1-10 track registry expansion](wiki/M1-10-Track-Expansion.md), and
 [M1-06 open lab PR migration](wiki/M1-06-Open-Lab-PR-Migration.md) if your branch
 predates `contract_version: 1` on `main`.
 

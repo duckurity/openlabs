@@ -1,0 +1,133 @@
+# Operations runbook
+
+**shopx-dep-confusion · Operator edition**
+
+> **Audience:** Challenge owners and authorized operators. This runbook
+> includes deployment details and challenge spoilers.
+
+[Topology](#service-topology) · [Start](#start-the-lab) · [Reset](#reset) · [Configuration](#configuration) · [Troubleshooting](#troubleshooting) · [Residual risks](#residual-risk-register)
+
+## Service topology
+
+```text
+Host --127.0.0.1:8080--> gateway (nginx)
+                             |
+                             +--> web-app (edge network)
+                             |
+                             +--> registry-public (edge + internal, bridge)
+                                        |
+                                   internal network (internal: true,
+                                   no outbound internet route)
+                                        |
+                             +----------+----------+
+                             |          |           |
+                        ci-runner  registry-private  internal-service
+```
+
+| Service | Responsibility | Network exposure |
+|---|---|---|
+| `gateway` | nginx reverse proxy | Only published host port: `8080:80` |
+| `web-app` | Express storefront + static asset proxy | `edge` only |
+| `registry-public` | Verdaccio, open/anonymous publish, no uplinks | `edge` + `internal` (bridge) |
+| `registry-private` | Verdaccio, scoped packages, no uplinks | `internal` only |
+| `ci-runner` | Simulated CI pipeline, non-root | `internal` only, no host port |
+| `internal-service` | Holds the flag, answers `/internal/*` | `internal` only, no host port |
+
+## Start the lab
+
+```bash
+cd labs/web/shopx-dep-confusion
+docker compose up -d --build
+docker compose ps
+curl http://localhost:8080/health
+```
+
+Give the stack 30-60 seconds after `up -d` before the first full CI cycle
+completes - `ci-runner` retries seeding the legitimate package onto
+`registry-public` for up to ~30 seconds in case that registry is still
+starting.
+
+Expected `/health` response:
+
+```json
+{"status":"ok","service":"shopx-storefront","version":"2.4.0","deployed_by":"ci-runner","build_commit":"f3a9c12"}
+```
+
+## Reset
+
+```bash
+docker compose down -v
+docker compose up -d --build
+```
+
+Why this is a complete, deterministic reset:
+
+- **No cached packages persist.** `ci-runner` deletes
+  `project/node_modules` and any generated `project/package-lock.json` at
+  the start of *every* pipeline cycle, not only at container start.
+- **No registry state persists.** Neither Verdaccio instance has a named
+  volume; their storage lives in each container's writable layer, destroyed
+  with the container on `down`.
+- **No CI log persists across `-v`.** `ci-shared` is the only named volume
+  in this lab. `down -v` removes it; `down` alone (without `-v`) would
+  leave a previous solve's flag line sitting in the log for the next
+  player - `-v` is the part of the reset that specifically matters here.
+- **The flag is fixed, not randomized per deployment** in the current
+  version: it is a baked-in default in `docker-compose.yml`'s
+  `internal-service.environment.FLAG`, matching `lab.yml`'s `flag_hash`.
+  Every reset reproduces the identical flag and identical intended solve
+  path.
+
+Verified by running this exact sequence twice in sequence during authoring
+and confirming the flag matched both times - see the
+[validation report](validation-report.mdx).
+
+## Configuration
+
+| Variable | Where | Default | Purpose |
+|---|---|---|---|
+| `FLAG` | `docker-compose.yml`, `internal-service` service | Baked-in real value | Override only for a deliberately different flag; do not rely on an external `.env` for correctness - a fresh clone must work without one |
+| `CI_CYCLE_SECONDS` | `docker-compose.yml`, `ci-runner` service (not currently overridden) | `25` (hardcoded default in `run-pipeline.js` if unset) | How often the simulated pipeline re-resolves dependencies |
+
+## Stop and remove
+
+```bash
+docker compose down --remove-orphans
+```
+
+## Troubleshooting
+
+| Symptom | Check | Action |
+|---|---|---|
+| `curl http://localhost:8080/health` refused | `docker compose ps` | Wait for all six services to report `Started`/`Healthy`; `registry-public`'s healthcheck has a 120s `start_period` |
+| CI never installs the malicious package | `curl http://localhost:8080/api/ci/last-log` | Confirm the publish actually landed: `curl http://localhost:8080/registry/<package-name>`; confirm the published version is actually higher and still within the project's semver range (`^1.4.2`) |
+| `npm publish` fails with `ENEEDAUTH` | `.npmrc` in the publishing directory | Add a dummy token: `//localhost:8080/registry/:_authToken="anything"` - required by the npm CLI even though the registry itself allows anonymous publish |
+| Flag wrong after a reset | `docker compose exec internal-service env \| grep FLAG` | Should show the real flag with no `.env` file present; if it shows a placeholder, the `docker-compose.yml` default was reverted - see [validation report](validation-report.mdx) item 6 |
+| `ci-runner` seems to have no network | `docker compose exec ci-runner cat /proc/1/status` | Confirm `Uid: 1000` and that the process is `node`, not `su`; the `internal` network being `internal: true` blocks only *outbound* routes, not traffic between containers already on that same network |
+
+## Residual risk register
+
+| ID | Risk | Rating | Treatment |
+|---|---|---|---|
+| RR-01 | `ci-runner` executes attacker-supplied npm package code by design | Accepted for lab only | Non-root execution, no outbound network route, payload limited by design to one fixed, logged HTTP GET |
+| RR-02 | `web-app`'s asset-proxy endpoint makes a genuine outbound `fetch()` for non-`/static/` URLs | Mitigated | `web-app` has no network membership that resolves internal service names; verified empirically, not just by network definition |
+| RR-03 | Base images pinned to full version tags, not explicit digests in the Dockerfile | Low | Docker resolves to a digest at build time (visible in build logs); explicit digest pins are an open item, not yet applied |
+| RR-04 | No independent (non-author) solve has been performed yet | Open | Requested as part of the maintainer review on the tracking issue |
+
+## Maintenance and change control
+
+Any change to the recon surface, registry routing, CI cycle behavior, or
+network topology requires:
+
+1. Update [challenge-design.mdx](challenge-design.mdx) (the stage graph and
+   SSRF scope section in particular) to match.
+2. Re-run the full manual validation sequence in
+   [validation-report.mdx](validation-report.mdx): baseline install, full
+   exploit chain, reset-twice determinism, and the non-root/network-isolation
+   checks.
+3. Re-run `python3 scripts/validate.py` and `--compose` from the repository
+   root.
+
+---
+
+[Documentation index](README.md) · [Challenge design](challenge-design.mdx) · [Security report](security-report.mdx) · [Validation and acceptance](validation-report.mdx)

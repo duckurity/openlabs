@@ -21,6 +21,8 @@ authoring and migration guidance and freezes `contract_version: 1` on `main`.
 
 Decision detail lives in [M1 contract decisions](M1-Contract-Decisions). Open lab
 branches still use [M1-06 open lab PR migration](M1-06-Open-Lab-PR-Migration).
+The additive track enum change is recorded in
+[M1-10 track registry expansion](M1-10-Track-Expansion).
 
 ## Authoring checklist
 

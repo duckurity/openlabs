@@ -1,0 +1,164 @@
+# Security report
+
+**shopx-dep-confusion · Technical assessment**
+
+> **Classification:** Training documentation. All company names, packages,
+> and data are fictional. The described weaknesses are deliberate learning
+> mechanisms and must not be deployed in a production system.
+
+## Executive summary
+
+shopx-dep-confusion is a self-contained npm supply-chain CTF based
+on a fictional retailer, ShopX. Its learning objective is npm's
+scope-exclusive registry routing: an internal package name that was never
+re-published under its organization's npm scope resolves entirely against the
+public default registry, with no cross-registry version comparison involved
+at any point. A player who publishes a same-named, higher-version package to
+that reachable registry gets it installed by the target's own CI pipeline,
+and rides the pipeline's own test stage - not an install hook - into a
+network-isolated internal service.
+
+## Challenge overview
+
+| Attribute | Value |
+|---|---|
+| Application | ShopX storefront + CI pipeline + two npm registries + internal billing service |
+| Attacker | Unauthenticated player, public storefront only |
+| Difficulty | Hard |
+| Primary weakness | Supply-chain / dependency confusion via npm scope misrouting |
+| Secondary weakness | SSRF (local-read variant), access control on static assets |
+| Completion evidence | One runtime-fixed flag, read from a CI log endpoint |
+| Isolation | Local Docker Compose only; no real npm registry is ever contacted |
+
+## Architecture and trust boundaries
+
+See [challenge-design.mdx](challenge-design.mdx#architecture-and-trust-boundaries)
+for the full diagram. In short: `gateway` is the only published port;
+`web-app` and `gateway` sit on an `edge` Docker network with no membership on
+the `internal` network; `ci-runner`, `registry-private`, and
+`internal-service` sit on `internal` only, which is configured
+`internal: true` (no default route to the public internet); `registry-public`
+bridges both networks so it is reachable from the player (via the gateway
+proxy) and from `ci-runner`.
+
+## Vulnerability descriptions
+
+### SDC-01 - Supply-chain: npm scope-exclusive misrouting
+
+**Affected component:** `ci-runner/project/.npmrc` and
+`ci-runner/project/package.json`.
+
+The project's `.npmrc` maps `@shopx:registry` to the private registry and the
+default (unscoped) `registry` to the public one. `package.json` depends on
+`shopx-utils` - unscoped - rather than `@shopx/shopx-utils`. Because npm's
+scope routing is exclusive by name shape, this specific dependency was never
+going to be looked up against the private registry, regardless of how
+correctly that registry is configured. Combined with an unpinned
+(`^1.4.2`) version range and a pipeline that deletes any generated lockfile
+every cycle, a same-named package published to the reachable public registry
+with a higher compatible version satisfies the dependency on the very next
+install.
+
+**Failed control:** the internal package was never re-scoped during the
+migration; the dependency is unpinned; no lockfile is committed or
+preserved between CI cycles.
+
+### SDC-02 - Trojanized package export executed by CI's own test stage
+
+**Affected component:** `ci-runner/smoke-test.js`.
+
+The CI's `test` stage is ordinary, intentional behavior: it `require()`s
+whatever `shopx-utils` resolved to and calls its documented `healthcheck()`.
+A malicious package satisfies the same interface while its `healthcheck()`
+makes one additional, fixed outbound request before returning. This executes
+specifically because the CI's own code calls it - not because of a
+postinstall hook - and survives script-blocking defenses (`npm install
+--ignore-scripts`) that target only install-time hooks.
+
+**Failed control:** no verification (hash, signature, provenance) of a
+resolved dependency before code paths that call into it are exercised by CI.
+
+### SDC-03 - Access control gap on static leaked artifacts
+
+**Affected component:** `web-app/server.js`, the `/static/js/*.bak` route
+and the `/static/backup/*.bak` files.
+
+Backup configuration files are served from the static tree. Files under
+`js/` with a `.bak` extension require a static header value
+(`X-Internal: build-mirror-2024`, itself leaked in another backup file);
+files under `backup/` have no such gate. Both leaks are intentional recon
+surface for the challenge; in a real incident, backup artifacts left in
+static hosting are a common, realistic finding regardless of header gating.
+
+**Failed control:** backup/config artifacts were never removed from the
+publicly served static tree.
+
+## Intended attack path
+
+See the [numbered stage graph](challenge-design.mdx#intended-chain) in the
+design document for the full ten-step path from recon through flag.
+
+## Impact assessment
+
+| Dimension | Demonstrated impact |
+|---|---|
+| Confidentiality | Internal billing service data (`/internal/data`) reachable only through the CI compromise, not directly |
+| Integrity | CI pipeline installs and executes attacker-supplied code |
+| Availability | No availability impact is intended or required |
+| Privilege | Public, unauthenticated player reaches code execution inside an internal-network container |
+| Containment | `ci-runner` runs non-root (confirmed: PID 1 is `node`, UID 1000, not root); `internal` network has no outbound route; the malicious payload performs exactly one fixed, logged HTTP GET and nothing else |
+
+## Flag retrieval
+
+The flag is a static value generated once per deployment, injected via the
+`FLAG` environment variable on `internal-service` (with a baked-in default so
+a fresh clone needs no external `.env` to reproduce it) and held nowhere else
+in plaintext except that one service's source. It never appears in `lab.yml`
+or `README.md`. It surfaces only inside the pipeline's own log output after
+the intended chain completes, read back through `/api/ci/last-log` on
+`web-app` - never returned directly by any endpoint.
+
+## Root-cause summary
+
+The chain exists because several related gaps compound: an internal package
+was never re-scoped after a registry migration started; its dependency range
+is unpinned and no lockfile persists between CI cycles; CI's own test stage
+trusts and executes whatever a dependency resolves to without verification;
+and `ci-runner` sits on the same internal network as `internal-service`
+because it legitimately needs to reach the registries there.
+
+## Remediation
+
+1. Publish `shopx-utils` under `@shopx/shopx-utils` and update the dependency
+   name to match - this single change removes the entire attack surface,
+   independent of everything else.
+2. Pin the dependency to an exact version and commit a lockfile; use `npm ci`
+   in CI rather than `npm install`.
+3. Verify package integrity/provenance before executing any code path that
+   depends on a freshly resolved package.
+4. Apply least-privilege network access to CI runners; a storefront build has
+   no legitimate reason to reach a billing service.
+5. Remove leaked backup/config artifacts and debug log endpoints from the
+   public static tree and API surface.
+
+Full mitigation detail, including what does and does not work on its own, is
+in the [challenge design document](challenge-design.mdx) and was validated
+against the running lab - see the [validation report](validation-report.mdx).
+
+## Unintended attack paths checked
+
+- Direct SSRF from `web-app` to `internal-service` or `registry-private`:
+  tested directly against a running instance, fails with a network error (no
+  Docker-DNS path, confirmed empirically, not just by network-definition
+  inspection).
+- Resolving the baseline (unpublished-attacker-package) state: confirmed the
+  legitimate `1.4.2` install and smoke test succeed cleanly, with no flag
+  anywhere in that output.
+- A stale generated `package-lock.json` silently pinning the legitimate
+  version forever, making the lab unsolvable after the first cycle: found
+  during authoring, fixed by having `ci-runner` delete any generated
+  lockfile every cycle alongside `node_modules`.
+
+---
+
+[Documentation index](README.md) · [Operations](operations.mdx) · [Challenge design](challenge-design.mdx) · [Validation and acceptance](validation-report.mdx)

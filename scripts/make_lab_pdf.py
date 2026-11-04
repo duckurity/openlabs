@@ -48,6 +48,7 @@ from typing import Sequence
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from openlabs_contract import format_validate_error, legacy_string_map, load_lab_metadata  # noqa: E402
+from tracks import TRACK_SLUGS  # noqa: E402
 
 TEMPLATES = REPO_ROOT / "templates"
 ASSETS = REPO_ROOT / ".github" / "assets"
@@ -56,7 +57,7 @@ BADGES = ASSETS / "badges"
 
 REQUIRED_KEYS = ("name", "track", "difficulty", "description")
 DIFFICULTIES = ("easy", "medium", "hard", "insane")
-TRACKS = ("web", "binary", "crypto", "network", "osint")
+TRACKS = TRACK_SLUGS
 COMPOSE_NAMES = (
     "docker-compose.yml",
     "docker-compose.yaml",

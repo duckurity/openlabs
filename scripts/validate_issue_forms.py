@@ -8,6 +8,8 @@ import re
 import sys
 from pathlib import Path
 
+from tracks import TRACK_SLUGS
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = REPO_ROOT / ".github" / "ISSUE_TEMPLATE"
 LABELS_FIXTURE = (
@@ -47,6 +49,50 @@ def extract_labels(text: str) -> list[str]:
     return labels
 
 
+OPTION_LINE_RE = re.compile(
+    r"^        - (?:'([^']+)'|\"([^\"]+)\"|([a-z0-9]+(?:-[a-z0-9]+)*))\s*$"
+)
+
+
+def extract_dropdown_options(path: Path, field_id: str) -> tuple[str, ...]:
+    """Return options from one issue form dropdown.
+
+    Accepts bare YAML scalars and single- or double-quoted values. Any other
+    non-empty line inside the options block raises ValueError so parity checks
+    cannot silently truncate the list.
+    """
+    lines = path.read_text(encoding="utf-8").splitlines()
+    field_line = f"    id: {field_id}"
+    try:
+        start = lines.index(field_line)
+    except ValueError:
+        return ()
+
+    options: list[str] = []
+    in_options = False
+    for index, line in enumerate(lines[start + 1 :], start=start + 2):
+        if line.startswith("  - type:"):
+            break
+        if line == "      options:":
+            in_options = True
+            continue
+        if not in_options:
+            continue
+        if not line.strip():
+            continue
+        if not line.startswith("        - "):
+            # Sibling key such as validations: ends the options list.
+            break
+        match = OPTION_LINE_RE.fullmatch(line)
+        if match is None:
+            raise ValueError(
+                f"{path.name}:{index}: unrecognized dropdown option line "
+                f"in {field_id!r}: {line!r}"
+            )
+        options.append(next(group for group in match.groups() if group is not None))
+    return tuple(options)
+
+
 def validate_form(path: Path, allowed: set[str]) -> list[str]:
     errors: list[str] = []
     text = path.read_text(encoding="utf-8")
@@ -68,6 +114,12 @@ def validate_form(path: Path, allowed: set[str]) -> list[str]:
         ):
             if needle not in text:
                 errors.append(f"{path.name}: missing field {needle}")
+    if path.name == "lab-idea.yml":
+        track_options = extract_dropdown_options(path, "track")
+        if track_options != TRACK_SLUGS:
+            errors.append(
+                f"{path.name}: track options {track_options!r} must match {TRACK_SLUGS!r}"
+            )
     return errors
 
 

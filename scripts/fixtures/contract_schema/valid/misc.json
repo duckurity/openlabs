@@ -1,0 +1,10 @@
+{
+  "contract_version": 1,
+  "name": "misc-fixture",
+  "track": "misc",
+  "difficulty": "medium",
+  "description": "Miscellaneous is a supported track enum.",
+  "flag_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+  "status": "experimental",
+  "techniques": []
+}
