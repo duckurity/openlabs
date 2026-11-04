@@ -1,8 +1,12 @@
 FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1     PYTHONUNBUFFERED=1     PIP_NO_CACHE_DIR=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
 
-RUN groupadd --gid 1000 ctf &&     useradd --uid 1000 --gid 1000 --create-home --shell /usr/sbin/nologin ctf
+RUN groupadd --gid 1000 ctf && \
+    useradd --uid 1000 --gid 1000 --create-home \
+    --shell /usr/sbin/nologin ctf
 
 WORKDIR /app
 
@@ -10,10 +14,14 @@ COPY src/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY src /app
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
-RUN chown -R ctf:ctf /app
+RUN chmod 755 /usr/local/bin/entrypoint.sh && \
+    chown -R ctf:ctf /app
+
 USER ctf
 
 EXPOSE 8080
 
-ENTRYPOINT ["python", "app.py"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["python", "app.py"]

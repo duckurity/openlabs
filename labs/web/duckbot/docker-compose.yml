@@ -5,11 +5,10 @@ services:
       dockerfile: Dockerfile
 
     container_name: duckbot
-
     restart: "no"
 
     environment:
-      FLAG: ${FLAG:-REPLACE_ME_SET_FLAG_HERE}
+      FLAG: ${FLAG:-}
 
     ports:
       - "8080:8080"
