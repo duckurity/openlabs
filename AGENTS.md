@@ -14,7 +14,7 @@ verifies a player's flag against the stored SHA-256 hash.
 
 | Path | What it is |
 |---|---|
-| `labs/<track>/<lab>/` | one lab; tracks: `web`, `binary`, `crypto`, `network`, `osint` |
+| `labs/<track>/<lab>/` | one lab; tracks: `web`, `binary`, `crypto`, `network`, `osint`, `forensics`, `misc` |
 | `labs/_template/` | skeleton for new labs, skipped by validation |
 | `scripts/validate.py` | CI validator, zero dependencies |
 | `scripts/validate_issue_forms.py` | checks issue form labels and intake links, zero dependencies |
@@ -53,6 +53,7 @@ verifies a player's flag against the stored SHA-256 hash.
 - `./openlabs` ships from the repository root (M2). Prefer it for player and
   maintainer lifecycle flows. Spec: `contracts/cli-v1.md`; guides: `wiki/OpenLabs-CLI.md`.
 - Keep `validate.py`, `check.py`, and other scripts for narrow debugging.
+- Track additions: read `wiki/M1-10-Track-Expansion.md` before changing the registry or enums.
 - Freeze records: `wiki/M1-09-Contract-v1-Freeze.md`, `wiki/M2-Release-Evidence.md`.
 
 ## Voice rules for any text you write

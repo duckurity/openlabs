@@ -1,0 +1,40 @@
+{
+  "registry_version": 1,
+  "tracks": [
+    {
+      "slug": "web",
+      "label": "Web",
+      "focus": "injection, broken access control, auth bypass, SSRF"
+    },
+    {
+      "slug": "binary",
+      "label": "Binary",
+      "focus": "memory corruption, exploitation, reverse engineering"
+    },
+    {
+      "slug": "crypto",
+      "label": "Crypto",
+      "focus": "weak primitives, protocol misuse, implementation faults"
+    },
+    {
+      "slug": "network",
+      "label": "Network",
+      "focus": "protocol abuse, traffic analysis, pivoting"
+    },
+    {
+      "slug": "osint",
+      "label": "OSINT",
+      "focus": "recon, source analysis, signature tracing"
+    },
+    {
+      "slug": "forensics",
+      "label": "Forensics",
+      "focus": "memory and disk analysis, artifact recovery, anti-forensics"
+    },
+    {
+      "slug": "misc",
+      "label": "Miscellaneous",
+      "focus": "constrained environments, escape logic, host-level puzzles"
+    }
+  ]
+}

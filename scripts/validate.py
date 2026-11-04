@@ -45,7 +45,6 @@ from openlabs_contract import collect_metadata_errors, load_lab_metadata
 REPO_ROOT = Path(__file__).resolve().parent.parent
 LABS_DIR = REPO_ROOT / "labs"
 
-TRACKS = {"web", "binary", "crypto", "network", "osint"}
 DIFFICULTIES = {"easy", "medium", "hard", "insane"}
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")

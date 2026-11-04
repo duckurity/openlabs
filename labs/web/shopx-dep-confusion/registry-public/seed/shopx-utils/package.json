@@ -1,0 +1,7 @@
+{
+  "name": "shopx-utils",
+  "version": "1.4.2",
+  "description": "ShopX internal helper library",
+  "main": "index.js",
+  "license": "UNLICENSED"
+}

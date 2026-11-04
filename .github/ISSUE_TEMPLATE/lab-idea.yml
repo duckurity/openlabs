@@ -4,6 +4,7 @@ labels:
   - enhancement
   - component:lab
   - needs-triage
+
 body:
   - type: markdown
     attributes:
@@ -15,6 +16,7 @@ body:
         Report repository or infrastructure vulnerabilities through
         [private vulnerability reporting](https://github.com/duckurity/openlabs/security/advisories/new),
         not through public issues.
+
   - type: dropdown
     id: track
     attributes:
@@ -26,8 +28,11 @@ body:
         - crypto
         - network
         - osint
+        - forensics
+        - misc
     validations:
       required: true
+
   - type: dropdown
     id: difficulty
     attributes:
@@ -40,6 +45,7 @@ body:
         - insane
     validations:
       required: true
+
   - type: textarea
     id: description
     attributes:
@@ -47,6 +53,7 @@ body:
       description: What does the player do? What is the intended vector? What service or environment does it need?
     validations:
       required: true
+
   - type: textarea
     id: references
     attributes:
