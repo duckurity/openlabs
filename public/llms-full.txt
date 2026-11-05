@@ -282,7 +282,6 @@ Run the container and interact with the service on `127.0.0.1:5353/udp`.
 ## Techniques
 Practise in this lab:
 - [EDNS Client Subnet (ECS) spoofing](/technique/ecs-spoofing)
-- [Authentication bypass](/technique/auth-bypass)
 
 ## Duck cross
 
