@@ -437,7 +437,7 @@ port: "{port}"
 {header}
 
 {body}{techniques_block}
-"""
+""".rstrip() + "\n"
 
 
 def sync() -> list[str]:

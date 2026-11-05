@@ -95,9 +95,10 @@ def build_public_catalog() -> dict:
         "catalogued_count": len(supported) + len(experimental),
         "maintainer": {
             "uncatalogued_count": len(uncatalogued),
-            "uncatalogued_paths": [
-                p.relative_to(REPO_ROOT).as_posix() for p in uncatalogued
-            ],
+            "uncatalogued_paths": sorted(
+                (p.relative_to(REPO_ROOT).as_posix() for p in uncatalogued),
+                key=str.casefold,
+            ),
             "directory_count": len(discover_all_lab_dirs()),
         },
         "supported": [row.to_dict() for row in supported],

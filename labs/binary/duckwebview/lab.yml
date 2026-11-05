@@ -1,0 +1,7 @@
+name: duckwebview
+track: binary
+difficulty: medium
+status: experimental
+description: DuckWebView is an Android security challenge demonstrating risks of insecure WebView JavaScript bridges.
+flag_hash: 435120ed0ef1ad5c485940b4a045808cf9bbf3bed67bd3d9a4baf33311ce130d
+techniques: [webview-security]

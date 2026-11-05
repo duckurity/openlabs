@@ -158,6 +158,12 @@
       "owner": "maintainers",
       "blocker": "",
       "follow_up_title": ""
+    },
+    "labs/binary/duckwebview": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
     }
   }
 }

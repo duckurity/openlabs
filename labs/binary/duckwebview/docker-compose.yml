@@ -1,0 +1,28 @@
+services:
+  duckwebview:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: duckwebview
+    restart: "no"
+
+    environment:
+      FLAG: ${FLAG:?Set FLAG before starting DuckWebView}
+
+    ports:
+      - "8080:8080"
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid
+
+    cap_drop:
+      - ALL
+
+    security_opt:
+      - no-new-privileges:true
+
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.50

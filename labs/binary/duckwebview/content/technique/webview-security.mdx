@@ -1,0 +1,12 @@
+---
+title: Android WebView JavaScript Bridge Exposure
+---
+
+## Overview
+An Android application that loads untrusted HTML into a WebView must carefully constrain JavaScript execution and any native interfaces exposed to that content.
+
+## Root cause
+The challenge intentionally exposes a native bridge to content that should not be trusted. A successful solve demonstrates how JavaScript running in a WebView can reach native functionality when the bridge and content trust boundary are configured unsafely.
+
+## Impact
+Depending on the methods exposed by the bridge, an attacker may access sensitive app data or invoke privileged app functionality. This challenge limits the intended impact to retrieving a CTF flag; it does not claim operating-system command execution.
