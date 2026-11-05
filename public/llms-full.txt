@@ -161,7 +161,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **2 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -272,11 +272,13 @@ Practise in this lab:
 
 Source: https://openlabs.duckurity.com/labs/dns-ecs-bypass
 
-A network challenge about DNS access control bypass.
+An internal DNS service is running on the target. It hosts a protected zone containing a flag. Access is restricted to clients from the internal network.
 ## Goal
-Retrieve the flag from the protected DNS zone.
+Retrieve the flag from the protected zone.
 ## Setup
 Run the container and interact with the service on `127.0.0.1:5353/udp`.
+## Brief
+لاب عن تجاوز قيود DNS باستخدام EDNS Client Subnet (ECS): السيناريو، الهدف، وإيه اللي المتدرب هيتعلمه.
 
 ## Duck cross
 
