@@ -161,7 +161,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **2 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -267,6 +267,16 @@ See [how to play](/play) for the usual solve loop.
 ## Techniques
 Practise in this lab:
 - [Server-side request forgery (SSRF)](/technique/ssrf)
+
+## Dns ecs bypass
+
+Source: https://openlabs.duckurity.com/labs/dns-ecs-bypass
+
+A network challenge about DNS access control bypass.
+## Goal
+Retrieve the flag from the protected DNS zone.
+## Setup
+Run the container and interact with the service on `127.0.0.1:5353/udp`.
 
 ## Duck cross
 
@@ -1209,6 +1219,34 @@ Browse all [labs](/labs) when it is solved.
 Same family of flaw — unsanitized input reaching an interpreter — but the interpreter here is the OS shell, not a database engine.
 **Do I need special tooling?**
 A browser or `curl` is enough to start. Read [how to play](/play) for the loop.
+
+## EDNS Client Subnet (ECS) spoofing
+
+Source: https://openlabs.duckurity.com/technique/ecs-spoofing
+
+## Overview
+EDNS Client Subnet (RFC 7871) lets a resolver's client declare which network
+it is querying from, so the resolver can return geographically relevant
+answers. The field is just part of the query the client sends — nothing
+authenticates it. A server that uses it to decide whether a zone is
+"internal-only" is trusting data the client wrote itself.
+## Examples
+Look for a DNS service that refuses a plain query but behaves differently
+once an EDNS Client Subnet option is attached (for example with
+`dig +subnet=<cidr>`). A `REFUSED` baseline followed by a successful answer
+once a specific subnet is declared is the tell.
+## Related labs
+Practise on a live target:
+- [Dns ecs bypass](/labs/dns-ecs-bypass) — a DNS zone gated on a client-declared subnet instead of the real source IP.
+Browse all [labs](/labs) when it is solved.
+## FAQ
+**Is this the same as IP spoofing?**
+No. Real IP spoofing forges the packet's source address and usually can't
+complete a UDP round trip back to the attacker. ECS spoofing forges a field
+*inside* a normal, correctly-addressed query — the response comes straight
+back, no packet-level tricks needed.
+**Do I need special tooling?**
+No. `dig` and `nmap` are enough. Read [how to play](/play) for the loop.
 
 ## Broken object-level authorization (IDOR)
 
