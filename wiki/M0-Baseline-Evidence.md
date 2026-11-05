@@ -43,11 +43,11 @@ Run the script locally or read CI artifacts; this report does not start containe
 
 ### Uncatalogued directories
 
+- `labs/web/Sayed_Khashana_REST_API_IDOR_CTF`
 - `labs/web/duckcorp-savegame`
 - `labs/web/duckdesk`
 - `labs/web/duckfleet`
 - `labs/web/duckmarket`
-- `labs/web/Sayed_Khashana_REST_API_IDOR_CTF`
 
 ### Experimental labs (not promoted)
 
