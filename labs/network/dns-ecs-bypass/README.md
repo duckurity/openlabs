@@ -1,28 +1,9 @@
-# dns-ecs-bypass
+# DNS ECS Bypass
 
-`medium` · `network`
-
-## Brief
-
-An internal DNS resolver is listening on UDP/5353. It hosts a zone that is
-supposed to be reachable only from the internal network. A normal query gets
-refused.
-
-## Setup
-
-Run these from the lab directory:
-
-```bash
-docker compose up -d
-```
-
-The resolver is reachable at `127.0.0.1:5353/udp`.
+A network challenge about DNS access control bypass.
 
 ## Goal
+Retrieve the flag from the protected DNS zone.
 
-Get past the access check and read the protected record. Verify the solve
-from the lab directory:
-
-```bash
-python3 ../../../scripts/check.py .
-```
+## Setup
+Run the container and interact with the service on `127.0.0.1:5353/udp`.
