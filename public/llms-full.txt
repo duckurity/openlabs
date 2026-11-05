@@ -161,7 +161,7 @@ Start with an `easy` lab. Read [how to play](/play) when you need the loop.
 
 Source: https://openlabs.duckurity.com/labs
 
-The public catalog lists **1 supported** and **20 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
+The public catalog lists **1 supported** and **21 experimental** labs with valid `lab.yml` metadata. Experimental labs are runnable but not promoted. 5 uncatalogued directories are maintainer-only and excluded from these totals.
 Open a brief. Run the service. Find the flag.
 Start with an `easy` lab. Read [how to play](/play) when you need the loop. Read the [rules](/rules) before you publish.
 
@@ -749,6 +749,33 @@ python3 ../../../scripts/check.py .
 ## Techniques
 Practise in this lab:
 - [Broken object-level authorization (IDOR)](/technique/idor)
+
+## Lewis clark drop
+
+Source: https://openlabs.duckurity.com/labs/lewis-clark-drop
+
+## Brief
+A contact was traveling along the Lewis and Clark Trail when they disappeared. Before going dark, they sent a photo of a monument. There are several similar monuments along the trail, but only one matches this exact photo.
+Find the correct monument and the detail left behind in the field note.
+## Setup
+Start the lab:
+    docker compose up -d --build
+Then open http://localhost:8089 in your browser (the lab listens on 127.0.0.1 only). The page shows the photo and the field note.
+This lab needs limited internet access. You may use only these three websites, and nothing else (no search engines):
+- `www.openstreetmap.org`
+- `nominatim.openstreetmap.org`
+- `en.wikipedia.org`
+## Goal
+Identify the monument from the photo, find its location on OpenStreetMap, and use the field note to find a date on Wikipedia.
+Submit one flag in the form `duck{...}`, built like this (lowercase letters, digits and underscores only):
+- `n` or `s`, then the latitude rounded to 3 decimals, with the dot written as `_`
+- `e` or `w`, then the longitude rounded to 3 decimals, with the minus sign dropped and the dot written as `_`
+- the month and day as four digits (`mmdd`)
+- the four-digit year
+Join the four parts with `_` and put them inside `duck{` and `}`.
+## Techniques
+Practise in this lab:
+- [Open-source intelligence (OSINT)](/technique/osint)
 
 ## Nexora platform
 
@@ -1404,6 +1431,59 @@ No. The server must reject or ignore the field. A client can edit a request outs
 Use your own authorized test object, preserve a normal request, add one low-impact candidate property, and verify the stored result. Do not send broad property lists.
 ### Can PATCH be secure?
 Yes. PATCH is safe when the server allowlists paths and applies authorization and validation to every supported property.
+
+## Open-source intelligence (OSINT)
+
+Source: https://openlabs.duckurity.com/technique/osint
+
+## Overview
+Open-source intelligence, or OSINT, is the practice of answering a question using information that is publicly available. In a lab, that usually means a photo, a public map and a reference page. The skill is not finding data. It is deciding which source to trust and how to combine sources into one answer you can defend.
+> **A clue is not a fact**
+>
+> A photo or a search result gives a lead. A fact needs a second source that agrees with it.
+## Where clues appear
+Look at every part of the material you are given, not only the main subject.
+- The subject itself: a statue, building, sign, or landscape
+- Background details: trees, road layout, nearby structures, terrain
+- Text in the scene: plaques, signs, inscriptions
+- File properties and metadata, when the lab provides a file
+- Notes or captions that come with the material
+## How to approach a photo-to-location task
+Use only the sources the lab lists as allowed.
+1. Describe what you see before searching: shape, pose, material, setting.
+2. Form a short list of candidates that could match.
+3. Compare each candidate with the photo on a public map and a reference page.
+4. Reject candidates that differ in a clear way, such as a different pose or surroundings.
+5. Read the exact value you need from the map, for example a point's coordinates.
+6. Confirm any date or name on a second reference page.
+7. Combine the values using the format the lab describes.
+## Common mistakes and false assumptions
+### "The first search result is the answer"
+Places and monuments often share names. Check the location, the type of object and the surroundings before accepting a match.
+### "It looks similar, so it is the same"
+Replicas, copies and similar monuments exist. A match needs details that agree, not only a general resemblance.
+### "Rounding does not matter"
+Coordinates can be rounded or cut off, and the two can give different results. Follow the lab's stated rule exactly.
+## Impact and ethics
+Public information can still harm people when it is used to locate a person. Practise on material that a lab provides for that purpose. Do not apply these methods to private individuals, and do not publish personal details you find.
+## How defenders reduce exposure
+- Remove location metadata from photos before sharing them.
+- Review what the background of a photo reveals.
+- Avoid posting real-time location.
+- Check what public pages say about you or your organisation.
+## Related labs
+Apply this technique after studying it:
+- [Lewis and Clark trail drop](/labs/lewis-clark-drop)
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+## FAQ
+### What is OSINT?
+OSINT means gathering and analysing information from public sources. It covers photos, maps, public records and reference pages.
+### Is OSINT legal?
+Reading public information is generally legal, but how you use it can break laws or harm people. Use it only for authorised practice and lawful work.
+### Why does a lab limit which websites I can use?
+A fixed list keeps the challenge fair and reproducible. Everyone works from the same sources, so the answer does not depend on a search engine's results.
+### Why does the lab ask me to follow a rounding rule?
+A single agreed rule means every correct solve produces the same string. Without it, rounded and cut-off values would give different answers.
 
 ## SQL injection
 

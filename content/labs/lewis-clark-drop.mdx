@@ -1,0 +1,68 @@
+---
+title: Lewis clark drop
+description: Identify a trail monument from a photo, then combine its map location with a date from a reference page.
+track: osint
+difficulty: medium
+port: "8089"
+type: lab
+key: lab-lewis-clark-drop
+slug: labs/lewis-clark-drop
+intent: Solve a medium osint lab in Docker.
+keywords:
+  primary: Lewis clark drop osint security lab docker
+  secondary:
+    - medium osint practice
+    - openlabs lewis-clark-drop
+verified: true
+score: 94
+score_grade: A
+status: experimental
+linksTo:
+  - technique/osint
+author_name: "mirnashams01-star"
+author_url: "https://github.com/mirnashams01-star"
+author_avatar: "https://github.com/mirnashams01-star.png"
+author_date: "2026-11-05"
+ogImage: /og/labs-lewis-clark-drop.png
+---
+
+{/* Generated from labs/osint/lewis-clark-drop/lab.yml and README.md. Do not edit by hand. Run scripts/sync_site_content.py. */}
+
+## Brief
+
+A contact was traveling along the Lewis and Clark Trail when they disappeared. Before going dark, they sent a photo of a monument. There are several similar monuments along the trail, but only one matches this exact photo.
+
+Find the correct monument and the detail left behind in the field note.
+
+## Setup
+
+Start the lab:
+
+    docker compose up -d --build
+
+Then open http://localhost:8089 in your browser (the lab listens on 127.0.0.1 only). The page shows the photo and the field note.
+
+This lab needs limited internet access. You may use only these three websites, and nothing else (no search engines):
+
+- `www.openstreetmap.org`
+- `nominatim.openstreetmap.org`
+- `en.wikipedia.org`
+
+## Goal
+
+Identify the monument from the photo, find its location on OpenStreetMap, and use the field note to find a date on Wikipedia.
+
+Submit one flag in the form `duck{...}`, built like this (lowercase letters, digits and underscores only):
+
+- `n` or `s`, then the latitude rounded to 3 decimals, with the dot written as `_`
+- `e` or `w`, then the longitude rounded to 3 decimals, with the minus sign dropped and the dot written as `_`
+- the month and day as four digits (`mmdd`)
+- the four-digit year
+
+Join the four parts with `_` and put them inside `duck{` and `}`.
+## Techniques
+
+Practise in this lab:
+
+- [Open-source intelligence (OSINT)](/technique/osint)
+
