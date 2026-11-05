@@ -1,5 +1,5 @@
 {
-  "catalogued_count": 22,
+  "catalogued_count": 21,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
@@ -177,14 +177,6 @@
   },
   "supported": [
     {
-      "description": "A DNS service trusts client-supplied ECS for access control.",
-      "difficulty": "medium",
-      "name": "dns-ecs-bypass",
-      "path": "labs/network/dns-ecs-bypass",
-      "status": "supported",
-      "track": "network"
-    },
-    {
       "description": "A reports portal with a missing object-level authorization check.",
       "difficulty": "easy",
       "name": "duck-cross",
@@ -193,6 +185,6 @@
       "track": "web"
     }
   ],
-  "supported_count": 2,
+  "supported_count": 1,
   "version": "openlabs.catalog-public.v1"
 }
