@@ -1,13 +1,43 @@
 ---
 title: Android WebView JavaScript Bridge Exposure
 description: Learn how insecure Android WebView JavaScript bridges can expose native functionality to untrusted JavaScript.
+type: technique
+key: technique-webview-security
+slug: technique/webview-security
+intent: Learn how insecure Android WebView JavaScript bridges expose native app functionality.
+keywords:
+  primary: Android WebView security
+  secondary:
+    - JavaScript bridge exposure
+    - Android WebView vulnerabilities
+    - WebView security testing
+linksTo:
+  - labs/duckwebview
+  - labs
+  - play
+  - technique
 ---
 
 ## Overview
 An Android application that loads untrusted HTML into a WebView must carefully constrain JavaScript execution and any native interfaces exposed to that content.
 
-## Root cause
-The challenge intentionally exposes a native bridge to content that should not be trusted. A successful solve demonstrates how JavaScript running in a WebView can reach native functionality when the bridge and content trust boundary are configured unsafely.
+## Examples
+Look for WebViews that enable JavaScript and expose native methods through interfaces such as `addJavascriptInterface`. Check whether untrusted pages, redirects, or externally controlled content can reach those methods. Review the bridge methods and determine what data or functionality they expose.
 
-## Impact
-Depending on the methods exposed by the bridge, an attacker may access sensitive app data or invoke privileged app functionality. This challenge limits the intended impact to retrieving a CTF flag; it does not claim operating-system command execution.
+## Related labs
+Practise on a live target:
+
+- [DuckWebView](/labs/duckwebview) — investigate an Android WebView JavaScript bridge exposure.
+
+Browse all [labs](/labs) to explore other security challenges.
+
+## FAQ
+
+**Does every JavaScript-enabled WebView have this vulnerability?**
+No. Enabling JavaScript alone does not establish a bridge exposure. The risk depends on the native interfaces exposed, the content loaded, and the trust boundaries enforced by the application.
+
+**Does JavaScript bridge exposure automatically mean remote code execution?**
+No. The impact depends on the methods exposed by the bridge and the actions they permit. Access to native functionality does not automatically imply operating-system command execution.
+
+**How can I practise testing this issue?**
+Inspect the WebView configuration, identify exposed JavaScript interfaces, and determine whether untrusted content can invoke them. Start with the [DuckWebView lab](/labs/duckwebview) and read [how to play](/play) for the challenge workflow.
