@@ -1,5 +1,6 @@
 name: dns-ecs-bypass
 track: network
 difficulty: medium
+status: supported
 description: A DNS service trusts client-supplied ECS for access control.
 flag_hash: 61db9e3cd17e6dc725cda62e787b3073cc482aaee76f0c17617dd70781fc4f78
