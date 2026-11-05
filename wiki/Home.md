@@ -17,8 +17,8 @@
     <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-supported-light.svg?v=1fc5bb5c" alt="labs: 1 supported" height="20">
   </picture>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-dark.svg?v=cb5bb134">
-    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-light.svg?v=afdc7d86" alt="labs: 21 experimental" height="20">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-dark.svg?v=fd917d25">
+    <img src="https://raw.githubusercontent.com/Duckurity/openlabs/main/.github/assets/badges/labs-experimental-light.svg?v=62d0179e" alt="labs: 21 experimental" height="20">
   </picture>
 <!-- catalog-public:badges-end -->
   <picture>
