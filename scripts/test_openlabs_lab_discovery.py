@@ -86,12 +86,13 @@ def test_list_json_baseline_counts() -> None:
     assert code == 0
     payload = _json(out, label="list.json")
     assert payload["data"]["action"] == "list"
-    assert payload["data"]["counts"] == {"supported": 1, "experimental": 20}
+    assert payload["data"]["counts"] == {"supported": 2, "experimental": 20}
     supported = payload["data"]["supported"]
-    assert len(supported) == 1
-    assert supported[0]["slug"] == "duck-cross"
-    assert supported[0]["lifecycle_eligible"] is True
-    assert supported[0]["port"] == 8377
+    assert len(supported) == 2
+    by_slug = {item["slug"]: item for item in supported}
+    assert set(by_slug) == {"duck-cross", "dns-ecs-bypass"}
+    assert by_slug["duck-cross"]["lifecycle_eligible"] is True
+    assert by_slug["duck-cross"]["port"] == 8377
     paths = {item["path"] for item in payload["data"]["experimental"]}
     assert not any("duckmarket" in path for path in paths)
 
@@ -100,7 +101,7 @@ def test_list_human_sections() -> None:
     code, out, err = _run(["lab", "list"])
     assert code == 0
     assert err == ""
-    assert "supported (1):" in out
+    assert "supported (2):" in out
     assert "experimental (20):" in out
     assert "duck-cross" in out
 

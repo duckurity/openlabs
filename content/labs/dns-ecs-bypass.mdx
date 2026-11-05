@@ -1,0 +1,49 @@
+---
+title: Dns ecs bypass
+description: A DNS service trusts client-supplied ECS for access control.
+track: network
+difficulty: medium
+port: "8080"
+type: lab
+key: lab-dns-ecs-bypass
+slug: labs/dns-ecs-bypass
+intent: Solve a medium network lab in Docker.
+keywords:
+  primary: Dns ecs bypass network security lab docker
+  secondary:
+    - medium network practice
+    - openlabs dns-ecs-bypass
+verified: true
+score: 100
+score_grade: A
+status: supported
+linksTo:
+  - technique/ecs-spoofing
+author_name: "Hagr5"
+author_url: "https://github.com/Hagr5"
+author_avatar: "https://github.com/Hagr5.png"
+author_date: "2026-11-04"
+ogImage: /og/labs-dns-ecs-bypass.png
+---
+
+{/* Generated from labs/network/dns-ecs-bypass/lab.yml and README.md. Do not edit by hand. Run scripts/sync_site_content.py. */}
+
+An internal DNS service is running on the target. It hosts a protected zone containing a flag. Access is restricted to clients from the internal network.
+
+## Goal
+
+Retrieve the flag from the protected zone.
+
+## Setup
+
+Run the container and interact with the service on `127.0.0.1:5353/udp`.
+
+## Brief
+
+لاب عن تجاوز قيود DNS باستخدام EDNS Client Subnet (ECS): السيناريو، الهدف، وإيه اللي المتدرب هيتعلمه.
+## Techniques
+
+Practise in this lab:
+
+- [EDNS Client Subnet (ECS) spoofing](/technique/ecs-spoofing)
+

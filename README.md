@@ -12,7 +12,7 @@
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/code-license-dark.svg?v=6164d6e0"><img src=".github/assets/badges/code-license-light.svg?v=d7baa62a" alt="code: Apache-2.0" height="20"></picture></a>
   <a href="LICENSE-CONTENT"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/content-license-dark.svg?v=b83304a6"><img src=".github/assets/badges/content-license-light.svg?v=b42ada1f" alt="content: CC-BY-4.0" height="20"></picture></a>
   <!-- catalog-public:badges-start -->
-  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-supported-dark.svg?v=5fbde818"><img src=".github/assets/badges/labs-supported-light.svg?v=154daa66" alt="labs: 1 supported" height="20"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-supported-dark.svg?v=5fbde818"><img src=".github/assets/badges/labs-supported-light.svg?v=154daa66" alt="labs: 2 supported" height="20"></picture>
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/labs-experimental-dark.svg?v=4bc78f54"><img src=".github/assets/badges/labs-experimental-light.svg?v=ea7e09f4" alt="labs: 20 experimental" height="20"></picture>
 <!-- catalog-public:badges-end -->
   <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/docker-dark.svg?v=2b6c885f"><img src=".github/assets/badges/docker-light.svg?v=d7abbc30" alt="docker: compose v2" height="20"></picture>
@@ -109,7 +109,7 @@ not how long it takes.
 ## Labs <span id="labs-catalog"></span>
 
 <!-- catalog-public:start -->
-<sub>1 supported · 20 experimental</sub>
+<sub>2 supported · 20 experimental</sub>
 
 <div align="center">
 
@@ -117,6 +117,7 @@ not how long it takes.
 
 | Lab | Track | Difficulty | Description |
 |:---:|:---:|:---:|:---|
+| [`dns-ecs-bypass`](labs/network/dns-ecs-bypass) | `network` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-medium-dark.svg?v=f8ea61c4"><img src=".github/assets/badges/chip-medium-light.svg?v=60518fcc" alt="MEDIUM" height="18"></picture> | A DNS service trusts client-supplied ECS for access control. |
 | [`duck-cross`](labs/web/duck-cross) | `web` | <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/badges/chip-easy-dark.svg?v=78286c0b"><img src=".github/assets/badges/chip-easy-light.svg?v=cb5cf439" alt="EASY" height="18"></picture> | A reports portal with a missing object-level authorization check. |
 
 ### Experimental
