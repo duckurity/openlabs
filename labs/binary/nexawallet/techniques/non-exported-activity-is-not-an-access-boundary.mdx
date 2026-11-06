@@ -1,0 +1,158 @@
+---
+title: A non-exported Android Activity is not a security boundary against in-process code
+description: Learn what android:exported="false" actually protects against, what it doesn't, and how to reach a non-exported component from inside a compromised process.
+type: technique
+key: technique-non-exported-activity-is-not-an-access-boundary
+slug: technique/non-exported-activity-is-not-an-access-boundary
+intent: Understand the real scope of android:exported="false" and how to reach a hidden component once you have in-process code execution.
+keywords:
+  primary: android exported false security bypass
+  secondary:
+    - launch non-exported activity frida
+    - android component visibility security
+linksTo:
+  - labs/nexawallet
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+`android:exported="false"` on an `Activity` (or any component) is a real,
+correctly-enforced Android OS control. It genuinely blocks two specific
+attack surfaces: another installed app constructing an `Intent` that
+targets it, and `adb shell am start -n <package>/<component>` from
+launching it externally. Both of these go through Android's own
+component-resolution path, which checks the `exported` flag and the
+calling UID before allowing the launch.
+
+What it does not protect against is code already running **inside the
+target app's own process** — at that point, starting an Activity is just
+an ordinary method call (`Context.startActivity()`) on an object the
+in-process code already holds a reference to, with no OS-level permission
+check in the way.
+
+## Examples
+
+### What "not exported" actually blocks
+
+A second app on the same device, or an `adb shell am start` command typed
+directly at a terminal, both go through Android's `ActivityManager` and
+its component-resolution/permission logic — and are both correctly
+refused with a security exception when the target is `exported="false"`.
+
+### What it doesn't block
+
+Dynamic instrumentation (Frida, or any other in-process code-execution
+technique) is, by definition, running inside the target app's own
+process, with the same privileges as the app itself. From there,
+obtaining the app's own `Context` (for example via
+`android.app.ActivityThread.currentApplication()`) and calling
+`startActivity()` on it is indistinguishable, from the OS's perspective,
+from the app legitimately starting one of its own screens — because
+that's exactly what it is.
+
+### Finding a component that relies on this alone
+
+In a decompiler, search the whole project for every reference to a
+suspicious or interesting-sounding Activity/Service/Receiver class name.
+If it appears only in its own class definition and in the manifest — no
+other component ever constructs an `Intent` targeting it, no button or
+menu item in the UI leads to it — that's a strong signal the component is
+reachable, if at all, only by a path the normal UI doesn't expose.
+
+## How to recognise it in a lab
+
+- A component is declared in the manifest with `exported="false"`.
+- Searching the entire decompiled codebase for references to that
+  component's class name turns up nothing except its own definition and
+  the manifest entry.
+- Attempting to launch it externally (`adb shell am start`) is refused
+  with a permission/security exception, confirming the flag is actually
+  enforced, not just declared.
+
+## Common mistakes and false assumptions
+
+### "exported=false means nothing can ever reach it"
+
+This conflates "not reachable externally" with "not reachable at all."
+It specifically blocks external launch paths (other apps, `adb`) — it
+says nothing about what code already running inside the same process can
+do, because that code isn't going through the OS's component-resolution
+path to begin with.
+
+### "I need a vulnerability to reach it"
+
+No vulnerability in the component itself is needed — only the ability to
+run code inside the app's process, which dynamic instrumentation already
+provides. This is a design-assumption gap (assuming "unreachable through
+the UI" is equivalent to "secure"), not a traditional bug like an
+injection flaw.
+
+### "This is the same as a deep link or implicit intent issue"
+
+Deep link / implicit intent vulnerabilities are a different, genuinely
+external-facing class of issue (another app exploiting an *exported*
+component it shouldn't be able to reach, or reaching it through an
+over-broad intent filter). This pattern is the opposite scenario: a
+component correctly locked down against external access, reached instead
+by an attacker who is already inside the process.
+
+## Impact
+
+Any sensitive functionality gated behind "the UI never exposes a path to
+this screen" plus `exported="false"` provides real protection only
+against external actors — not against anyone who has already achieved
+code execution inside the app's own process, which is exactly the
+capability dynamic instrumentation tooling provides.
+
+## How developers prevent relying on this as real security
+
+- Use `exported="false"` for what it actually is — a correct, worthwhile
+  control against other apps and external launch attempts — not as a
+  substitute for an actual authorization check inside the component
+  itself.
+- Any component that performs a sensitive action (granting elevated
+  state, approving a privileged operation) should independently verify
+  *who* is invoking it and under what legitimate conditions, rather than
+  relying solely on "nothing in our own UI links here" as the protection.
+- For anything that genuinely needs to resist an attacker with full
+  control of the client device (jailbroken/rooted, instrumented), the
+  decision cannot live entirely client-side at all — it needs a
+  server-side counterpart, the same conclusion that applies throughout
+  this lab's design.
+
+## Related labs
+
+`nexawallet`'s `ReviewGateActivity` is exactly this pattern: declared
+`exported="false"`, never referenced by any other component, confirmed
+unreachable via `adb shell am start`, and reachable only by calling the
+app's own `Context.startActivity()` from inside a Frida-attached process
+— see the companion technique on driving that launch from Frida
+specifically.
+
+## FAQ
+
+### Is exported="false" pointless, then?
+
+No — it's doing real, correct work against the attack surfaces it's
+actually designed for (other apps, external `am start`). The mistake is
+treating "defeats external access" as equivalent to "defeats an attacker
+with code execution inside the process," which is a categorically
+different threat model.
+
+### How would I know if a real app has this problem?
+
+The same diagnostic used here: find a sensitive, non-exported component
+with no in-app path leading to it, and ask whether reaching it from
+inside a legitimately-or-illegitimately instrumented process would grant
+something an attacker shouldn't be able to get on their own.
+
+### What should I keep in a lab writeup?
+
+The manifest entry showing `exported="false"`, the search confirming no
+other component references it, the refused external-launch attempt (as
+evidence the flag is genuinely enforced), and the exact in-process launch
+call used to reach it anyway.

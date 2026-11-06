@@ -1,0 +1,163 @@
+# Challenge design — NexaWallet
+
+## Design brief
+
+NexaWallet is a single Android application (Kotlin, View Binding) built
+around a fictional digital-wallet app with a per-account transfer limit.
+There is no real backend — balances and limits are stored locally on the
+device — so the entire security boundary the player must defeat lives
+**inside the APK itself**, enforced at runtime. This is the catalog's
+first `binary`-track mobile lab, delivered BYOD (bring-your-own-device):
+the player supplies their own emulator/device, `adb`, and Frida stack.
+
+| Property | Value |
+| --- | --- |
+| Track | binary (mobile) |
+| Difficulty | hard |
+| Stack | Kotlin, AndroidX, View Binding, OkHttp (unused for solving — no real backend) |
+| Delivery | BYOD artifact (APK only — see `operations.mdx`) |
+| Per-player isolation | n/a — fully client-side, no shared infra |
+
+## Learning objective
+
+A player who finishes NexaWallet should be able to explain, in their own
+words:
+
+- Why client-side instrumentation detection (root/Frida/Xposed checks) is
+  a deterrent, not an access-control boundary, once an attacker has code
+  execution inside the same process.
+- How ART/JIT method inlining can silently defeat a naive Frida hook
+  placed on a small wrapper function, and how to diagnose that (the hook
+  "installs" with no error, but visibly has no effect) and pivot to
+  hooking the underlying framework methods instead.
+- Why `android:exported="false"` is a real, correctly-functioning control
+  against *other apps* and `adb shell am start`, but not against an
+  attacker who already has arbitrary code execution inside the target
+  app's own process — and how to reach such a component anyway, using the
+  app's own `Context.startActivity()` from a Frida script.
+- Why a flag/token minted entirely by client-side logic, however it's
+  obfuscated, is not proof of anything to a party that doesn't trust the
+  client — and why that holds even when the obfuscation defeats a casual
+  `strings`/static scan.
+
+## Skills exercised
+
+1. **Static analysis of a modern Kotlin/Android APK** — using jadx to
+   decompile and navigate the app's package structure, reading
+   `AndroidManifest.xml` to see what's declared (and what's
+   conspicuously never launched from anywhere).
+2. **Frida fundamentals** — attaching to a running or spawned process,
+   `Java.perform`, `Java.use`, and overriding a method's
+   `.implementation`.
+3. **Diagnosing a hook that "installs" but doesn't actually fire** —
+   recognizing the signs of ART/JIT method inlining defeating an
+   application-level hook, and knowing to pivot to hooking the
+   underlying **framework** methods (`java.net.Socket`,
+   `java.io.BufferedReader`, `java.lang.Thread`) instead of the app's
+   own wrapper function.
+4. **Understanding Android component visibility** — the difference
+   between an `Activity` that's merely present in the compiled code
+   versus one that's actually reachable through the app's UI or through
+   the OS's own component-launch mechanism (`exported` in the
+   manifest), and what it means for an attacker who already has code
+   execution inside the target process.
+5. **Driving arbitrary in-process behavior with Frida beyond simple
+   hooking** — using `startActivity()` from a Frida script (via the
+   app's own `Context`) to reach and trigger a code path that the UI
+   itself never exposes.
+6. **Chaining the result into the app's real business logic** —
+   recognizing that defeating the detection layer alone is not
+   sufficient; a second, independent authorization condition still has
+   to be satisfied before the intended (over-limit) code path — and the
+   flag it mints — becomes reachable.
+
+## What is explicitly *not* being tested
+
+- Native/JNI reverse engineering (the entire app is Kotlin; there is no
+  `.so` library to disassemble).
+- Cryptographic cryptanalysis — the flag token is a fixed,
+  XOR+Base64-obfuscated constant (see "Why the flag design changed
+  during review" below), not a cipher the player is meant to break;
+  recovering it is about reaching the code path that reveals it, not
+  about breaking any cryptographic primitive.
+- Network interception (SSL pinning layers exist in the codebase for
+  realism but are not required to solve this particular challenge —
+  there is no real backend to intercept).
+
+## Story and actors
+
+NexaWallet is framed as a budget digital wallet. The player registers a
+local account, logs in, and lands on a Transfer screen that shows a fixed
+maximum transfer limit (EGP 100.00 in the shipped build). Attempting a
+transfer above that limit is declined immediately with a plain message.
+
+Two independent gates stand between the player and the flag:
+
+1. **Integrity Gate** (`IntegrityGate.isTampered()`) — a composite,
+   fully deterministic check for active dynamic instrumentation: a
+   loopback socket probe on Frida's default port (27042), a scan of
+   `/proc/self/maps` for known injected-library name fragments
+   (`frida-agent`, `frida-gadget`, `linjector`, `xposed`), and a scan of
+   live thread names for Frida's own runtime threads (`gum-js-loop`,
+   `gmain`, `gdbus`, `frida`). Tripping any one of the three redirects the
+   player to a "Security Check Failed" screen before the Transfer screen
+   is even reachable.
+2. **Review Clearance** (`ReviewState.isCleared`, set only by
+   `ReviewState.grantClearance(from: ReviewGateActivity)`) — even after
+   Gate 1 is defeated, an over-limit transfer additionally requires this
+   flag to be set. It is granted only by `ReviewGateActivity`, a screen
+   declared `android:exported="false"` and never referenced by any button,
+   menu, or `Intent` anywhere else in the app — the player must discover
+   it by reading the decompiled code/manifest, then reach it from inside
+   the running process.
+
+Only once **both** gates are satisfied does
+`TransferAuthorizer.mintClearanceToken()` execute and the flag appear in
+the UI.
+
+## Why the flag design changed during review
+
+The author's first draft derived the flag at runtime from
+`SHA256(username:amount:timestamp-bucket:secret)`, so the token differed
+per player and per 10-second-rounded attempt. That's a reasonable
+"prove-you-actually-ran-it" idea in isolation, but it's structurally
+incompatible with this catalog's single static `flag_hash` field in
+`lab.yml` — there is no single correct answer for the checker to compare
+against.
+
+The fix (confirmed with the author) is a **fixed** flag, generated once
+and shipped as an XOR+Base64-obfuscated constant inside
+`TransferAuthorizer`, decoded only at `mintClearanceToken()` call time.
+See `validation-report.mdx` for the explicit trade-off this introduces
+(a sufficiently determined static reader can, in principle, decode the
+constant offline without ever running the app) and why it was accepted
+rather than reworked further.
+
+## Anti-analysis spec
+
+| Check | Implemented | In-scope bypass | Out-of-scope |
+| --- | --- | --- | --- |
+| Frida loopback port probe (27042) | Yes | Hook `java.net.Socket.connect` | Blocking all local ports at the OS/firewall level |
+| `/proc/self/maps` injected-library scan | Yes | Hook `java.io.BufferedReader.readLine` | Renaming `frida-server`'s binary/process to evade the scan entirely |
+| Live thread-name scan | Yes | Hook `java.lang.Thread.getName` | Running a custom/patched Frida build with renamed internal threads |
+| Non-exported hidden Activity | Yes | In-process `Context.startActivity()` via Frida | External `am start` (intentionally refused by the OS) |
+| `ReviewState.grantClearance()` liveness check | Yes | `Java.choose()` to obtain a genuinely live instance | Reflection-based private-field overwrite of `cleared` (works, but is not the intended/taught path) |
+
+Root detection, SSL pinning (`PinningConfig`/`WebViewTrustManager`), and
+native/JNI analysis are **not** part of this lab's intended solve path —
+the entire app is Kotlin with no `.so` library, and there is no real
+backend to intercept traffic to.
+
+## Expected solve time
+
+45–90 minutes for a player comfortable with jadx and basic Frida scripting
+(`Java.perform`, `.implementation`, `Java.choose`). The inlining dead-end
+in Part 2 of the Walkthrough is the primary time sink by design — it is
+meant to force a diagnose-then-pivot moment, not to be instantly obvious.
+
+## Related labs
+
+`dual-check` (binary/RE track) exercises a sibling skill — reproducing a
+chained transform and deriving a key from decompiled Windows PE code —
+with no dynamic-instrumentation component. NexaWallet is this catalog's
+first lab to require *dynamic* Android instrumentation specifically.

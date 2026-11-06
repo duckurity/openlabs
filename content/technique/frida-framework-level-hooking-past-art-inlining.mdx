@@ -1,0 +1,132 @@
+---
+title: Framework-level Frida hooking past ART inlining
+description: Learn why a Java-layer Frida hook can silently miss, and how framework-level or native-layer hooking recovers visibility into an inlined method.
+type: technique
+key: technique-frida-framework-level-hooking-past-art-inlining
+slug: technique/frida-framework-level-hooking-past-art-inlining
+intent: Learn why ART inlining defeats naive Java hooks and how to hook past it.
+keywords:
+  primary: Frida hook not triggering ART inlining
+  secondary:
+    - bypass ART AOT inlining Frida
+    - Java.deoptimizeEverything explained
+linksTo:
+  - labs/nexawallet
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+A Frida script that calls `Java.use('com.app.Checker').check.implementation = ...` assumes every call to `check()` passes through one callable method entry point. The Android Runtime (ART) does not guarantee that. When a method is small, final, or otherwise provably safe to inline, ART's ahead-of-time (AOT) compiler or JIT can inline its body directly into the caller. The call instruction disappears. A hook installed on the method's entry point never fires, because execution never reaches that entry point at runtime.
+
+This is not an anti-Frida trick by itself. It is a standard compiler optimization that happens to defeat a hooking technique built on the assumption that a method call is a call.
+
+## Examples
+
+### The hook that never fires
+
+```java
+// Checker.java
+final class Checker {
+    static boolean isDebuggerOrFridaPresent() {
+        return Debug.isDebuggerConnected() || hasFridaPort();
+    }
+}
+```
+
+```javascript
+// Looks correct. Often does nothing.
+Java.perform(() => {
+    const Checker = Java.use('com.app.Checker');
+    Checker.isDebuggerOrFridaPresent.implementation = () => false;
+});
+```
+
+If the caller and `Checker` are compiled in the same dex and `isDebuggerOrFridaPresent` is small enough, ART's optimizing compiler can fold the entire check into the caller at AOT-compile time on the device (`dex2oat`) or at JIT time. The overwritten `implementation` sits on a method object that the running code no longer calls.
+
+### Forcing the call to exist
+
+Frida's Java bridge exposes a way to tell ART to stop inlining and run everything through the interpreter, where every call is a real call and every hook is reachable:
+
+```javascript
+Java.perform(() => {
+    Java.deoptimizeEverything(); // interpreter-only, slow, but hooks become reliable
+    const Checker = Java.use('com.app.Checker');
+    Checker.isDebuggerOrFridaPresent.implementation = () => false;
+});
+```
+
+`Java.deoptimizeEverything()` is blunt: it disables JIT and treats every method as interpreted for the rest of the process's life, which is slow but removes inlining as a variable while you confirm a hook's logic. `Java.deoptimizeBoundMethod()` narrows the same idea to one already-bound method, at lower cost once you know which call site matters.
+
+### Hooking below the method, not at it
+
+When a target is inlined everywhere it is used, hooking the Java method is the wrong layer. Hooking the native call it eventually reaches (a JNI boundary, a libc function like `ptrace` or `readlink`, or an ART internal such as the interpreter's method-invocation entry point) catches every inlined copy at once, because the native layer those copies all route through was never inlined away.
+
+```javascript
+const ptrace = Process.getModuleByName('libc.so').getExportByName('ptrace');
+Interceptor.attach(ptrace, {
+    onEnter(args) {
+        // PTRACE_TRACEME is request 0; a self-trace call is a common
+        // debugger/Frida-presence probe implemented in native code.
+    },
+});
+```
+
+## How to recognise it in an authorized lab
+
+1. Hook a method you expect to run, then confirm with a visible side effect (a log line, a thrown exception) that it actually ran at all.
+2. If the hook is silent while the app's behaviour still reflects the original logic, suspect inlining before suspecting a typo in the class or method name.
+3. Decompile the installed APK (jadx is enough) and check whether the target method is `private`, `final`, `static`, or trivially short — all favour inlining.
+4. Re-test with `Java.deoptimizeEverything()` active. If the hook now fires, inlining was the cause.
+5. Once confirmed, decide whether to keep deoptimization on (simplest, slowest) or move the hook to a native or framework-level choke point that every inlined copy still passes through.
+
+## Common mistakes and false assumptions
+
+### "The hook installed without an error, so it is active"
+
+Frida's `Java.use(...).method.implementation = fn` succeeds as a JavaScript assignment regardless of whether the runtime ever calls that method object again. A clean script run proves the hook was installed, not that it intercepts anything.
+
+### "Deoptimizing everything is always the fix"
+
+It works, but it is expensive and changes timing-sensitive behaviour. Treat it as a diagnostic step first, and move to a narrower native-layer hook for anything long-running.
+
+### "This only happens with obfuscation"
+
+Inlining is a plain `dex2oat`/JIT optimization. It happens in ordinary release builds with no obfuscator involved, which is why a hook that worked on a debug build can silently stop working on a release one.
+
+## Impact
+
+A defeated hook is invisible by design: the script reports success, the process keeps running, and only the absence of the expected side effect reveals the gap. In an instrumentation-detection gate, this means a player can believe a check is patched while the original, un-hooked logic is still the one deciding the outcome.
+
+## How developers prevent it
+
+Inlining helps attackers avoid detection logic the same way it hides detection logic from legitimate instrumentation, so treat anti-tamper checks as a defense that must not rely on one single call site:
+
+- Duplicate a security-relevant check at more than one layer (Java and native) so defeating one hook point is not sufficient.
+- Avoid assuming a single Java-level check is unreachable to native inspection; pair it with native integrity checks that do not depend on a specific compiled call shape.
+- Expect that a sufficiently equipped attacker can reach any single in-process check eventually, and do not treat client-side detection as a substitute for server-side verification of anything that grants value.
+
+## Related labs
+
+Apply this technique after studying it:
+
+- [Nexawallet](/labs/nexawallet)
+
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+
+## FAQ
+
+### Does this mean Frida cannot hook final or private methods?
+
+No. Frida can still install the hook. The issue is whether the compiled code still calls that method object at the inlined call site, not whether Frida can reach it.
+
+### Is `Java.deoptimizeEverything()` safe to leave on for a whole engagement?
+
+It is safe but slow, and it changes timing. Use it to confirm a hypothesis, then narrow to a targeted hook once you understand which call site needs it.
+
+### Does this only affect security checks?
+
+No. It affects any Java-layer hook on a method short or final enough to inline, including ordinary logic you are instrumenting for analysis rather than bypass.

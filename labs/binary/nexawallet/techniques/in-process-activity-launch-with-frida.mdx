@@ -1,0 +1,166 @@
+---
+title: Launching an Android component from inside a running process with Frida
+description: Learn how to use Frida to call an app's own Context.startActivity() from inside the running process, reaching screens the UI and adb am start cannot.
+type: technique
+key: technique-in-process-activity-launch-with-frida
+slug: technique/in-process-activity-launch-with-frida
+intent: Drive arbitrary in-process behavior with Frida beyond simple method hooking, specifically launching a component the UI never exposes.
+keywords:
+  primary: frida startActivity in process android
+  secondary:
+    - frida launch hidden activity
+    - ActivityThread currentApplication frida
+linksTo:
+  - labs/nexawallet
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+Frida is usually introduced as a hooking tool — intercepting an existing
+method call and changing its behavior or return value. It's equally
+capable of actively *driving* behavior: calling methods on live objects
+inside the target process that nothing in the app's own code path would
+normally call at that moment. One practical application is launching an
+Android component (an `Activity`, for example) directly, using the app's
+own `Context`, from a Frida script — without touching the UI and without
+going through the OS's external component-resolution path at all.
+
+## Examples
+
+### Obtaining the app's own Context
+
+```javascript
+Java.perform(function () {
+    var ActivityThread = Java.use("android.app.ActivityThread");
+    var app = ActivityThread.currentApplication();
+    // 'app' is now a live Application Context, usable like any other Context.
+});
+```
+
+`ActivityThread.currentApplication()` is a standard Android framework
+method that returns the current process's live `Application` instance —
+it works because the Frida script is running inside that same process,
+with the same access any of the app's own code would have.
+
+### Building and firing the Intent
+
+```javascript
+var Intent = Java.use("android.content.Intent");
+var intent = Intent.$new();
+intent.setClassName("com.example.targetapp", "com.example.targetapp.ui.SomeActivity");
+intent.addFlags(0x10000000); // FLAG_ACTIVITY_NEW_TASK — required when
+                              // starting an Activity from a non-Activity
+                              // Context such as the Application Context.
+app.startActivity(intent);
+```
+
+This is functionally identical to the app calling
+`startActivity(intent)` on itself from one of its own screens — because,
+from the OS's point of view, it is the app doing exactly that. No
+external launch path (another app, `adb shell am start`) is used, so
+`exported="false"` has no bearing on whether this succeeds.
+
+### Going further: Java.choose() for a live instance
+
+Once the component launches, `Java.choose("com.example.targetapp.ui.SomeActivity", { onMatch: function(instance) { ... }, onComplete: function(){} })`
+can retrieve a live, running instance of that exact Activity — letting a
+script call methods on it directly (simulating a button tap's effect, or
+calling an internal method that requires "a real instance" as an
+argument) rather than only interacting with it visually on-screen.
+
+## How to recognise it in a lab
+
+- A component is confirmed reachable only from inside the process (see
+  the companion technique on `exported="false"` not being an access
+  boundary) — no UI path, no external launch path.
+- The component's purpose, once reached, is something the player needs
+  to trigger (set some state, display something, run some logic) as part
+  of the solve.
+
+## Common mistakes and false assumptions
+
+### "I need FLAG_ACTIVITY_NEW_TASK or it will always fail"
+
+This flag is specifically required when starting an Activity from a
+Context that isn't itself an Activity (such as the Application Context
+obtained here). If launching from a context that already is an Activity
+instance, this flag may not be strictly necessary — but including it is a
+safe default for an Application-Context-based launch.
+
+### "This only works for Activities"
+
+The same general approach — obtaining a live `Context` or other object
+reference from inside the process and calling a normal API on it directly
+— applies to many other in-process actions beyond launching Activities;
+starting an Activity is simply one of the most common and demonstrable
+examples in reverse-engineering practice.
+
+### "Doing this is the same as a vulnerability in the app"
+
+Nothing about this technique exploits a bug in Android or in the app's
+own code — `Context.startActivity()` is a completely standard,
+intended API. What makes this notable is the *context* it's used in*:*
+reaching a component the app's own design assumed would never be
+reachable this way.
+
+## Impact
+
+Any component an app relies on being unreachable "because nothing in the
+UI links to it, and it's not exported" can be reached by anyone capable
+of running code inside the app's process — which is precisely what
+dynamic instrumentation tooling provides. The component's own internal
+logic (if any) is then what actually determines whether reaching it
+grants something meaningful, not the fact that it was reached.
+
+## How developers prevent relying on this as real security
+
+- Never treat "no in-app UI path leads here, and it's not exported" as
+  equivalent to "unreachable" — assume any component can be launched by
+  anyone with code execution inside the process, and design its internal
+  logic (authorization checks, state validation) accordingly.
+- If a component performs a sensitive action, that action should require
+  something an in-process attacker cannot trivially fabricate (ideally, a
+  server-verified signal) — not merely "was I launched," which is exactly
+  what this technique demonstrates is always achievable from inside the
+  process.
+
+## Related labs
+
+`nexawallet` requires exactly this: after confirming
+`ReviewGateActivity` is unreachable through the UI or `adb shell am
+start`, the player uses `ActivityThread.currentApplication()` plus a
+manually constructed `Intent` to launch it from inside a Frida-attached
+process, then (in the fully scripted variant) uses `Java.choose()` to
+grab the live instance and call `ReviewState.grantClearance()` on it
+directly.
+
+## FAQ
+
+### Does this require root?
+
+No — this requires Frida attached to the target process (which itself
+typically requires either a rooted device/emulator, a repackaged APK with
+`frida-gadget` embedded, or an emulator image that supports attaching
+without root), but the `startActivity()` call itself is an ordinary
+in-process API call, not a privileged operation.
+
+### Could the app detect this is happening?
+
+In principle, yes — an app could check, from inside the launched
+component, whether it was started by a "normal" path versus this kind of
+direct call (for example, inspecting the launching component or Intent
+flags) and treat that as a signal. Nothing in this lab does so; it's
+mentioned here for completeness, as a logical extension of "treat
+instrumentation signals as input to a server-side decision," not a
+client-side gate.
+
+### What should I keep in a lab writeup?
+
+The exact Frida script used (Context acquisition, Intent construction,
+any `Java.choose()` calls), and confirmation that the normal UI and `adb`
+paths were tried and refused first — showing the in-process path was
+necessary, not just convenient.

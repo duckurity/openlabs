@@ -1,0 +1,117 @@
+---
+title: Client-side authorization decisions
+description: Learn why an authorization check implemented only in client code is not a security control, and how attacker control of the client defeats it.
+type: technique
+key: technique-client-side-authorization-decisions
+slug: technique/client-side-authorization-decisions
+intent: Learn why authorization logic must be enforced server-side, not just client-side.
+keywords:
+  primary: client-side authorization vulnerability
+  secondary:
+    - trusting client for authorization is insecure
+    - mobile app server-side validation
+linksTo:
+  - labs/nexawallet
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+A client-side authorization decision is any check that decides whether an action is allowed, running entirely in code the user's own device executes, with the result trusted without independent server-side verification. Common shapes: a transfer-limit check in app code before calling an API, a feature flag read from local state, a role check in JavaScript before showing or hiding a button, or a licence check performed entirely on-device.
+
+The client is attacker-controlled hardware running attacker-reachable code. Any decision made there can be observed, patched, or skipped by someone with the right access to that device or app process. This is not a mobile-specific or Frida-specific issue; it is the same failure whether the client is a native app, a browser, or a desktop binary. What changes by platform is how easy the client is to inspect and alter.
+
+> **Authentication proves identity. It does not relocate authorization.**
+>
+> A client that correctly identifies its user has told the server who is asking. Whether that user may perform the requested action is a decision the server must still make, using its own state, every time.
+
+## Examples
+
+### A limit enforced only on-device
+
+```kotlin
+// TransferViewModel.kt
+fun onConfirmTransfer(amount: Long) {
+    if (amount > wallet.maxTransferLimit) {
+        showError("Amount exceeds your limit")
+        return
+    }
+    api.submitTransfer(amount) // server trusts the amount it receives
+}
+```
+
+If the server endpoint behind `submitTransfer` accepts any amount the client sends and only the app's own `if` statement enforces the limit, patching that check (or calling the endpoint directly, bypassing the app's UI entirely) removes the limit completely. The server received a number; it never independently decided whether that number was allowed.
+
+### A role flag trusted from local state
+
+```javascript
+// Trusting a client-stored flag instead of a server-verified session claim.
+if (localStorage.getItem('role') === 'admin') {
+    renderAdminPanel();
+    callAdminApi(); // the API must still check the caller's real role server-side
+}
+```
+
+Hiding a button is a UI convenience. If `callAdminApi()` does not independently verify the caller's role on the server, setting `localStorage.role = 'admin'` is sufficient to reach it.
+
+### A check defeated by patched logic, not patched data
+
+In a compiled app, the equivalent of editing `localStorage` is hooking or patching the method that performs the check, so it always returns the permissive branch. The data sent to the server can look entirely legitimate; only the decision that produced it was tampered with.
+
+## How to recognise it in an authorized lab
+
+1. Identify every action that has a value threshold, role, or entitlement gating it (a limit, an admin feature, a paywalled capability).
+2. Trace where the gating decision is made: client code only, or client code followed by an independent server-side check using its own state.
+3. If only the client decides, attempt to reach the server-side effect while skipping or altering the client-side decision: call the API directly, patch the client's check with a hook, or modify the value the client was about to send after its check already passed.
+4. Confirm the server performs the privileged action anyway. That confirms the authorization decision lived entirely client-side.
+5. Distinguish this from input validation: a value out of range being silently clamped by the server is a different (and better) outcome than the server performing the action with the attacker-supplied value unchanged.
+
+## Common mistakes and false assumptions
+
+### "Obfuscation or anti-tampering makes the client check sufficient"
+
+Obfuscation raises the cost of reading or patching client code. It does not change where the decision is made. A sufficiently motivated attacker, or a lab built to practice exactly this, still reaches the server endpoint with the check skipped.
+
+### "The mobile app can't be scripted the way a browser can"
+
+Instrumentation frameworks give an attached process the same reach into app logic that browser developer tools give into a web page's JavaScript. The platform differs; the trust boundary problem is identical.
+
+### "We validate input types and lengths server-side, so we're covered"
+
+Type and length validation is necessary but answers a different question than authorization. The server can correctly accept a well-formed request for an amount, a role, or an action that it should have rejected because the requester was not entitled to it.
+
+## Impact
+
+The impact scales with what the bypassed check was protecting: a transfer limit becomes unenforced, a paywalled feature becomes free, an admin action becomes available to any authenticated user, or in the most severe case, any user at all. Because the request the server receives can be well-formed, these bypasses often leave no obvious trace at the input-validation layer.
+
+## How developers prevent it
+
+- Re-verify every authorization-relevant decision server-side, using server-held state (the stored balance, the user's actual role from the database, the real entitlement), never a value or flag the client supplied.
+- Treat client-side checks as UX only: they may prevent an honest user from submitting an invalid request, but they must never be the only gate on a privileged action.
+- For mobile specifically, assume any on-device check can be read, hooked, or patched by someone with physical or instrumented access to the device, and design the server contract accordingly.
+- Log and alert on server-side rejections of requests that an honest client should never have produced, since they are a strong signal of a bypassed client check.
+
+## Related labs
+
+Apply this technique after studying it:
+
+- [Nexawallet](/labs/nexawallet)
+
+Browse all [labs](/labs), then read [how to play](/play) before starting a lab.
+
+## FAQ
+
+### Is this the same as broken object-level authorization (IDOR)?
+
+They are related failures in the same family. IDOR is about the server failing to check *which object* a request may touch. Client-side authorization is about the server failing to independently decide *whether an action is allowed at all*, having delegated that decision to the client.
+
+### Does HTTPS prevent this?
+
+No. Transport encryption protects the request in transit. It does nothing about whether the request itself should have been honoured once it arrives.
+
+### Can rate limiting replace server-side authorization?
+
+No. Rate limiting constrains how often a request can be made, not whether a given request was authorized. Both can be relevant; neither substitutes for the other.

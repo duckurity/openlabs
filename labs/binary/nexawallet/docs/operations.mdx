@@ -1,0 +1,110 @@
+# Operations — NexaWallet
+
+Operator/maintainer guide. Covers artifact production and the BYOD
+delivery model. This lab has **no server-side component the solve
+depends on** — unlike the catalog's web-track labs, nothing in the
+intended solve path talks to a container. A `docker-compose.yml` is
+present (see "Docker role" below), but it is a distribution-only
+convenience, not part of the challenge.
+
+## Delivery model (BYOD artifact)
+
+NexaWallet ships as a single installable APK (`bin/NexaWallet-debug.apk`
+in the submission layout) plus this documentation. The player supplies
+their own:
+
+- Android emulator or physical device (API 24+ to run the app normally;
+  see the BYOD matrix below for the versions this was actually tested
+  against for *solving*, which has additional requirements).
+- `adb`.
+- A Frida stack: `frida-tools` on the host, matching `frida-server`
+  pushed to the device/emulator.
+- A decompiler — jadx (jadx-gui) is what the Walkthrough and this
+  solution were produced with; any comparable Kotlin-aware decompiler
+  works.
+
+`lab.yml` documents `port: 8090` for the optional distribution helper
+below — this is not a port the solve chain ever connects to. See
+`challenge-design.mdx` and the root `README.md`'s "Delivery model"
+section for the full reasoning.
+
+## BYOD matrix
+
+| Component | Tested version(s) |
+| --- | --- |
+| Emulator image | Pixel 6, API 29 and API 34 (Google APIs images) |
+| `adb` | Platform-tools matching Android Studio's bundled version at test time |
+| `frida-tools` (host) | **17.22.0** (pinned, per maintainer request) |
+| `frida-server` (device) | **`frida-server-17.22.0-android-x86`** (pinned, matching the host `frida-tools` version above; `-x86` because the author's test emulator image reported an x86 ABI via `adb shell getprop ro.product.cpu.abi`) — a different ABI emulator needs the matching `frida-server-17.22.0-android-<abi>` build instead |
+| Decompiler | jadx-gui |
+| Min SDK (app) | `minSdk 24` (confirmed directly against `app/build.gradle` in `Mobile CTF Challenge (v2 Design)/app/` — see `validation-report.mdx`) |
+| Target/compile SDK | `compileSdk 34`, `targetSdk 34` |
+
+Author-confirmed: the APK was rebuilt from the current source (after the
+flag-design fix) and the full Walkthrough solve chain was run end-to-end
+on-device, recovering the correct flag (matches `lab.yml`'s `flag_hash`).
+See `validation-report.mdx` for the full sign-off.
+
+## Artifacts
+
+- **Build recipe:** `src/BUILD_INSTRUCTIONS.md` (Android Studio /
+  `./gradlew assembleDebug`, `compileSdk 34`, `minifyEnabled = false`).
+- **Signing:** Debug-signed only; no release signing is used or required
+  — the solve path is identical in debug and would remain identical in a
+  signed release build (no signature-based checks in the app).
+- **SHA-256 of the release APK:** `a80baaf41745df20240a9c65992439cca2457e3e7de4fbd15058d6d791e38fac`
+  (`bin/NexaWallet-debug.apk`, computed by the author after rebuilding
+  from current source — `Get-FileHash .\NexaWallet-debug.apk -Algorithm SHA256`).
+
+## CI scope
+
+What can run in GitHub Actions for this lab, once it's part of the
+catalog's CI:
+
+- **In CI:** Static checks only — `lab.yml` schema validation, `check.py`
+  unit tests against the known flag/hash pair (does not require the APK),
+  link-checking the `techniques:` slugs once authored.
+- **Requires manual device evidence (not CI):** The actual solve chain.
+  Running Frida against a live emulator/device is not something this
+  lab's CI can automate without a device farm, which is out of scope for
+  this submission. The evidence of a correct solve is the Walkthrough's
+  screenshots plus this author's own confirmed run (see
+  `validation-report.mdx`).
+
+## Docker role
+
+Distribution-only. `docker-compose.yml` runs a single
+`nexawallet-dist` service (`python:3.12-alpine`, pinned to digest
+`sha256:1b668429b3511ab407d8e00648891631b0b1a4d7e15e3ca70f38ab5b91ad4ab4`
+— author-confirmed via `docker pull` + `docker inspect` on their own
+machine, matching the digest-pinning convention used in
+`labs/web/vaultcorp/`'s `Dockerfile`; `python3 -m http.server`) that
+serves this folder's `NexaWallet-debug.apk` and the `../docs/` tree over
+plain HTTP on the documented host port, **`8090`** (recorded in
+`lab.yml`). It exists only to satisfy the catalog's general
+`docker-compose.yml`/`validate.py` requirement for a BYOD binary lab —
+nothing in the intended solve chain connects to it, reads from it, or
+depends on it in any way; the player still installs the APK directly via
+`adb install`, per "Delivery model" above.
+
+## Reset / per-player state
+
+Not applicable — there is no shared infrastructure. All "state" is local
+to the player's own device/emulator (`LocalLedger`'s `SharedPreferences`),
+reset by uninstalling the app.
+
+## Troubleshooting
+
+- **Hook on `IntegrityGate.isTampered()` installs but has no effect:**
+  this is by design — see `challenge-design.mdx`'s anti-analysis spec and
+  the Walkthrough's Part 2/2b. Direct the player toward hooking the
+  underlying framework methods, not toward "fixing" anything in the app.
+- **`adb shell am start` on `ReviewGateActivity` is refused:** also by
+  design (`exported="false"`); this is the intended signal to look for an
+  in-process launch path.
+- **Frida fails to attach at all:** usually an architecture mismatch
+  between the emulator image and the pushed `frida-server` binary, or a
+  `frida-tools`/`frida-server` version mismatch — not a challenge bug. If
+  in doubt, use the pinned pair above (`frida-tools 17.22.0` /
+  `frida-server-17.22.0-android-x86`, substituting the matching ABI
+  suffix for a non-x86 image).

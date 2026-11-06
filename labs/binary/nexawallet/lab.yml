@@ -1,0 +1,25 @@
+contract_version: 1
+name: nexawallet
+track: binary
+difficulty: hard
+description: An Android wallet app that mints its flag only after a player defeats two independent, in-process gates — a Frida-detection layer that resists direct hooking due to ART inlining, and a hidden, non-exported Activity reachable only from inside the running process.
+flag_hash: 17166ae75476ab1231632df6a4e7d3648d7f2d9453839e885f576eebc4dfd4eb
+status: experimental
+techniques: [frida-framework-level-hooking-past-art-inlining, non-exported-activity-is-not-an-access-boundary, in-process-activity-launch-with-frida, client-side-authorization-decisions]
+# Optional v1 fields (see contracts/lab.schema.json):
+# checkpoint_flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+#
+# Release APK SHA-256 (bin/NexaWallet-debug.apk, rebuilt from the current
+# source after the flag-design fix; author-confirmed full solve recovered
+# the correct flag matching flag_hash above):
+# apk_sha256: a80baaf41745df20240a9c65992439cca2457e3e7de4fbd15058d6d791e38fac
+# Optional distribution-only helper (docker-compose.yml) serves the
+# APK + docs over plain HTTP for convenience; nothing in the intended
+# solve path uses it. This lab is still BYOD for solving — the player
+# installs the APK on their own emulator/device, adb, and Frida stack.
+# See README.md's "Delivery model" section.
+port: 8090
+#
+# Proposed technique slugs (pages not yet written under content/technique/ —
+# add them and uncomment once authored):
+# techniques: [frida-framework-level-hooking-past-art-inlining, non-exported-activity-is-not-an-access-boundary, in-process-activity-launch-with-frida, client-side-authorization-decisions]
