@@ -1,0 +1,49 @@
+# Operations: The Lewis and Clark Trail Drop
+
+## Online exception
+
+This lab is approved for limited outbound web access during the solve (maintainer approval on issue #171). All other labs stay offline after setup.
+
+## Allowlisted hosts
+
+Players may use only these exact hostnames, and nothing else (no search engines, no open internet):
+
+- `www.openstreetmap.org`
+- `nominatim.openstreetmap.org`
+- `en.wikipedia.org`
+
+The same list appears in the player `README.md`. If a solve step needs a host that is not on this list, the lab must be changed or the host added with maintainer approval.
+
+## Lab contents
+
+- `app/monument.png`: the photo, a PNG with no GPS or camera metadata.
+- `app/field-note.txt`: points to the person's Wikipedia page without naming the person or the statue.
+- `app/index.html`: serves the photo and links to the field note and README.
+- Served by unprivileged nginx on `127.0.0.1:8089` (container port 8080).
+
+## Solve path
+
+1. Identify the monument from the photo.
+2. Find the monument's node on OpenStreetMap and read its coordinates. The reference node is OSM node `5418672039`.
+3. Use the field note to find the person's Wikipedia page and read the birth date.
+4. Build the flag from the coordinates and the date.
+
+## Flag derivation
+
+The submitted value is a single `duck{...}` string. Only its SHA-256 hash is stored in `lab.yml`. Allowed characters inside the braces are lowercase letters, digits and underscores, 16 to 40 characters.
+
+Parts, joined with `_`:
+
+1. `n` or `s`, then the latitude rounded to 3 decimals, with the dot written as `_`
+2. `e` or `w`, then the longitude rounded to 3 decimals, with the minus sign dropped and the dot written as `_`
+3. The month and day as four digits (`mmdd`)
+4. The four-digit year
+
+Three decimals are used so that rounding and truncating give the same result.
+
+The plaintext flag, coordinates and date are deliberately not recorded in this repository or in the issue thread.
+
+## Maintenance notes
+
+- OSM data is community-edited. Re-check that the node and its position still match before each release.
+- Wikipedia pages can change. Re-check that the birth date is unchanged before each release.

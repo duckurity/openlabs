@@ -1,0 +1,9 @@
+contract_version: 1
+name: lewis-clark-drop
+track: osint
+difficulty: medium
+description: Identify a trail monument from a photo, then combine its map location with a date from a reference page.
+flag_hash: 4c8997daac6bb7246bce8238991f943c131509c4e70cfc5de6cf20abfb1851e7
+status: experimental
+techniques: [osint]
+port: 8089
