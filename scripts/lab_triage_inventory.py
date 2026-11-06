@@ -294,16 +294,16 @@ def main() -> int:
     errors = check_registry_complete(report)
 
     if args.json:
-        args.json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        args.json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="")
 
     if args.write_wiki:
         content = render_wiki(report)
         if args.write_wiki.exists():
             existing = args.write_wiki.read_text(encoding="utf-8")
             if existing != content:
-                args.write_wiki.write_text(content, encoding="utf-8")
+                args.write_wiki.write_text(content, encoding="utf-8", newline="")
         else:
-            args.write_wiki.write_text(content, encoding="utf-8")
+            args.write_wiki.write_text(content, encoding="utf-8", newline="")
 
     if args.check:
         if errors:
