@@ -2,7 +2,7 @@
 
 Completion record for milestone **M2 - One-command lab lifecycle** and [#133 M2-10](https://github.com/duckurity/openlabs/issues/133).
 
-Reviewed on `2026-11-05`. Regenerate with `python3 scripts/m2_release_report.py --write-wiki wiki/M2-Release-Evidence.md`.
+Reviewed on `2026-11-06`. Regenerate with `python3 scripts/m2_release_report.py --write-wiki wiki/M2-Release-Evidence.md`.
 
 ## Release markers
 
@@ -11,7 +11,7 @@ Reviewed on `2026-11-05`. Regenerate with `python3 scripts/m2_release_report.py 
 | CLI version | `0.2.0` |
 | Command envelope | `openlabs.command.v1` |
 | Lab contract | `1` |
-| Reviewed commit | `01aa564719f3` |
+| Reviewed commit | `9d5b0f1a8693` |
 | Release evidence commit | `d6ebe8116452` |
 
 ## Supported manifest
