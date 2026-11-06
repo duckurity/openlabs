@@ -7,7 +7,7 @@ Reviewed on `2026-10-24`. Regenerate with `python3 scripts/baseline_report.py --
 ## Catalog manifest
 
 - Supported: **1**
-- Experimental: **20**
+- Experimental: **21**
 - Invalid status: **0**
 - Uncatalogued directories: **5**
 
@@ -51,6 +51,7 @@ Run the script locally or read CI artifacts; this report does not start containe
 
 ### Experimental labs (not promoted)
 
+- `labs/binary/dual-check` (validates)
 - `labs/web/aegis-ctf` (validates)
 - `labs/web/cafe-house-rules` (validates)
 - `labs/web/cloudvault` (validates)
@@ -74,7 +75,7 @@ Run the script locally or read CI artifacts; this report does not start containe
 
 ### Triage follow-ups (from M0-05)
 
-Directories inventoried: **26**. Uncatalogued: **5**.
+Directories inventoried: **27**. Uncatalogued: **5**.
 
 - M0-05 follow-up: rename and catalog Sayed Khashana REST IDOR lab
 - M0-05 follow-up: compose and lab.yml for duckcorp-savegame or approved removal

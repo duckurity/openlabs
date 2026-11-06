@@ -1,0 +1,117 @@
+# Validation report — dual-check
+
+## Current deployment review
+
+This report records what has actually been verified for `dual-check` as
+of this submission, and what still needs independent re-checking by a
+reviewer — written honestly about the limits of what could be verified
+from the authoring environment, rather than claiming coverage that
+wasn't actually exercised.
+
+## Evidence ledger
+
+| Check | Method | Result |
+| --- | --- | --- |
+| Full intended chain, original flag | Ghidra static analysis + Python/CyberChef reproduction, performed by the challenge author | **Pass** — documented step by step in `official-solution.mdx`'s "Full narrated walkthrough"; produced the then-current flag |
+| `strings` scan shows no flag/password leakage | Run by the challenge author against both original binaries | **Pass** |
+| Flag format compliance | Regex check against `^duck\{[a-z0-9_]{16,40}\}$` | **Fail (original flag), fixed** — the originally authored flag (`duck{...}`) contains uppercase letters and the symbols `+ ! # $`, none of which the catalog's flag format allows. Regenerated as a fully random, compliant flag: `duck{...}`. |
+| `flag_hash` correctness | SHA-256 of the full new flag string (braces included) | **Pass** — matches `lab.yml` |
+| `checker.c` patch is minimal and surgical | Diff review: only `FLAG_CIPHERTEXT` changed | **Pass** — `PW2_HASH_HEX`, `CHECK_SEED`, `CHECK_CONST`, `FLAG_IV`, and all of `game.c` are byte-for-byte unchanged from the version `official-solution.mdx`'s walkthrough was written against |
+| Patched chain still solves with the exact documented values | Compiled the patched `checker.c` as a Linux ELF test build (`gcc checker.c aes.c sha256.c`) in the authoring sandbox and ran it with the Walkthrough's own password (`ch3ck3r_unl0ck_key`) and hex value (`2bb50ef99ea5dcea300e6efd3d8085e4`) | **Pass** — printed the new flag exactly; the chained-transform algorithm, the password gate, and the key-derivation logic were not touched by the fix, only the AES-encrypted flag bytes |
+| Negative paths still reject correctly | Same Linux test build: wrong password, and correct password + wrong hex value | **Pass** — both still print the correct generic rejection message; the flag never appears in either error path |
+| `checker.exe` (the actual shipped Windows PE binary) rebuilt from the patched source | Author rebuilt on Windows (MinGW/TDM-GCC) and pushed the new binary. Independently re-confirmed in this environment by extracting the current `FLAG_IV`/`FLAG_CIPHERTEXT` byte arrays from `src/checker.c` and searching for those exact 16+48 byte sequences inside the committed `bin/checker.exe` — found at the expected adjacent offsets, confirming the shipped binary embeds the current source's ciphertext, not a stale build. **Since superseded by a live run (see next row).** | **Pass** |
+| Live, interactive solve of the exact shipped `game.exe` + `checker.exe` | Run directly by the maintainer (`0xyouzv`) on a real Windows machine, start to finish, no shortcuts: `game.exe` → password `r3v3rs3_m3_pl2` accepted → quiz answered (4 key bytes, `4B 33 79 21`, function name `verify_sys_integrity`) → mini-game won (secret number 7) → Password 2 `ch3ck3r_unl0ck_key` revealed → `checker.exe` → that password + hex value `2bb50ef99ea5dcea300e6efd3d8085e4` accepted → printed `duck{...}` | **Pass** — exact match to `lab.yml`'s `flag_hash`. This is now an independently confirmed live solve of the actual shipped binaries, not just a static byte-match or a Linux-ELF stand-in. |
+| `game.exe` needs rebuilding | — | **Not needed** — `game.c` was not modified by this fix |
+| `check.py` correctness | Run directly in the authoring sandbox against the real new flag and a wrong flag | **Pass** — exits `0` and prints success for the correct flag, exits `1` for an incorrect one, and exits `2` with a clear message if `lab.yml` is missing |
+| Dependency / binary malware or heuristic AV scan | Run by the maintainer on the same Windows machine, directly against both shipped binaries: `MpCmdRun.exe -Scan -ScanType 3 -File game.exe` and the same for `checker.exe` (the `Start-MpScan` PowerShell cmdlet failed with a WMI-provider error on that machine, so the standalone Defender CLI was used instead, which ran a real scan — confirmed distinct from the machine's old, unrelated `Get-MpThreatDetection` history, which predates this submission and names unrelated files) | **Pass** — "Scanning ... found no threats" for both `game.exe` and `checker.exe`. |
+
+## What the fix proves (closed)
+
+The Linux-compiled test build was already strong evidence that the *fix
+is correct and non-destructive*, and the byte-level ciphertext match
+confirmed the shipped `checker.exe` embeds the current source. That gap
+is now fully closed: the maintainer ran the exact documented solve
+values (`r3v3rs3_m3_pl2` → quiz → `7` → `ch3ck3r_unl0ck_key` →
+`2bb50ef99ea5dcea300e6efd3d8085e4`) live against the actual shipped
+`game.exe` and `checker.exe` on a real Windows machine and recovered the
+current flag, `duck{...}`, exactly. No
+further re-solve is needed.
+
+## Validation coverage
+
+Covered by evidence above: flag format and hash correctness, the
+surgical scope of the fix, full chain logic re-verification (on a
+Linux-compiled equivalent), negative-path rejection, and `check.py`
+correctness.
+
+Now also covered: a fresh end-to-end *live, interactive* solve of the
+exact shipped `game.exe` + `checker.exe`, run directly by the maintainer
+on a real Windows machine (see the evidence ledger above) — recovered
+the current flag exactly; and a real Microsoft Defender scan of both
+shipped binaries on that same machine, finding no threats.
+
+Still not covered: the platform decision (Windows-only vs. also
+providing a Linux ELF build for headless CI) remains undecided — see
+`README.md`'s "Delivery model" section, which currently documents
+Windows-only as the design decision but notes no CI step exists to
+validate that automatically yet. This is a scope/design decision for the
+maintainer, not a verification gap.
+
+## Documentation verification
+
+`challenge-design.mdx` and `official-solution.mdx` were cross-checked
+against the original narrative walkthrough and objective write-ups (now
+folded into `official-solution.mdx` and `challenge-design.mdx`
+themselves — see `docs/README.md` for what moved where) and the actual
+`checker.c`/`game.c` source for consistency (constants, function names,
+solve order) — no contradictions found.
+`lab.yml`'s `techniques:` field intentionally stays commented out until
+technique pages are authored and placed at `content/technique/<slug>.mdx`
+in the catalog repository, for the same reason as VaultCorp's: referencing
+them before they exist there would fail the catalog's own existence
+check.
+
+## Release decision
+
+**Validation complete; not yet released.** `checker.exe` has been
+rebuilt on Windows from the patched `checker.c`, confirmed byte-for-byte
+to embed the current flag ciphertext, and — as of this pass — solved
+live end-to-end on real Windows hardware, recovering the exact current
+flag. Both shipped binaries have also been scanned with Microsoft
+Defender with no threats found. No outstanding verification gaps remain
+for this lab. Per the standing agreement for this submission, nothing is
+pushed to `duckurity/openlabs` until all three proposed challenges
+(VaultCorp, NexaWallet, and `dual-check`) are reviewed and agreed with
+the maintainer on their respective sub-issues.
+
+## Independent acceptance procedure (already completed once)
+
+A reviewer can reproduce this lab's full acceptance independently, the
+same way the maintainer already did for this report:
+
+1. Run the shipped `bin/game.exe` directly (no rebuild needed — this was
+   already verified against the current shipped binary): password
+   `r3v3rs3_m3_pl2` → quiz → mini-game → confirm Password 2
+   (`ch3ck3r_unl0ck_key`) is revealed.
+2. Run the shipped `bin/checker.exe` with that password and hex value
+   `2bb50ef99ea5dcea300e6efd3d8085e4`; confirm it prints
+   `duck{...}`.
+3. `python3 check.py "<printed flag>"` from the lab root; a `0` exit
+   code and "Correct!" message is sufficient acceptance evidence.
+4. Optionally, scan both binaries with any AV engine
+   (`MpCmdRun.exe -Scan -ScanType 3 -File <path>` on Windows is a quick
+   way) — already run once by the maintainer, with no threats found.
+
+## Evidence handling
+
+Every "Pass" above is either directly reproducible (the Python/CyberChef
+reproductions, `check.py`, the Linux test build), was produced by the
+challenge author on their own analysis (the original Ghidra walkthrough,
+the `strings` scan), or was run live by the maintainer (`0xyouzv`) on
+their own Windows machine against the exact shipped binaries (the
+end-to-end solve and the Defender scan). No rows remain marked "Not
+run" — the two gaps this report used to carry (the live interactive
+solve, and the AV scan) were both genuinely blocked only by this
+reviewer sandbox's lack of a Windows/Wine runtime and its network
+allowlist, not by anything wrong with the lab, and have now been closed
+by someone with the right environment.

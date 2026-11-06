@@ -1,0 +1,154 @@
+---
+title: Reimplementing a chained byte transform from decompiled code
+description: Learn how to read a custom, CBC-like chained algorithm out of decompiled pseudo-C and faithfully reproduce it in an external tool, rather than extracting a stored value.
+type: technique
+key: technique-chained-byte-transform-reversing
+slug: technique/chained-byte-transform-reversing
+intent: Learn how to reproduce a chained, order-dependent algorithm found in a decompiler and which labs exercise it.
+keywords:
+  primary: chained transform reversing practice lab
+  secondary:
+    - CBC-like custom algorithm reimplementation
+    - keygen-style reverse engineering
+linksTo:
+  - labs/dual-check
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+Not every value a crackme or licensing check needs is sitting in the
+binary as a readable constant. Sometimes the check requires a value that
+must be *computed* by an algorithm the binary contains — and the
+algorithm itself is "chained": each output byte depends on the result of
+the previous byte, similar in spirit to how CBC block-cipher mode chains
+each block's encryption into the next. This means the value cannot be
+derived byte-by-byte independently or out of order; the full sequence
+must be reproduced faithfully, start to finish.
+
+## Why this is a distinct skill from reading a constant
+
+Reading a stored key or password out of a binary is a lookup. A chained
+transform is different: there is no single value to copy — you have to
+read a function (expressed as decompiled pseudo-C, or raw disassembly),
+understand exactly what it does to each byte and in what order, and
+rewrite that same logic in a language you can actually run and iterate
+in (commonly Python), byte for byte. Any small deviation — wrong
+rotation amount, wrong operand order, using the wrong "previous" value —
+produces a completely different, silently wrong result, since byte-level
+transforms give no partial-credit feedback.
+
+## Examples
+
+### A feedback loop over a fixed-size buffer
+
+A typical shape: iterate over N input bytes (from one or more fixed
+arrays embedded in the binary), and for each one, combine it with the
+previous iteration's output (not the previous iteration's *input*) using
+some mix of XOR, bit rotation, and addition, seeded by a fixed initial
+value for the very first byte.
+
+### Reading rotation and arithmetic correctly
+
+Decompiled pseudo-C often renders bit rotations as a specific idiom
+(shift-left OR'd with shift-right by the complementary amount) rather
+than a named "rotate" function — recognising this idiom, and getting the
+rotation amount and direction exactly right, is usually where a
+reimplementation first goes wrong if rushed.
+
+### Verifying a reimplementation
+
+Because the transform is deterministic, the fastest way to confirm a
+reimplementation is correct is to compare its output against any known
+checkpoint — for example, if the program itself ever prints or uses an
+intermediate or final value you can observe, your script's output for
+the same inputs should match it exactly.
+
+## How to recognise it in a lab
+
+- A check requires a value the player is never shown or given anywhere
+  — no prompt reveals it, no file contains it in plaintext — meaning it
+  must be computed, not looked up.
+- The relevant decompiled function takes one or more fixed-size byte
+  arrays as input and produces a fixed-size output, with a loop whose
+  body references the previous iteration's result (not just the current
+  index's input).
+- The function's structure resembles a well-known chaining pattern (CBC
+  mode, a simple stream cipher, a custom "checksum"-like routine) even
+  if it isn't a real, named cryptographic primitive.
+
+## Common mistakes and false assumptions
+
+### "I can compute each byte independently since I have all the inputs"
+
+If the transform is genuinely chained, each byte's computation depends
+on the previous byte's *output*, not just on the fixed input arrays —
+skipping ahead or parallelizing the computation produces wrong results
+from the second byte onward.
+
+### "Any reasonable Python translation will work"
+
+Operator precedence, signed-vs-unsigned byte arithmetic, and rotation
+direction are easy to get subtly wrong when translating from pseudo-C.
+Masking intermediate values to a single byte (`& 0xFF`) at every step,
+and double-checking rotation direction against the decompiler's actual
+shift instructions, avoids results that are "close" but wrong.
+
+### "The decompiler's variable names tell me what each value means"
+
+Decompiler-assigned names (`local_9`, `param_1`) carry no semantic
+meaning — they're placeholders. Understanding what a variable represents
+comes from reading how it's used (is it the loop's running "previous"
+value? an index into a fixed array?), not from its name.
+
+## Impact
+
+A chained transform like this is usually the single strongest barrier
+in a client-side crackme, precisely because it can't be shortcut by
+simply reading a stored value — but once correctly reimplemented, it's
+exactly as deterministic and reproducible as everything else in the
+binary, with no remaining ambiguity.
+
+## How developers prevent relying on this as real security
+
+A custom, undocumented chained transform is still just an algorithm
+fully present in client-controlled code — unlike real cryptography, it
+has had no public scrutiny, and unlike a server-side check, it is fully
+readable by anyone with a decompiler. It raises the specific effort
+needed (reading and faithfully reimplementing the algorithm) without
+changing the fundamental limit: anything the client can compute, an
+attacker reading the client's code can also compute.
+
+## Related labs
+
+`checker.exe` in the `dual-check` lab requires exactly this: a 16-byte
+value computed by a chained transform (`compute_check_value`) that is
+never stored anywhere in the binary, requiring the player to read the
+function from the decompiler and reproduce it faithfully in Python
+before `checker.exe` will accept it.
+
+## FAQ
+
+### How is this different from the XOR/Base64 obfuscation technique?
+
+That technique is about recovering a value that already exists,
+hidden behind reversible encoding. This technique is about computing a
+value that was never stored at all — the binary only contains the
+*recipe*, not the result.
+
+### Is there a faster way than manually reimplementing the function?
+
+For a genuinely chained, order-dependent transform, no — by design it
+can't be shortcut without either running the actual code (dynamically)
+or faithfully reproducing its logic (statically). Reimplementation is
+the intended path when dynamic analysis is out of scope or undesired.
+
+### What should I keep in a lab writeup?
+
+The decompiled source of the function (as read, before translation),
+your reimplementation, and the exact output it produced — this lets a
+reviewer verify your reimplementation matches the original logic rather
+than just trusting that the final value happened to work.

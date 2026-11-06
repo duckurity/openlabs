@@ -1,0 +1,80 @@
+# Security report — dual-check
+
+Training documentation for a fictional, self-contained static
+reverse-engineering lab. Two Windows PE binaries, no real users, no
+real secrets, no network-facing service.
+
+## Objective
+
+Static reverse engineering practice, rated **medium**. See
+`challenge-design.mdx` for the full stage-by-stage design and
+`official-solution.mdx` for the full reproducible solve.
+
+## Root cause pattern being demonstrated
+
+This challenge is a deliberately-built simulation of a pattern that
+shows up repeatedly in **real-world client-side applications**: desktop
+licensing tools, mobile apps, and games that try to protect a secret (a
+license key, an API key, a flag, premium content) by hiding it inside a
+binary the end user fully controls.
+
+**Security-through-obscurity on an untrusted client.** Any logic, key,
+or secret that ships inside a binary the attacker can run and
+disassemble offline is, by definition, fully available to that attacker
+given enough time and skill. Obfuscation (XOR, masking, custom
+"home-made" algorithms, anti-debugging) raises the *cost* of
+extraction — it does not make extraction impossible.
+
+This maps directly to common real incidents:
+
+- **Hardcoded API keys/secrets in mobile APKs** — easily recovered via
+  `strings`, decompilation, or Frida hooking.
+- **Desktop licensing "crackmes"** — routinely broken via static
+  analysis + keygen reproduction, exactly as done in this challenge.
+- **Client-side-only entitlement checks** — any check that runs
+  entirely on a device the user controls can be read, understood, and
+  bypassed or satisfied offline.
+
+## Specific weaknesses intentionally built into this challenge (and why)
+
+| Weakness | Purpose in this challenge |
+| --- | --- |
+| Obfuscated-but-recoverable credentials embedded in binary | Simulates hardcoded secrets — the #1 real-world client-side mistake |
+| XOR + Base64 + byte-masking | Mirrors the layered-but-weak "obfuscation" seen in real crackmes; defeats naive `strings` scans but not real analysis |
+| Anti-debugging check (`IsDebuggerPresent`-style) | Mirrors real anti-tamper attempts that only raise the bar for *dynamic* analysis, while doing nothing against *static* analysis — which is how this challenge is actually solved |
+| Custom chained transform (`compute_check_value`) for the second gate | Simulates a bespoke "keygen algorithm" — a common pattern in licensing software, which is almost always reproducible once read from a decompiler |
+| AES-128-CBC encrypting the final flag | Shows that even "real" cryptography does not help once the attacker fully controls the key material's derivation path — the algorithm, not the cipher, was the weak point |
+| Two files cryptographically bound (flag requires values from both) | Demonstrates that even splitting trust across components doesn't help if both components still ship to the same untrusted client |
+
+## Why this is realistic and not just a puzzle
+
+A real attacker with Ghidra, a Python interpreter, and no deadline will
+reach the same end state demonstrated by this challenge: given enough
+time, **any secret embedded in binary the attacker fully controls will
+eventually be extracted.** The engineering question is never "can we
+fully prevent extraction" (for a fully client-side design, the honest
+answer is no) — it's "what should never be trusted to the client in the
+first place."
+
+## Remediation (summary — full detail in `remediation.mdx`)
+
+Move any real secret or entitlement decision off the client entirely,
+to a server the attacker does not control; treat all client-side
+obfuscation (encoding, custom transforms, anti-debugging) as a cost
+multiplier, never as a security boundary.
+
+## Verification
+
+For this lab itself (unchanged, since it is intentionally beatable for
+training purposes), verification is: the documented solve chain
+reliably works end-to-end against the shipped binaries, and a `strings`
+scan of both confirms no leakage of the flag, its format, or either
+password outside the intended solve path. See `validation-report.mdx`
+for the current evidence this produces.
+
+## Scope
+
+Local, fully offline, artifact-only. No real users, data, or network
+service exist anywhere in this lab. See `player-briefing.mdx` for the
+player-facing, non-spoiler description, and `official-solution.mdx` for
+the full spoiler-laden writeup.

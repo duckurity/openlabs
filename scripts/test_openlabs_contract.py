@@ -68,10 +68,10 @@ def run_fixture_cases() -> int:
 def run_catalog_context() -> int:
     failures = 0
     labs: list[Path] = []
-    for track in sorted(LABS_DIR.iterdir()):
+    for track in sorted(LABS_DIR.iterdir(), key=lambda p: p.name):
         if not track.is_dir() or track.name.startswith((".", "_")):
             continue
-        for lab in sorted(track.iterdir()):
+        for lab in sorted(track.iterdir(), key=lambda p: p.name):
             if lab.is_dir() and (lab / "lab.yml").is_file():
                 labs.append(lab)
     for lab in labs:

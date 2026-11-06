@@ -54,6 +54,20 @@
 \RequirePackage{tikz}
 \RequirePackage{microtype}
 
+%% ------------------------------------------------------------ line-breaking
+%% The measure is narrow (~48-char at 10pt, fewer still in a bold 15pt
+%% heading) and the body mixes prose with \texttt{} tokens (paths, flags,
+%% hashes) that the generator marks up with \allowbreak{} at /, -, and _
+%% instead of real hyphenation, since code must never grow a mid-word
+%% hyphen. LaTeX's default \tolerance=200 rejects most of those breakpoints
+%% as too loose and falls back to an overfull line instead of using them.
+%% Raising tolerance and giving TeX emergency stretch as a last resort
+%% lets it actually take the breakpoints we supply; microtype's protrusion
+%% still keeps ordinary prose tight.
+\tolerance=2000
+\emergencystretch=3em
+\hbadness=10000
+
 %% ---------------------------------------------------------------- geometry
 %% Symmetric 20mm. Generous paper, room for the running header and a calm
 %% rule-free footer. Text width gives a ~48-char measure at 10pt.

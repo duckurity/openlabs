@@ -1,0 +1,82 @@
+# Remediation — dual-check
+
+These recommendations apply to any real system that resembles this
+challenge's design — a client-side binary responsible for validating a
+secret or unlocking protected content. Full root-cause detail is in
+`security-report.mdx`.
+
+## 1. Never trust validation logic that runs entirely on the client
+
+If an attacker can run the binary offline with no network access, **any
+check inside it can eventually be read, understood, and satisfied** —
+no amount of obfuscation changes that fact, only the time required.
+
+**Fix:** Move the actual secret/entitlement check to a server you
+control. The client sends a request; the server holds the real secret,
+performs the real comparison, and returns only an authorization
+decision (not the secret itself, and not enough information to derive
+it offline).
+
+## 2. Don't rely on "custom crypto" / obfuscation as the only protection
+
+XOR layers, byte-masking, and bespoke "keygen" algorithms (like
+`compute_check_value` in this challenge) are not cryptographic
+protections — they are speed bumps. A patient analyst with a decompiler
+will always be able to read and replicate deterministic logic.
+
+**Fix:** Use obfuscation (if at all) only as a *supplementary* layer on
+top of a design that does not depend on the client keeping a secret.
+Don't use home-grown transforms where a real, reviewed cryptographic
+primitive is required — and even then, remember the key still has to
+live somewhere the client can read it if validation happens
+client-side.
+
+## 3. Anti-debugging checks are not a substitute for not having the secret client-side
+
+`IsDebuggerPresent()` (or equivalent) stops casual dynamic analysis but
+does nothing against static analysis — which is how most real
+client-side protections are broken in practice (as demonstrated in this
+exact challenge).
+
+**Fix:** Treat anti-debugging as a minor deterrent at best, never as a
+security boundary. The real boundary should be: the sensitive operation
+never runs — and the sensitive data never exists — on a device you
+don't control.
+
+## 4. Binding multiple components together does not help if they all ship to the client
+
+This challenge intentionally required values from *two* separate
+binaries to derive the final key, simulating a "defense in depth"
+design. In practice this only raised the effort required — it did not
+prevent full offline recovery, because both components were still fully
+available to the attacker.
+
+**Fix:** "Split trust" designs only work if at least one part of the
+system is genuinely out of the attacker's reach (e.g. a server-side
+component, a hardware security module, or a secure enclave) — not just
+a second file shipped alongside the first.
+
+## Practical checklist for a real product
+
+- No API keys, license keys, or other long-lived secrets hardcoded in
+  client binaries or mobile app packages.
+- All authorization/entitlement decisions are made server-side, with
+  the client treated as untrusted input.
+- If offline validation is a hard business requirement (no network
+  available), explicitly accept that it is a deterrent, not a security
+  guarantee, and design the business/legal response around that
+  assumption rather than around the binary being "unbreakable."
+- Any client-side crypto use is reviewed against a standard library and
+  threat model, not invented ad hoc.
+- Anti-tamper/anti-debug measures are documented as a deterrent layer,
+  not relied upon in the security model.
+
+## Verification a fix is complete
+
+For a real system applying these fixes, retests should confirm: no
+secret or entitlement decision can be recovered or forged by analyzing
+the client binary alone, offline, without backend involvement; any
+client-side obfuscation is documented as a deterrent, not relied upon as
+a control; and anti-debugging/anti-tamper checks are never treated as a
+substitute for not shipping the real secret to the client in the first
+place.

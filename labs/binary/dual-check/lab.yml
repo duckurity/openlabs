@@ -1,0 +1,20 @@
+contract_version: 1
+name: dual-check
+track: binary
+difficulty: medium
+description: Two independent Windows PE binaries bound by a shared secret — recover an obfuscated password from game.exe, then reimplement a chained transform read from checker.exe's decompiled code to derive the AES-128 key that decrypts the embedded flag.
+flag_hash: 731af593826aaff1b4c02b537f8c35200b13753322b1817f64d95e3edc3d9124
+status: experimental
+techniques: [static-binary-analysis-ghidra, chained-byte-transform-reversing, client-side-obfuscation-xor-base64-masking, aes-key-derivation-from-split-secrets]
+# Optional v1 fields (see contracts/lab.schema.json):
+# checkpoint_flag_hash: 0000000000000000000000000000000000000000000000000000000000000000
+# Optional distribution-only helper (docker-compose.yml) serves the
+# two binaries + docs over plain HTTP for convenience; nothing in the
+# intended solve path uses it. This lab is still artifact-only for
+# solving — the player runs the binaries directly. See README.md's
+# "Delivery model" section.
+port: 8091
+#
+# Proposed technique slugs (pages not yet written under content/technique/ —
+# add them and uncomment once authored):
+# techniques: [static-binary-analysis-ghidra, chained-byte-transform-reversing, client-side-obfuscation-xor-base64-masking, aes-key-derivation-from-split-secrets]

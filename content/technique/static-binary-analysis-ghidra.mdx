@@ -1,0 +1,151 @@
+---
+title: Static binary analysis with a decompiler
+description: Learn how to recover a program's logic and embedded data without running it, using a disassembler/decompiler such as Ghidra.
+type: technique
+key: technique-static-binary-analysis-ghidra
+slug: technique/static-binary-analysis-ghidra
+intent: Learn the core static-analysis workflow and which labs exercise it.
+keywords:
+  primary: static binary analysis practice lab
+  secondary:
+    - Ghidra decompiler walkthrough
+    - reverse engineering without a debugger
+linksTo:
+  - labs/dual-check
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+Static analysis means understanding a program by reading it, not by
+running it: disassembling its machine code back into assembly or a
+C-like pseudo-code approximation, and reading the raw bytes it embeds,
+without ever executing a single instruction. A decompiler like Ghidra
+(free, cross-platform) automates the disassembly-to-pseudo-C step, turning
+a reverse-engineering task into something much closer to reading
+unfamiliar source code.
+
+## Where it matters
+
+Anywhere a binary is handed to someone who isn't meant to see how it
+works: license-check tools, DRM, crackmes, malware samples under
+analysis, or — in this catalog — reverse-engineering CTF challenges. If
+the binary can be read and disassembled offline, with no network
+dependency, static analysis is almost always the fastest and safest way
+in, since it carries none of dynamic analysis's risk of the program
+detecting it's being watched.
+
+## Examples
+
+### Reading embedded constants
+
+Keys, seeds, masks, and other fixed data a program uses are typically
+stored in a `.data` or `.rdata` section and show up directly in a
+decompiler's Listing/Memory view as raw bytes at a fixed address — no
+execution needed to see them.
+
+### Reading program logic as pseudo-C
+
+A decompiler reconstructs something close to the original source from
+the compiled machine code: variable names are usually synthetic
+(`local_9`, `param_1`), but control flow, arithmetic, and function calls
+are preserved well enough to read a function's actual behavior line by
+line.
+
+### Recognising decompiler artifacts
+
+Decompilers sometimes render adjacent data in a way that looks like one
+longer string or structure than what the program actually reads at
+runtime (for example, two separate string literals placed next to each
+other in memory rendering as one concatenated string). Cross-checking
+against the raw bytes in a Listing/Memory view — not just the decompiler's
+higher-level guess — avoids being misled by this.
+
+## How to recognise it as the right approach in a lab
+
+- You have the binary file itself (not just access to a running
+  instance of it), and the environment is offline or the binary doesn't
+  need network access to do what you're investigating.
+- The task is to recover a fixed value (a key, a password, a target
+  number) or understand a fixed algorithm (a check function, a transform)
+  — both are things a decompiler shows you directly, rather than things
+  you'd need to observe via side effects at runtime.
+- A plain `strings` scan isn't enough (the answer isn't sitting there as
+  readable text) but the program also isn't hiding its logic behind
+  anything dynamic (network calls, server-side checks) that static
+  reading alone can't see.
+
+## Common mistakes and false assumptions
+
+### "I need to run it in a debugger to understand it"
+
+Dynamic analysis (debugging, tracing) is useful, but for a program whose
+logic and data are fully present in the compiled file, everything a
+debugger would show you stepping through is already visible by reading
+the decompiled function directly — often faster and without triggering
+any anti-debug checks the program might have.
+
+### "The decompiler's pseudo-C is the literal original source"
+
+It's a reconstruction, not the original — variable and function names are
+usually synthetic unless debug symbols are present, and some constructs
+(especially around how adjacent static data renders) can be decompiler
+artifacts rather than real program behavior. Cross-check anything
+surprising against the raw disassembly or the raw bytes.
+
+### "If `strings` doesn't show it, it's not in the binary"
+
+`strings` only finds contiguous printable-text runs. Encoded, encrypted,
+masked, or binary (non-text) data is still sitting in the file — a
+decompiler's Listing/Memory view shows the actual bytes regardless of
+whether they happen to look like text.
+
+## Impact
+
+Static analysis is what makes any purely offline, client-side protection
+mechanism fundamentally breakable given enough time: if the data and
+logic needed to pass a check are fully present in a file an attacker
+controls, they can always eventually be read out, no matter how
+obfuscated.
+
+## How developers prevent relying on an insecure design here
+
+This isn't a bug to "fix" with a coding change — it's a structural limit.
+The defense isn't a stronger obfuscation technique; it's not putting the
+check, or the secret it depends on, somewhere a static read can reach it
+in the first place (typically: move the actual validation server-side).
+
+## Related labs
+
+The `dual-check` lab in this catalog is entirely solvable through static
+analysis alone — no dynamic debugging is required at any stage, by
+design; every value needed is either directly readable as raw bytes or
+computable by faithfully reproducing a documented algorithm.
+
+## FAQ
+
+### Do I need Ghidra specifically?
+
+No — any capable disassembler/decompiler (Ghidra, IDA, Binary Ninja,
+radare2/Cutter) exposes the same underlying information. Ghidra is free
+and commonly used as a default.
+
+### When would dynamic analysis actually be necessary?
+
+When the logic you need to understand only becomes visible at runtime —
+for example, values computed from environment-dependent input, or
+behavior that's meaningfully obfuscated against static reading (such as
+self-modifying code or heavy virtualization-based protection). Neither
+applies to a straightforward crackme built around static data and
+deterministic transforms.
+
+### What should I keep in a lab writeup?
+
+The exact addresses or function names where you found each piece of
+data or logic, the raw bytes you extracted, and the reproduction script
+or tool recipe you used to turn that into the final answer — this is
+what lets someone else (or future-you) verify the solve without redoing
+the whole analysis from scratch.

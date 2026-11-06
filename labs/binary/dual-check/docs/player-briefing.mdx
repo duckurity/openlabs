@@ -1,0 +1,41 @@
+# Player briefing — dual-check
+
+**Challenge:** Reverse Engineering — Medium
+**Files provided:** `game.exe`, `checker.exe`
+
+## Scenario
+
+You've been handed two small Windows programs. `game.exe` looks like a
+simple password-protected game with a quiz and a number-guessing round.
+`checker.exe` looks like a standalone flag-verification tool. Neither
+program documents how it works, and neither one will simply hand you the
+answer by running it with guesses.
+
+## What you need to do
+
+1. Analyze `game.exe` and work out how its password check actually
+   works — don't just try typing things, look at what the binary is
+   doing.
+2. Get past its quiz and mini-game (hint: the quiz questions are
+   answerable from what you already found doing step 1).
+3. `game.exe` will give you a value you'll need for the next file. Note
+   that `checker.exe` does **not** read anything from `game.exe`
+   automatically — you carry that value over yourself.
+4. Analyze `checker.exe` independently. It asks for two things. One of
+   them you already have. The other one is **not stored anywhere in the
+   file** — you'll need to understand an algorithm inside the binary and
+   compute it yourself.
+5. Once you have both correct values, `checker.exe` will give you the
+   flag.
+
+## Notes
+
+- No dynamic debugging is required to solve this — everything can be
+  done with static analysis plus your own scripting/tooling, though
+  you're welcome to use a debugger if you prefer.
+- A plain `strings` scan of either binary will not reveal the flag, the
+  passwords, or even a hint of the flag's format.
+- Both files are independent pieces of the same puzzle — solving only
+  one of them is not enough.
+
+**Flag format:** `duck{...}`

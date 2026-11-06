@@ -6,7 +6,7 @@
   "dry_run": false,
   "data": {
     "action": "list",
-    "counts": {"supported": 1, "experimental": 19},
+    "counts": {"supported": 1, "experimental": 20},
     "supported": [
       {
         "slug": "duck-cross",
