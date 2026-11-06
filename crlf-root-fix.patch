@@ -1,0 +1,50 @@
+diff --git a/scripts/make_badges.py b/scripts/make_badges.py
+index be14f52..1795b12 100644
+--- a/scripts/make_badges.py
++++ b/scripts/make_badges.py
+@@ -179,7 +179,7 @@ def write_atomic(path: Path, content: str) -> None:
+     tmp = path.with_name(path.name + ".tmp")
+     fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+     try:
+-        with os.fdopen(fd, "w", encoding="utf-8") as f:
++        with os.fdopen(fd, "w", encoding="utf-8", newline="") as f:
+             f.write(content)
+     except Exception:
+         try:
+diff --git a/scripts/sync_catalog_public.py b/scripts/sync_catalog_public.py
+index 6cf9a10..a747000 100644
+--- a/scripts/sync_catalog_public.py
++++ b/scripts/sync_catalog_public.py
+@@ -216,7 +216,7 @@ def patch_readme(catalog: dict, chips: dict[str, str]) -> None:
+     text = text.replace('href="#labs-1-live"', 'href="#labs-catalog"')
+     if 'id="labs-catalog"' not in text:
+         text = text.replace("## Labs\n", '## Labs <span id="labs-catalog"></span>\n', 1)
+-    path.write_text(text, encoding="utf-8")
++    path.write_text(text, encoding="utf-8", newline="")
+ 
+ 
+ def patch_wiki_home(catalog: dict) -> None:
+@@ -240,7 +240,7 @@ def patch_wiki_home(catalog: dict) -> None:
+             MARKER_BADGES_END,
+             render_wiki_badge_block(catalog),
+         )
+-    path.write_text(text, encoding="utf-8")
++    path.write_text(text, encoding="utf-8", newline="")
+ 
+ 
+ def patch_site_index(catalog: dict) -> None:
+@@ -266,12 +266,12 @@ def patch_site_index(catalog: dict) -> None:
+         text = replace_block(
+             text, start, end, render_site_index_body(catalog)
+         )
+-    path.write_text(text, encoding="utf-8")
++    path.write_text(text, encoding="utf-8", newline="")
+ 
+ 
+ def write_json(catalog: dict) -> None:
+     GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+-    JSON_PATH.write_text(json_document(catalog), encoding="utf-8")
++    JSON_PATH.write_text(json_document(catalog), encoding="utf-8", newline="")
+ 
+ 
+ def expected_outputs(catalog: dict, chips: dict[str, str]) -> dict[str, str]:
