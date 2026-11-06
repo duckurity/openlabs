@@ -1,0 +1,231 @@
+# Security report — VaultCorp
+
+## Report navigation
+
+This report documents every intentional vulnerability in VaultCorp, how
+they chain together, their individual and combined impact, and the
+remediation each one would need in a real production deployment. It is a
+maintainer-facing companion to `challenge-design.mdx` (what was built and
+why) and `validation-report.mdx` (evidence it was tested).
+
+## Executive summary
+
+VaultCorp chains six independently-exploitable weaknesses — none of them
+individually catastrophic — into full remote code execution and flag
+disclosure. The chain is representative of how real breaches happen: not
+one critical bug, but several small, plausible mistakes compounding in
+sequence. Full chain: client-side secret leak → unauthenticated privilege
+escalation → SSRF filter bypass → loopback-trust abuse (CVE-2021-41238
+pattern) → job-injection RCE → output disclosure via static file serving.
+
+## Challenge overview
+
+Single-container ASP.NET Core 8 Razor Pages app, SQLite storage, Hangfire
+for background jobs. Each registration provisions an isolated tenant with
+a player account, decoy "noise" accounts, and one admin support account.
+See `challenge-design.mdx` for the full architecture and intended chain.
+
+## Architecture and trust boundaries
+
+One process, one port (5000), no reverse proxy. The exploited trust
+boundary throughout the chain is the gap between "authenticated as some
+tenant user" and "authenticated as Admin," and later between "request
+originated from loopback" and "request came from someone trusted" — see
+VC-CTF-04 below.
+
+## Attacker starting point
+
+Fully unauthenticated, with nothing but the target URL. Registration is
+open and free, matching the in-fiction "free trial" framing (see
+`player-briefing.mdx` for the exact player-facing brief).
+
+## Relevant attack surface
+
+- `/register`, `/login` — standard auth.
+- `/profile` — loads two client-side fixture scripts.
+- `/js/user-utils.js` — per-tenant JS fixture (VC-CTF-01).
+- `/support_login` — unlinked escalation endpoint (VC-CTF-02).
+- `/admin/import` — SSRF sink (VC-CTF-03).
+- `/hangfire`, `/internal/api/create` — loopback-trusting internal surface
+  (VC-CTF-04, VC-CTF-05).
+- `wwwroot/` static file serving — output disclosure (VC-CTF-06).
+
+## Vulnerability descriptions
+
+### VC-CTF-01 — Sensitive data exposure in client-side JavaScript
+
+**What happened:** `/js/user-utils.js` embeds the tenant's admin
+`LocalId` and `ApiToken`, XOR(0x42)+Base64 "obfuscated," among two random
+decoy entries, in a script served to any authenticated tenant user.
+
+**Root cause:** a debugging/support-login fixture mechanism left reachable
+in production. The encoding defeats a casual `strings` scan but is fully
+reversible by reading the same script's own decode function.
+
+**OWASP reference:** A02:2021 — Cryptographic Failures (encoding mistaken
+for encryption); API3:2023 — Broken Object Property Level Authorization.
+
+### VC-CTF-02 — Unauthenticated / unlinked support escalation endpoint
+
+**What happened:** `/support_login` accepts a `LocalId`+`ApiToken` pair
+and grants a full Admin session, with no additional factor, no rate
+limiting, and no link from any UI element.
+
+**Root cause:** built for internal support use, deployed with no network
+restriction, relying entirely on the pair being hard to find rather than
+hard to use once found.
+
+**OWASP reference:** API5:2023 — Broken Function Level Authorization.
+
+### VC-CTF-03 — SSRF via naive string-blacklist WAF
+
+**What happened:** `/admin/import` performs a server-side fetch of a
+player-supplied URL. `UrlFetchService` blocks requests whose raw URL
+string contains `localhost`, `127.0.0.1`, `0.0.0.0`, `::1`, `[::1]`, or
+`0177.0.0.1` — but does not resolve the hostname or otherwise validate the
+destination IP, so any other valid representation of the same address
+(e.g. `127.1`) passes untouched.
+
+**Root cause:** filtering on raw request text instead of the resolved
+destination, a well-documented SSRF filter-bypass pattern.
+
+**Reference:** OWASP WSTG-INPV-19.
+
+### VC-CTF-04 — Internal service exposure via SSRF (loopback trust)
+
+**What happened:** the Hangfire dashboard and its internal job-creation
+API are protected only by `LocalRequestsOnlyAuthorizationFilter`, which
+checks that `ctx.Connection.RemoteIpAddress` is loopback. Because VC-CTF-03
+lets the application issue a request to itself, that check passes for a
+request the attacker fully controls the content of.
+
+**Root cause:** `LocalRequestsOnlyAuthorizationFilter` is a development
+convenience left enabled in production, under the unstated assumption that
+SSRF was not reachable elsewhere in the same app.
+
+**CVE reference:** CVE-2021-41238 — Hangfire.Core Missing Authorization
+(CVSS 8.6, High). This challenge reproduces the generalized pattern:
+source-IP checks are not an identity check once any SSRF-capable feature
+exists in the same process.
+
+### VC-CTF-05 — Unauthenticated job injection → remote code execution
+
+**What happened:** `/internal/api/create` accepts a .NET type name, a
+method name, and arbitrary arguments, and queues a Hangfire job calling
+that method via reflection. It is gated by the same loopback check as
+VC-CTF-04. `CommandExecutorJob.Run` is reachable this way and executes its
+first argument via `/bin/sh -c`, giving full command execution as the
+application's own OS user.
+
+**Root cause:** a reflection-based, fully attacker-parameterized job
+creation endpoint, intended as internal tooling, left reachable with no
+authentication beyond the same loopback check, alongside a job class whose
+entire purpose is running arbitrary shell commands.
+
+**Reference:** matches the published "exposed job dashboard → RCE"
+pattern documented in multiple real-world pentest writeups of Hangfire and
+similar background-job dashboards.
+
+### VC-CTF-06 — Command output disclosure via static file serving
+
+**What happened:** `CommandExecutorJob.Run` writes its command's output to
+`wwwroot/<caller-supplied filename>`, which `UseStaticFiles()` serves
+publicly. Any file written there — including the flag read via VC-CTF-05
+— becomes retrievable with a single unauthenticated GET request.
+
+**Root cause:** output was written to the simplest available location for
+inspection, without considering that the directory is web-servable.
+
+## Intended attack path
+
+See `challenge-design.mdx`'s "Intended chain" section for the exact,
+stage-by-stage path; it is identical to the one exercised by
+`verify/verify_solve.py`.
+
+## Impact assessment
+
+Chained, these findings give an unauthenticated external party (after
+self-registration) full remote code execution as the application process,
+with no escalation path beyond the application — read access to any file
+the process can read, and the ability to run arbitrary commands within the
+container's own privileges. In a real deployment this is a complete
+compromise of the application host.
+
+## Flag retrieval
+
+The flag is read via VC-CTF-05 (`cat /app/flag.txt`) and disclosed via
+VC-CTF-06 (the command's output file served from `wwwroot/`). No stage of
+retrieval depends on anything other than the six findings above.
+
+## Root-cause summary
+
+| ID | Weakness | OWASP / CVE |
+| --- | --- | --- |
+| VC-CTF-01 | Client-side secret leak (reversible "obfuscation") | A02:2021, API3:2023 |
+| VC-CTF-02 | Broken function-level auth (unlinked escalation endpoint) | API5:2023 |
+| VC-CTF-03 | SSRF filter bypass (string blacklist, no resolution check) | WSTG-INPV-19 |
+| VC-CTF-04 | Loopback-trust authorization bypass via SSRF | CVE-2021-41238 pattern |
+| VC-CTF-05 | Unauthenticated job injection → RCE | — |
+| VC-CTF-06 | Sensitive output disclosure via static files | — |
+
+No finding in this chain is independently sufficient to retrieve the flag;
+each depends on the one before it (see `challenge-design.mdx`'s "Stage
+boundaries").
+
+## Remediation
+
+Full fix guidance per finding lives in `remediation.mdx` and is
+summarized here:
+
+- **VC-CTF-01:** never embed real credentials in client-shipped code,
+  obfuscated or not; move support authentication server-side.
+- **VC-CTF-02:** require real authentication and rate limiting on every
+  endpoint, whether linked in the UI or not.
+- **VC-CTF-03:** resolve the hostname first, then check the resulting IP
+  against a denylist of loopback/private/link-local ranges (or, better,
+  an explicit allowlist) — never match on raw URL text.
+- **VC-CTF-04:** never use source-IP matching as the sole authorization
+  check for a dashboard or internal API; require real authentication
+  regardless of where the request can originate from.
+- **VC-CTF-05:** remove reflection-based arbitrary job creation entirely;
+  predefine and review every job type that can exist in the application.
+- **VC-CTF-06:** never write command output, or any sensitive data, into
+  a directory served as static content.
+
+## Verification and retest
+
+`verify/verify_solve.py` scripts the full intended chain end-to-end
+against a running instance and asserts the real flag is recovered; see
+`validation-report.mdx` for the evidence this produces and its current
+run status.
+
+## Unintended attack paths
+
+None identified during authoring or review beyond the intended chain. The
+main unintended-path risk this design is aware of is the RCE primitive's
+blast radius if the container retains outbound network access. An attempt
+to close this by setting the container's Docker network to
+`internal: true` (`docker-compose.yml`) was reverted after local
+verification showed it breaks inbound port publishing on Docker Desktop
+(Windows/Mac) — see `operations.mdx`'s residual risk register for the
+current, open status of this item.
+
+**Network egress — current state vs. ideal:** egress from the container
+is **open today** — not restricted at the Docker level, so code executed
+via VC-CTF-05 could in principle reach the outside network, not just the
+container's own filesystem. The **ideal** posture is deny-by-default
+egress (no outbound network access for the container at all, allowlisting
+nothing, since the intended solve path never needs it). This lab does not
+implement that ideal today because the one mechanism tried to approach it
+(`internal: true`) broke inbound port publishing on Docker Desktop; no
+alternative (e.g. a host-level egress firewall rule, or restricting this
+deployment target to native Linux Docker) has been implemented yet. This
+is tracked as an open item, not treated as already mitigated.
+
+## Conclusion
+
+VaultCorp intentionally reproduces a realistic, documented
+vulnerability-chaining pattern end to end, with per-tenant isolation,
+deterministic mechanics, and a contained blast radius for its RCE
+primitive. All six findings above are intentional and are the entirety of
+the challenge's attack surface as currently understood.

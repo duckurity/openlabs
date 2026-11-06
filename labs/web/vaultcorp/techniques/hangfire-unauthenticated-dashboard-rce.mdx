@@ -1,0 +1,141 @@
+---
+---
+title: Unauthenticated background-job dashboard RCE (CVE-2021-41238 pattern)
+description: Learn how a background-job dashboard that trusts "it came from localhost" turns any SSRF into remote code execution.
+type: technique
+key: technique-hangfire-unauthenticated-dashboard-rce
+slug: technique/hangfire-unauthenticated-dashboard-rce
+intent: Learn how loopback-trusting job dashboards become RCE and which labs exercise this chain.
+keywords:
+  primary: unauthenticated job dashboard RCE practice lab
+  secondary:
+    - CVE-2021-41238 explained
+    - SSRF to RCE via background job framework
+linksTo:
+  - labs/vaultcorp-ssrf-rce
+  - labs
+  - play
+  - technique
+ogImage: /og/technique.png
+---
+
+## Overview
+
+Background-job frameworks (Hangfire for .NET, Sidekiq for Ruby, Celery for
+Python, and similar) typically ship a dashboard for inspecting and managing
+queued jobs. Some default authorization filters for that dashboard, rather
+than checking any identity, simply check whether the request's source IP
+address is loopback — on the reasoning that only someone with shell access
+to the box could originate a loopback request. That reasoning breaks the
+moment the application has any feature that makes the server issue requests
+to itself, because that feature now lets a remote, unauthenticated attacker
+originate a request that looks exactly like a loopback one.
+
+This is the same trust pattern published as CVE-2021-41238 for Hangfire's
+default dashboard authorization filter, and it generalizes to any
+"localhost is trusted" check in any framework.
+
+## Why "it's from localhost" is not an identity check
+
+Checking `RemoteIpAddress` tells you where a TCP connection originated, not
+who or what made the request. On a single-host deployment, anything capable
+of causing the application to make an HTTP request to itself — a reverse
+proxy misconfiguration, a webhook relay, an SSRF sink, even a redirect the
+app blindly follows — can make that request originate from loopback. The
+check conflates "reached me from 127.0.0.1" with "reached me from someone I
+trust," and those are not the same thing once the app has any
+request-issuing feature of its own.
+
+## Examples
+
+### The textbook CVE-2021-41238 pattern
+
+Hangfire's dashboard, by default, used an authorization filter that allowed
+any request whose source address was loopback, with no further
+authentication. Deployments that exposed the dashboard behind a reverse
+proxy or load balancer, or that had any internal mechanism capable of
+reaching it from the box itself, effectively exposed the dashboard with no
+authentication to anyone who could trigger that internal request.
+
+### Chained with SSRF
+
+The more interesting real-world case is a dashboard (or other
+loopback-trusting internal endpoint) that is not directly reachable by an
+external attacker, paired with an unrelated SSRF sink elsewhere in the same
+application. The SSRF sink is the attacker's way to make the server itself
+issue the loopback request on their behalf — the SSRF supplies the "from
+127.0.0.1" that the authorization filter is looking for.
+
+### From dashboard access to code execution
+
+A job dashboard that lets an authorized user inspect, trigger, or (in some
+configurations) create jobs is not just an information-disclosure risk.
+If job creation accepts enough information to specify an arbitrary method
+on an arbitrary type with attacker-controlled arguments, and any reachable
+method can run a shell command, read a file, or otherwise touch the
+filesystem or OS, a dashboard-level primitive becomes full remote code
+execution.
+
+## How to recognise it in an authorized lab
+
+- Look for a dashboard or admin path associated with a known background-job
+  library (`/hangfire`, `/sidekiq`, `/flower`, and similar are common
+  defaults) that returns different behavior from loopback versus external
+  requests.
+- If it's unreachable externally, look elsewhere in the application for any
+  feature that fetches a URL on the server's behalf — that is very often
+  the intended way in.
+- Once reachable, look for any endpoint that lets you specify a job to run
+  — directly through the dashboard's own job-creation flow, or through a
+  separate internal API the dashboard links to or that uses the same
+  framework underneath it.
+- Confirm code execution with a low-impact command before escalating
+  (listing a directory or reading a known-harmless file), per the
+  engagement's rules.
+
+## How developers prevent it
+
+- Never use source-IP matching as an authorization mechanism. Require real
+  authentication (even a simple shared secret or basic auth is better than
+  none) in front of any dashboard or internal API, regardless of where
+  requests to it can originate.
+- If a dashboard is genuinely meant to be internal-only, enforce that at
+  the network layer (it should not be reachable from the same process that
+  has SSRF-capable features) rather than relying on an in-process IP check.
+- Treat "the request came from this process" and "the request came from an
+  internal admin" as different facts. The first is attacker-influenced the
+  moment any SSRF-capable feature exists anywhere in the app.
+- Disable or tightly restrict any feature that allows creating jobs with
+  attacker-specified type, method, and arguments — job definitions should
+  come from trusted application code, not from dashboard input.
+
+## Related labs
+
+The VaultCorp lab in this catalog chains exactly this pattern: an SSRF sink
+elsewhere in the app reaches the job dashboard's internal job-creation API
+over loopback, which the API's authorization filter accepts purely on
+source address, allowing a shell command to be executed and its output
+read back through the web root.
+
+## FAQ
+
+### Is this a bug in the job framework itself?
+
+It is a configuration/default-trust decision, not a memory-safety bug.
+Most such frameworks support real authentication for the dashboard; the
+risk comes from leaving the loopback-only default in place in an
+environment where loopback requests are attacker-reachable through another
+feature.
+
+### Does this only matter if the dashboard allows creating jobs?
+
+No — even read-only dashboard access is often an information disclosure
+issue (queued job arguments, connection strings, recurring job definitions,
+environment details). Job creation or job argument control is what
+escalates it to code execution specifically.
+
+### What should I keep in a lab writeup?
+
+Document how you reached the dashboard or internal API (what SSRF sink or
+network path got you there), the exact job you created (the target type,
+method and arguments), and how you retrieved the command's output.

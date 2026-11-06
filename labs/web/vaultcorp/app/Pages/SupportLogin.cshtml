@@ -1,0 +1,35 @@
+@page "/support_login"
+@model VaultCorp.Pages.SupportLoginModel
+@{
+    ViewData["Title"] = "Support Access";
+    Layout = null;   // stripped-down page — no nav bar
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Support Access — VaultCorp</title>
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+<div class="auth-card support-card">
+    <h2>🔧 Support Access</h2>
+    <p class="subtitle">Internal use only. Provide your support reference credentials.</p>
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="alert alert-error">@Model.Error</div>
+    }
+
+    <form method="post">
+        <label>Reference ID</label>
+        <input type="text" name="refId" placeholder="e.g. 51" required autocomplete="off" />
+
+        <label>Access Token</label>
+        <input type="text" name="token" placeholder="tk_..." required autocomplete="off" />
+
+        <button type="submit" class="btn-primary full-width">Verify &amp; Access</button>
+    </form>
+</div>
+</body>
+</html>

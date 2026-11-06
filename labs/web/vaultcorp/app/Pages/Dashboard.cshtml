@@ -1,0 +1,34 @@
+@page
+@model VaultCorp.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="page-header">
+    <h1>My Workspace</h1>
+    <p class="subtitle">@Model.CompanyName</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-num">@Model.BackupCount</span>
+        <span class="stat-label">Backups stored</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-num">@Model.TeamSize</span>
+        <span class="stat-label">Team members</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-num">Active</span>
+        <span class="stat-label">Plan status</span>
+    </div>
+</div>
+
+<div class="section-card">
+    <h3>Recent Activity</h3>
+    <ul class="activity-list">
+        <li><span class="ts">Today 09:14</span> Backup job completed — 2.3 MB</li>
+        <li><span class="ts">Today 03:00</span> Scheduled cleanup ran</li>
+        <li><span class="ts">Yesterday</span> New team member added</li>
+    </ul>
+</div>

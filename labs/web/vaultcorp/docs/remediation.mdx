@@ -1,0 +1,148 @@
+# Remediation — VaultCorp
+
+This maps the lab's six root-cause findings (full detail in
+`security-report.mdx`, "Vulnerability descriptions") to concrete fixes
+for a *real* SaaS backup/storage system. These are not changes that
+would make this specific lab harder — it's intentionally built to be
+beatable — they describe how production systems should avoid this class
+of weakness entirely.
+
+## Findings and fixes
+
+### VC-CTF-01 — Remove credentials from client-side code
+
+**Fix:** Never embed authentication credentials, tokens, or secrets in
+any JavaScript file served to users — obfuscated or not. Obfuscation is
+not encryption and provides no security guarantee.
+
+**Correct approach:**
+
+- Support authentication should use a server-side session initiated
+  through a secure, rate-limited endpoint.
+- Development fixtures must be removed before any code reaches
+  production. Use environment-specific configuration
+  (`appsettings.Development.json`) and ensure `Production` never loads
+  test data.
+- Implement a pre-deployment secret-scanning step (e.g. `git-secrets`,
+  `truffleHog`) in the CI/CD pipeline.
+
+### VC-CTF-02 — Protect the support login endpoint
+
+**Fix:** Never rely on "security through obscurity" for authentication
+endpoints.
+
+**Correct approach:**
+
+- Restrict `/support_login` to internal IP ranges at the
+  network/reverse-proxy level (Nginx `allow`/`deny`, firewall rules).
+- Require a second factor (TOTP, hardware key) for support staff access.
+- Implement rate limiting and lockout on all authentication endpoints.
+- Log and alert on all support login attempts.
+
+### VC-CTF-03 — Fix the SSRF filter
+
+**Fix:** Replace the blacklist-based filter with a proper allowlist and
+IP-resolution check.
+
+```csharp
+// WRONG: string blacklist
+if (url.Contains("localhost") || url.Contains("127.0.0.1")) { block(); }
+
+// CORRECT: resolve the hostname and check the resulting IP
+var host = new Uri(url).Host;
+var addresses = await Dns.GetHostAddressesAsync(host);
+foreach (var addr in addresses) {
+    if (IPAddress.IsLoopback(addr) || IsPrivateRange(addr)) { block(); }
+}
+```
+
+Key points:
+
+- Always resolve the hostname **after** parsing, not before.
+- Check against loopback AND all private IP ranges (RFC 1918: `10.x`,
+  `172.16-31.x`, `192.168.x`).
+- Block IPv6 loopback (`::1`) and link-local addresses (`169.254.x.x`).
+- Consider using an allowlist of permitted domains instead of a
+  blocklist.
+
+### VC-CTF-04 — Secure the Hangfire dashboard
+
+**Fix:** `LocalRequestsOnlyAuthorizationFilter` is a development
+convenience, not a production security control.
+
+**Correct approach:**
+
+- Require proper authentication for the Hangfire dashboard (e.g. check
+  for an admin role from the application's own auth system).
+- If the dashboard must be accessible only internally, enforce this at
+  the **network level** (firewall, VPC rules) — not in application code
+  that can be bypassed via SSRF.
+- Consider disabling the Hangfire dashboard entirely in production and
+  using server-side monitoring instead.
+
+```csharp
+// Example: require authenticated admin user
+app.UseHangfireDashboard("/hangfire", new DashboardOptions {
+    Authorization = new[] { new HangfireAuthFilter() }
+});
+
+public class HangfireAuthFilter : IDashboardAuthorizationFilter {
+    public bool Authorize(DashboardContext ctx) {
+        var http = ctx.GetHttpContext();
+        return http.User.Identity?.IsAuthenticated == true
+            && http.User.IsInRole("HangfireAdmin");
+    }
+}
+```
+
+### VC-CTF-05 — Remove the internal job creation API
+
+**Fix:** Never expose an API that allows arbitrary code execution, even
+on internal interfaces.
+
+**Correct approach:**
+
+- Remove `/internal/api/create` entirely. There is no legitimate reason
+  to allow creating arbitrary jobs via an HTTP endpoint.
+- If programmatic job creation is needed, do it through authenticated,
+  strongly-typed API calls that accept only predefined job types.
+- Apply the principle of least privilege: `CommandExecutorJob` should
+  not exist in a production application. Maintenance tasks should be
+  predefined, reviewed, and deployed through code — not created at
+  runtime.
+
+### VC-CTF-06 — Do not write sensitive output to static files
+
+**Fix:** Never write command output or sensitive data to a
+publicly-accessible directory.
+
+**Correct approach:**
+
+- Write job output to a private directory outside of `wwwroot`.
+- If job results need to be retrieved, serve them through an
+  authenticated API endpoint that checks the requesting user's
+  permissions.
+- Apply appropriate filesystem permissions to ensure the web server
+  process cannot write to directories it serves.
+
+## General recommendations
+
+| Control | Recommendation |
+| --- | --- |
+| Secret management | Use a secrets manager (Azure Key Vault, AWS Secrets Manager) — never hardcode or embed secrets |
+| SSRF prevention | Validate and resolve URLs server-side; use allowlists not blocklists |
+| Internal services | Never trust IP-based access controls as the sole defence; layer with auth |
+| Debug endpoints | Remove all development/debug code before production deployment via CI/CD gates |
+| Job queues | Treat every job queue entry as potentially malicious; validate job types strictly |
+| Monitoring | Alert on unusual patterns: bulk job creation, internal URL access, admin logins from new IPs |
+
+## Verification a fix is complete
+
+For a real system applying these fixes, retests should confirm: no
+client-shipped code contains credentials in any form; every
+authentication endpoint requires real auth regardless of whether it's
+linked in the UI; SSRF filtering resolves hostnames before checking
+destination IPs against a denylist of loopback/private/link-local
+ranges; no internal dashboard or job-creation API is reachable without
+real authentication, regardless of source IP; and no sensitive output is
+ever written to a web-servable directory.

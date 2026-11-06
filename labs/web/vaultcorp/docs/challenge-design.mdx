@@ -1,0 +1,218 @@
+# Challenge design — VaultCorp
+
+## Design brief
+
+VaultCorp is a single-container ASP.NET Core 8 (Razor Pages) web challenge
+built around a realistic SaaS backup platform. The challenge chains six
+independently-documented vulnerability classes into one deterministic path
+from registration to remote code execution. No stage can be skipped; each
+stage's output is the input the next stage needs.
+
+| Property | Value |
+| --- | --- |
+| Track | web |
+| Difficulty | hard |
+| Stack | ASP.NET Core 8 Razor Pages, SQLite, Hangfire (in-memory) |
+| Deployment | single container, Docker Compose |
+| Per-player isolation | yes — tenant-per-registration |
+
+## Learning objective
+
+A player who finishes VaultCorp should be able to explain, in their own
+words:
+
+- Why obfuscating a secret client-side (encoding, not encryption) is not a
+  control, and how to recover it from the browser alone.
+- Why an unlinked endpoint is still reachable, and how to find one.
+- Why a string-blacklist SSRF filter fails against alternate IP literal
+  forms, and what a correct fix looks like (resolve, then check).
+- Why "the request came from loopback" is not an identity check, and how
+  that assumption turns an SSRF into RCE when paired with a trusting
+  internal service (the CVE-2021-41238 pattern).
+- How command output written to a web-servable directory turns an RCE
+  primitive into a one-request data exfiltration path.
+
+## Skills exercised
+
+| Stage | Skill |
+| --- | --- |
+| 1 | JavaScript source analysis + custom encoding (XOR + Base64) |
+| 2 | Directory brute-forcing with SecLists |
+| 3 | Server-Side Request Forgery (SSRF) with WAF bypass via IP obfuscation |
+| 4 | Internal service enumeration via blind SSRF port scanning |
+| 5 | Unauthenticated Hangfire dashboard access via loopback trust |
+| 6 | Remote Code Execution via Hangfire job injection |
+
+## Story and actors
+
+VaultCorp is framed as a cloud backup SaaS. The player registers a free
+trial account, which provisions an isolated "tenant" (a fake company) with:
+
+- The player's own account (`Role = Employee`).
+- 4–6 generated noise employee accounts (`IsNoise = true`), present purely
+  as decoys so the player cannot assume every account in the tenant is
+  meaningful.
+- One `Role = Admin` support account, created per-tenant, whose credentials
+  are the object of the chain's first escalation.
+
+No actor is shared across tenants — every registration is a fresh,
+isolated playthrough with its own admin credential and its own flag.
+
+## Intended chain
+
+```
+Register (isolated tenant auto-provisioned)
+  -> /js/user-utils.js (per-tenant JS fixture)
+       -> XOR(0x42) + Base64 decode -> admin LocalId + ApiToken
+  -> /support_login (unlinked endpoint, found via brute-force
+     or by noticing /login rejects an id/token pair)
+       -> Admin session
+  -> /admin/import (SSRF sink, Admin-only)
+       -> naive string-blacklist WAF blocks "127.0.0.1" / "localhost" / etc.
+       -> alternate loopback literal ("127.1") bypasses it
+  -> SSRF reaches /internal/api/create (loopback-trusting job API)
+       -> Hangfire job created: CommandExecutorJob.Run("cat /app/flag.txt", <file>)
+  -> job output written to wwwroot/<file>
+  -> GET /<file> -> flag
+```
+
+### Stage boundaries
+
+Each stage is gated on the previous one in a way that cannot be
+reordered:
+
+1. **Credential recovery** requires an authenticated (any) session, because
+   `/js/user-utils.js` reads `TenantId` from the session and returns empty
+   fixtures otherwise.
+2. **Privilege escalation** requires the decoded `LocalId:tk_<ApiToken>`
+   pair; `/support_login` does not accept a username/password.
+3. **SSRF** requires an Admin session; `/admin/import` redirects to
+   `/login` for any non-Admin role.
+4. **RCE** requires the WAF bypass; the direct loopback strings are
+   blocked, and the internal job API itself only accepts loopback-origin
+   requests, so it cannot be reached directly by an external client at all.
+5. **Flag retrieval** requires the job to have actually run; the output
+   file does not exist until the Hangfire worker picks up the job, which
+   introduces a small, expected delay after job creation.
+
+## Architecture and trust boundaries
+
+A single process serves the whole application: Razor Pages UI, the
+Hangfire dashboard and job server, and static file serving, all on port
+5000. SQLite persists in a Docker volume. There is no reverse proxy, no
+second service, and (as of the RCE-containment fix) no outbound network
+access from the container at runtime — the intended solve only ever needs
+the container to reach itself.
+
+The key trust boundary the challenge exploits is the gap between "this
+request originated from loopback" and "this request came from someone we
+trust." `/internal/api/create` checks only the former
+(`IPAddress.IsLoopback(ctx.Connection.RemoteIpAddress)`), and the
+`/admin/import` SSRF sink is the mechanism that lets an external,
+authenticated-as-Admin player make the server satisfy that check on their
+behalf.
+
+## UI contract
+
+- `/register`, `/login` — standard credential forms, antiforgery-protected.
+- `/dashboard`, `/profile` — authenticated player pages; `/profile` is
+  where the two fixture scripts (`user-utils.js`, `internal.js`) are
+  loaded from.
+- `/support_login` — intentionally unlinked from any nav element or page;
+  discoverable only by directory brute-force or by inference once
+  `/login` rejects an id/token pair.
+- `/admin/index`, `/admin/import` — Admin-only; redirect to `/login`
+  otherwise.
+- `/hangfire`, `/hangfire/recurring` — reachable only via the SSRF chain
+  (loopback-gated), never directly by the player's browser.
+- `/internal/api/create` — never linked anywhere in the UI; its usage is
+  documented only in a comment inside `wwwroot/js/internal-notes.js`,
+  itself only reachable the same way the Hangfire dashboard is.
+
+## Determinism and flag design
+
+- Every registration provisions a new, random `TenantId`, a random set of
+  `LocalId`s, and random credentials for every account in that tenant —
+  nothing about the chain's mechanics depends on these specific values, so
+  no player can brute-force or guess their way past a stage using another
+  player's values.
+- The flag itself is generated once at image build time
+  (`docker-compose.yml`'s `FLAG` build arg), baked into `/app/flag.txt`
+  inside the image, and is identical for every tenant in a given deployed
+  instance — this is intentional for a single-container, single-instance
+  CTF deployment model, consistent with how `lab.yml`'s single
+  `flag_hash` is defined for the whole lab rather than per-tenant.
+- The flag body is fully randomly generated (not hand-crafted) and matches
+  the catalog's `^duck\{[a-z0-9_]{16,40}\}$` format; `lab.yml`'s
+  `flag_hash` is the SHA-256 of the full flag string, braces included.
+
+## Difficulty and safety
+
+**Why hard, not medium:** six stages, each individually a distinct OWASP
+category, that must be chained in order with no shortcut between any two
+non-adjacent stages. Finding stage 2 requires noticing `/login` rejects
+the stage-1 credential shape, rather than any direct hint. The WAF bypass
+requires knowing (or discovering) multiple alternate loopback
+representations, since only one of several common ones is actually
+unblocked.
+
+**Safety boundaries:** the only destructive-capable primitive is
+`CommandExecutorJob.Run`, which executes via `/bin/sh -c`. An attempted
+RCE-containment fix (`docker-compose.yml`'s `internal: true` network) was
+reverted after local verification on Docker Desktop (Windows) showed it
+also breaks inbound port publishing there — the container became
+unreachable at `http://localhost:5000` entirely. Outbound network egress
+is therefore currently unrestricted at the Docker level; see
+`operations.mdx`'s residual risk register for the accepted trade-off.
+
+## Appendix A. Implementation reference
+
+### A.1 Key types
+
+- `TenantService.ProvisionAsync` — creates the tenant, player, noise
+  accounts, and admin account on registration.
+- `UrlFetchService.FetchAsync` — the SSRF sink; applies the string
+  blacklist, then performs the fetch.
+- `CommandExecutorJob.Run` — executes a shell command via `/bin/sh -c` and
+  writes its output into `wwwroot/`.
+
+### A.2 HTTP surface (intended path)
+
+| Method | Path | Auth | Role |
+| --- | --- | --- | --- |
+| POST | `/register` | none | creates Employee session |
+| GET | `/js/user-utils.js` | session | any |
+| POST | `/support_login` | none (credential pair) | escalates to Admin session |
+| POST | `/admin/import` | session | Admin |
+| GET | `/hangfire/recurring` | loopback only | n/a |
+| GET | `/internal/api/create` | loopback only | n/a |
+| GET | `/<output-file>` | none (static) | n/a |
+
+### A.3 Blocked WAF literals (as implemented)
+
+`localhost`, `127.0.0.1`, `0.0.0.0`, `::1`, `[::1]`, `0177.0.0.1` — matched
+as a case-insensitive substring of the raw URL, before any DNS resolution.
+
+### A.4 Intentional defect boundaries
+
+Everything in this document describes an intentionally introduced flaw.
+Nothing in the chain relies on an unintended bug; see `security-report.mdx`
+for the full root-cause writeup of each stage, and `validation-report.mdx`
+for the evidence that the intended path works and nothing unintended was
+found during testing.
+
+## Appendix B. Design decisions
+
+### Design guardrails
+
+- Every stage reflects a documented, real-world pattern (OWASP WSTG-INPV-19
+  for the SSRF bypass; CVE-2021-41238 for the loopback-trust pattern) —
+  nothing in the chain is a puzzle invented purely for puzzle's sake.
+- No stage depends on timing, race conditions, or non-deterministic
+  behavior other than the expected short delay between Hangfire job
+  creation and its output appearing (stage boundary 5, above).
+- Per-tenant isolation means one player's actions (including any
+  accidental or intentional abuse of the RCE primitive) cannot affect
+  another player's tenant data; the flag file itself is shared read-only
+  image content, not tenant data, so this does not weaken isolation for
+  the parts of the chain that matter.

@@ -1,0 +1,104 @@
+# Validation report — VaultCorp
+
+## Current deployment review
+
+This report records what has actually been verified for VaultCorp as of
+this submission, and what remains to be independently re-checked by a
+reviewer. It is written honestly about the limits of what could be
+verified from the authoring environment, rather than claiming coverage
+that wasn't actually exercised.
+
+## Evidence ledger
+
+| Check | Method | Result |
+| --- | --- | --- |
+| Full intended chain, real deployment | Manual solve by the challenge author, local Docker Desktop build | **Pass** — recovered `duck{...}`, matching `lab.yml`'s `flag_hash` |
+| Base image digests resolve | `docker buildx imagetools inspect`, run by the author locally | **Pass** — both SDK and runtime digests in `app/Dockerfile` confirmed valid at time of pinning |
+| Flag format compliance | Regex check against `^duck\{[a-z0-9_]{16,40}\}$` | **Pass** |
+| `flag_hash` correctness | SHA-256 of the full flag string (braces included) | **Pass** — matches `lab.yml` |
+| Dead code removal (`Flag` model) | Exhaustive `grep` across the codebase for all references | **Pass** — no remaining references after removing the `Flags` DbSet, its generation in `TenantService`, and its cleanup in `DatabaseCleanupJob` |
+| C# compiles after dead-code removal | — | **Not run** — no .NET SDK available in the authoring sandbox; verified by grep coverage only, not an actual build. The author's own local Docker build (which does compile the project) succeeded after these changes, which is indirect confirmation. |
+| Automated end-to-end solve script (`verify/verify_solve.py`) | Two attempts: (1) a reviewer sandbox with a real Docker Engine but a restricted network allowlist, (2) the author/maintainer's own Windows machine with full internet access, running `py verify_solve.py` against `docker compose up --build` from this exact repo layout | **Pass (live, independently run)** — attempt (1) failed only at the image-pull step (`mcr.microsoft.com` unreachable from that sandbox; not a lab defect, see the now-struck note below). Attempt (2), run on a machine with normal registry access, built and started the container successfully and the script completed all 6 stages end to end: registered a low-privilege account, decoded the leaked `prod` fixture from `/js/user-utils.js` to recover the Admin API token, escalated to Admin via `/support_login`, pulled the antiforgery token from `/admin/import`, submitted the SSRF request to create a Hangfire RCE job (not blocked), and polled the job output to recover `duck{...}` — exact match to `lab.yml`'s `flag_hash`. This is now independently confirmed, not just author-claimed. |
+| RCE containment (`internal: true` network) | Author re-ran `docker compose up --build` on Docker Desktop (Windows) | **Failed, reverted** — the published port (5000) was unreachable from the host with `internal: true` set. Docker Desktop's WSL2/Hyper-V networking does not reliably forward inbound traffic to an internal network, unlike native Linux Docker. Removed `internal: true`; see `operations.mdx`'s residual risk register for the now-open egress-containment gap. (Note for a future re-check: a *native* Linux Docker host, unlike Docker Desktop, is generally expected to still forward published ports on an `internal: true` network — a reviewer on native Linux could re-test whether `internal: true` could be safely restored there, even though it must stay off for the Docker-Desktop/Windows case this was reverted for.) |
+| Dependency / container image vulnerability scan | — | **Not run** — see `operations.mdx`'s residual risk register |
+
+## What the verification script proves (once run)
+
+`verify/verify_solve.py` was written directly against the real handler
+source (`Register.cshtml.cs`, `Login.cshtml.cs`, `SupportLogin.cshtml.cs`,
+`Admin/Import.cshtml.cs`, `Assets/UserUtils.cshtml.cs`/`.cshtml`,
+`Program.cs`), not from the player-facing walkthrough alone — including
+confirming that Razor Pages' default antiforgery validation applies to
+every POST form it submits to, and scraping
+`__RequestVerificationToken` from each form before posting. When it is run
+against a live instance, a `0` exit code with a flag matching
+`--expect-flag` is direct evidence the intended chain is solvable exactly
+as `challenge-design.mdx` and `security-report.mdx` describe. **A
+maintainer or reviewer with a working Docker environment should run it at
+least once before merge**, since it has not been executed end-to-end from
+this authoring environment.
+
+## Validation coverage
+
+Covered by evidence above: flag design and hashing, dead-code hygiene,
+base-image pinning, and one full manual solve of the intended chain
+(pre-dating the RCE-containment change).
+
+Not yet covered: a live run of `verify_solve.py` (attempted from a
+reviewer sandbox with a working Docker Engine, but blocked by that
+sandbox's own network allowlist on the `mcr.microsoft.com` image pull —
+see the evidence ledger; a reviewer with open registry access still
+needs to run it once); a post-containment re-solve; any dependency/image
+scan; any load or concurrency testing of per-tenant isolation beyond code
+review of the `TenantId`-filtered queries.
+
+## Documentation verification
+
+- `challenge-design.mdx`, `security-report.mdx`, and `operations.mdx` were
+  cross-checked against each other and against the real application
+  source for consistency (endpoint paths, blocked WAF literals, job type
+  names, file paths) — no contradictions found between the three.
+- `lab.yml`'s `techniques:` field intentionally stays commented out until
+  the four technique pages drafted under `techniques/` in this submission
+  are actually placed at `content/technique/<slug>.mdx` in the catalog
+  repository — referencing them before they exist there would fail the
+  catalog's own `content/technique/` existence check.
+
+## Release decision
+
+**Not yet released.** Per the standing agreement for this submission,
+nothing in this lab is pushed to `duckurity/openlabs` until all three
+proposed challenges (VaultCorp, NexaWallet, and the reverse-engineering
+challenge) are reviewed and agreed with the maintainer on their respective
+sub-issues. This report should be revisited — and the "Not run" /
+"Not yet independently re-confirmed" rows above re-checked — before that
+release happens.
+
+## Optional independent acceptance procedure
+
+A reviewer can independently confirm this lab without trusting any claim
+above, by running:
+
+```bash
+cd labs/web/vaultcorp
+docker compose up --build -d
+cd verify && pip install requests
+python3 verify_solve.py --base-url http://localhost:5000
+```
+
+A `0` exit code and matching flag is sufficient acceptance evidence for
+the intended chain. Reviewers should additionally skim
+`security-report.mdx`'s six findings against the actual source files
+listed in `challenge-design.mdx`'s Appendix A.
+
+## Evidence handling
+
+All evidence in this report is either directly reproducible (the solve
+script, the hash checks) or was produced by the challenge author on their
+own machine (the manual solve, the digest resolution) rather than
+fabricated or assumed. Rows marked "Not run" are left that way rather than
+claimed, consistent with being transparent about this authoring
+environment's limits (no .NET SDK available here; a later reviewer pass
+did have a working Docker Engine, but that sandbox's network allowlist
+still blocks pulling Microsoft's container images, so the live solve
+script run remains genuinely outstanding).

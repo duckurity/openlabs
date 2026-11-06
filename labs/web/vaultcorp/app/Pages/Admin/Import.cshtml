@@ -1,0 +1,155 @@
+@page "/admin/import"
+@model VaultCorp.Pages.Admin.ImportModel
+@{
+    ViewData["Title"] = "Import Backup from URL";
+}
+
+<div class="page-header">
+    <h1>⬆ Import Backup from URL</h1>
+    <p class="subtitle">
+        Provide a direct URL to an external backup archive or JSON export.
+        The server will fetch the resource on your behalf.
+    </p>
+</div>
+
+<div class="section-card import-card">
+    <form method="post" class="import-form">
+        <div class="import-field">
+            <label for="url-input">Backup Source URL</label>
+            <div class="import-input-row">
+                <span class="url-prefix">🌐</span>
+                <input id="url-input"
+                       type="text"
+                       name="url"
+                       placeholder="https://storage.example.com/mybackup.json"
+                       value="@Model.LastUrl"
+                       autocomplete="off"
+                       spellcheck="false"
+                       required />
+                <button type="submit" class="btn-primary import-btn">Fetch &amp; Import</button>
+            </div>
+            <p class="field-hint">Supported: HTTP/HTTPS endpoints returning JSON or plain text.</p>
+        </div>
+    </form>
+</div>
+
+@if (Model.Result is not null)
+{
+    <div class="section-card result-card">
+
+        @* ── WAF Block ──────────────────────────────────────────────────────── *@
+        @if (Model.Result.Blocked)
+        {
+            <div class="waf-block-page">
+                <div class="waf-icon">🛡</div>
+                <div class="waf-title">Request Blocked</div>
+                <div class="waf-code">HTTP 403 — Web Application Firewall</div>
+                <table class="waf-table">
+                    <tr><td>Rule ID</td>    <td><code>@Model.Result.ErrorCode</code></td></tr>
+                    <tr><td>Category</td>   <td>SSRF-PROTECTION-LOOPBACK</td></tr>
+                    <tr><td>Action</td>     <td>Block</td></tr>
+                    <tr><td>Reason</td>     <td>@Model.Result.ErrorReason</td></tr>
+                </table>
+                <p class="waf-footer">
+                    This request was intercepted by the VaultCorp Security Gateway
+                    and was not forwarded to the target host.
+                </p>
+            </div>
+        }
+
+        @* ── Fetch Failed (connection error — WAF passed but host unreachable) *@
+        else if (!Model.Result.Success && Model.Result.ErrorCode == "FETCH_FAILED")
+        {
+            <div class="fetch-error">
+                <div class="fetch-error-header">
+                    <span class="fetch-error-icon">⚠</span>
+                    <span class="fetch-error-title">FETCH_FAILED</span>
+                </div>
+                <pre class="fetch-error-body">@Model.Result.ErrorReason</pre>
+                <p class="fetch-error-hint">
+                    The URL passed the security filter but the server could not
+                    establish a connection to the target host.
+                </p>
+            </div>
+        }
+
+        @* ── Success ─────────────────────────────────────────────────────────── *@
+        else
+        {
+            <div class="result-header">
+                <h3>Response</h3>
+                <span class="badge @(Model.Result.StatusCode == 200 ? "badge-ok" : "badge-err")">
+                    HTTP @Model.Result.StatusCode
+                </span>
+            </div>
+            <pre class="response-body">@Model.Result.Content</pre>
+        }
+
+    </div>
+}
+
+@section Scripts {
+<style>
+/* ── Import form ───────────────────────────────────── */
+.import-card   { padding: 28px 28px 20px; }
+.import-field  { display: flex; flex-direction: column; gap: 8px; }
+.import-field label { font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.import-input-row {
+    display: flex; align-items: center; gap: 0;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg); overflow: hidden;
+}
+.url-prefix { padding: 0 12px; color: var(--muted); font-size: 1rem; }
+.import-input-row input {
+    flex: 1; border: none; background: transparent;
+    padding: 12px 8px; color: var(--text); font-size: .95rem; font-family: monospace;
+}
+.import-input-row input:focus { outline: none; }
+.import-btn { border-radius: 0 var(--radius) var(--radius) 0; padding: 12px 22px; margin: 0; }
+.field-hint { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+
+/* ── WAF block page ────────────────────────────────── */
+.waf-block-page {
+    background: rgba(248,113,113,.06);
+    border: 1px solid rgba(248,113,113,.35);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    text-align: center;
+}
+.waf-icon  { font-size: 2.4rem; margin-bottom: 10px; }
+.waf-title { font-size: 1.3rem; font-weight: 700; color: var(--danger); margin-bottom: 4px; }
+.waf-code  { font-size: .88rem; color: var(--muted); margin-bottom: 20px; }
+.waf-table { margin: 0 auto 20px; border-collapse: collapse; font-size: .88rem; text-align: left; }
+.waf-table td { padding: 5px 14px; border-bottom: 1px solid var(--border); }
+.waf-table td:first-child { color: var(--muted); white-space: nowrap; }
+.waf-table code { background: rgba(248,113,113,.15); padding: 2px 6px; border-radius: 4px; color: var(--danger); }
+.waf-footer { font-size: .8rem; color: var(--muted); margin: 0; }
+
+/* ── Fetch error ───────────────────────────────────── */
+.fetch-error {
+    border: 1px solid #4a4e6a;
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.fetch-error-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    background: rgba(255,200,100,.07);
+    border-bottom: 1px solid #4a4e6a;
+}
+.fetch-error-icon  { font-size: 1.1rem; }
+.fetch-error-title { font-weight: 700; color: #fbbf24; font-size: .95rem; font-family: monospace; }
+.fetch-error-body  {
+    margin: 0; padding: 14px 16px;
+    background: var(--bg);
+    font-size: .82rem; color: #cbd5e1;
+    white-space: pre-wrap; word-break: break-all;
+}
+.fetch-error-hint  { padding: 10px 16px; margin: 0; font-size: .8rem; color: var(--muted); border-top: 1px solid var(--border); }
+
+/* ── Result header ─────────────────────────────────── */
+.result-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.badge-ok  { background: rgba(74,222,128,.15); color: var(--success); }
+.badge-err { background: rgba(248,113,113,.15); color: var(--danger); }
+</style>
+}

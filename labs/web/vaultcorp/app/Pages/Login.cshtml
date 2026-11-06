@@ -1,0 +1,26 @@
+@page
+@model VaultCorp.Pages.LoginModel
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<div class="auth-card">
+    <h2>Welcome back</h2>
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="alert alert-error">@Model.Error</div>
+    }
+
+    <form method="post">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="johndoe" required autocomplete="username" />
+
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required autocomplete="current-password" />
+
+        <button type="submit" class="btn-primary full-width">Sign In</button>
+    </form>
+
+    <p class="auth-link">No account yet? <a href="/register">Get started</a></p>
+</div>
