@@ -1,0 +1,9 @@
+contract_version: 1
+name: coupon-reuse
+track: web
+difficulty: easy
+description: A merch checkout with a once-per-cart welcome offer.
+flag_hash: fea10514ff657c363d1ebcc267055a4b5629e706ce58590c0597110f562170d7
+status: experimental
+techniques: []
+port: 8080

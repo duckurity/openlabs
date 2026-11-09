@@ -1,0 +1,104 @@
+# Coupon reuse: instructor solution
+
+Keep this document for instructors.
+It contains the solution.
+Give players the [public briefing](../README.md).
+
+## Public briefing
+
+Backstage Merch is a fictional online shop.
+The player receives a customer account with `100` credits.
+The shop sells an Exclusive Digital Pass for `300` credits.
+
+The public briefing gives the login details and purchase objective.
+The shop shows the welcome offer and its once-per-cart rule.
+
+## Objective
+
+Buy the pass and read the flag in the purchase confirmation.
+The player needs to find a way to make the pass affordable.
+
+## Walkthrough
+
+Start with fresh progress in the default mode, `SECURE_MODE=0`.
+Use the [reset steps](operations.mdx#reset-progress) if needed.
+The following steps describe the expected result from the source code.
+
+1. Open `http://localhost:8080/login`.
+   Sign in with `customer` / `Backstage2026!`.
+2. Check the wallet balance of `100` credits and the pass price of `300`.
+3. Find the coupon `WELCOME50`.
+   The shop says it saves `50` credits and can be used once per cart.
+4. Add the pass to the cart.
+5. Apply the coupon once.
+   The total becomes `250`, which is still above the wallet balance.
+   Trying to pay at this point should return `409` for insufficient balance.
+6. Apply the same coupon again.
+   The total becomes `200`, even though the coupon was already used.
+7. Apply it two more times.
+   The total falls to `150`, then `100`.
+8. Select **Pay with wallet**.
+   The purchase uses the `100` credits and opens the confirmation.
+9. Read the flag in the **Purchase complete** section.
+   In a full OpenLabs checkout, check it from the lab directory:
+
+   ```bash
+   python3 ../../../scripts/check.py .
+   ```
+
+Four applications are enough to buy the pass.
+More applications can reduce the total to zero, but never below zero.
+The flag requires a completed purchase, not an exact number of applications.
+
+## What happened and why
+
+The shop says the coupon can be used once, but the server does not enforce
+that rule in vulnerable mode.
+
+Each request to `POST /cart/coupon` adds another discount to the database.
+Checkout adds up all those discounts and subtracts them from the price.
+The player can repeat the normal coupon action until the pass is affordable.
+
+This is a business-logic flaw.
+The requests can happen one after another.
+No timing trick or concurrent requests are needed.
+
+After payment, the server saves the purchase for the signed-in account.
+The cart page then shows the flag in `code#flag`.
+The same account can see it again on later visits.
+The flag is stored in service internals and copied into the database at startup.
+
+## How to fix/mitigate
+
+Enforce the once-per-cart rule in the database.
+The existing secure mode creates this unique index:
+
+```sql
+CREATE UNIQUE INDEX IF NOT EXISTS coupon_once
+ON coupon_applications(cart_id, code);
+```
+
+With `SECURE_MODE=1`, the first application is allowed.
+A second application to the same cart should return `409`.
+The total stays at `250`, so the starting wallet cannot pay.
+
+Hiding or disabling the button is not enough.
+The server must reject repeated requests.
+Follow [the secure-mode steps](operations.mdx#compare-secure-mode) with clean state.
+
+## Lab details
+
+The lab uses Flask, Gunicorn, and SQLite.
+It runs as one Compose service on `127.0.0.1:8080`.
+It uses fictional credits and has no real payment gateway.
+Dependencies install during the image build.
+
+Metadata declares `web`, `easy`, `experimental`, and `techniques: []`.
+The easy grade fits one visible weakness and a short sequence of actions.
+The flag digest belongs in `lab.yml`, not in this document.
+
+All browsers using the customer account share progress.
+Use a separate instance for each player.
+
+See the [security report](security-report.mdx), [validation results](validation-report.mdx),
+and [operations guide](operations.mdx) for the remaining details.

@@ -1,0 +1,1 @@
+"""Backstage Merch application package."""

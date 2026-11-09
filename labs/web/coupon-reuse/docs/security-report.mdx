@@ -1,0 +1,59 @@
+# Security report
+
+## The problem
+
+The coupon is meant to work once per cart.
+In `SECURE_MODE=0`, the server accepts it more than once.
+Each accepted use adds another `50`-credit discount.
+
+The pass costs `300` credits and the wallet starts with `100`.
+One use leaves `250` to pay.
+Four uses leave `100`, so the player can buy the pass.
+
+## Why it happens
+
+The server checks the coupon code but does not check whether that cart
+already used it.
+The database stores each application as a new row.
+
+Using a database transaction does not enforce the missing rule.
+The same request can be repeated without a race.
+See the [walkthrough](challenge-design.mdx#walkthrough).
+
+## How to fix/mitigate
+
+Use a unique database index on `(cart_id, code)`.
+The existing `SECURE_MODE=1` option does this.
+
+The first application should work.
+The next application to that cart should return `409`.
+Keep the payable total calculation on the server.
+
+Reset into clean state before comparing modes.
+Old duplicate rows can prevent the unique index from being created.
+Use the [secure-mode procedure](operations.mdx#compare-secure-mode).
+
+## Other controls
+
+The inspected source checks login and CSRF tokens.
+It uses SQL parameters and calculates prices on the server.
+It shows the flag after a purchase owned by the signed-in account.
+
+The container uses a non-root account.
+Compose binds the service to `127.0.0.1:8080`.
+The player uses the web interface.
+Anyone with access to the source or Docker volume can inspect the stored flag.
+
+The account is shared within one instance.
+Use separate instances for independent players.
+Keep plaintext flags out of documentation.
+
+## What was checked
+
+The review inspected the source and ran static repository checks.
+It also verified clean-clone startup and exercised the documented flow,
+secure mode, and reset in an isolated container with external networking disabled.
+The shared checker accepted the flag after both solves.
+
+The [validation report](validation-report.mdx) links the recorded results.
+These checks do not constitute a full penetration test or dependency vulnerability audit.

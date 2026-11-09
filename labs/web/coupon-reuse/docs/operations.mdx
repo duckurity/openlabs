@@ -1,0 +1,98 @@
+# Operations
+
+## Start the lab
+
+Requires Docker with Docker Compose.
+Run these commands from the lab directory in a POSIX shell:
+
+```bash
+SECURE_MODE=0 docker compose up -d --build
+docker compose ps
+```
+
+Open `http://localhost:8080/login`.
+Sign in with `customer` / `Backstage2026!`.
+The lab publishes one host port, `8080`, on the local machine.
+
+To inspect the service:
+
+```bash
+docker compose logs --tail=100 coupon-reuse
+curl --fail --silent --show-error http://localhost:8080/health
+```
+
+The expected health response contains `"status": "ok"`.
+This checks that the service can reach SQLite.
+It does not check the full solution.
+
+## Stop and resume
+
+Stop the service:
+
+```bash
+docker compose stop coupon-reuse
+```
+
+Resume the default challenge:
+
+```bash
+SECURE_MODE=0 docker compose up -d
+```
+
+Progress is stored in `/data/backstage.sqlite3`.
+Compose keeps it in the `coupon_reuse_data` volume.
+Stopping or rebuilding the service preserves that data.
+Browsers using the customer account share the same progress.
+
+## Reset progress
+
+Reset clears carts, discounts, and purchases.
+It restores the `100`-credit wallet and requires a new login.
+It keeps the same authored flag.
+
+Stop all web workers first.
+These commands delete the current player progress:
+
+```bash
+docker compose stop coupon-reuse
+SECURE_MODE=0 docker compose run --rm --no-deps coupon-reuse python app.py reset
+SECURE_MODE=0 docker compose up -d
+```
+
+The expected message is:
+
+```text
+Reset complete. Restart web workers before serving requests.
+```
+
+Sign in again.
+Check the wallet balance, empty cart, and absence of a purchase confirmation.
+
+## Compare secure mode
+
+Use this mode to demonstrate the fix.
+Stop the service and reset before switching.
+This clears player progress:
+
+```bash
+docker compose stop coupon-reuse
+SECURE_MODE=1 docker compose run --rm --no-deps coupon-reuse python app.py reset
+SECURE_MODE=1 docker compose up -d --force-recreate
+```
+
+One coupon application should work.
+The second should return `409`.
+The total should stay at `250`.
+
+Run the reset procedure with `SECURE_MODE=0` to return to the challenge.
+The mode assignment applies to the command it prefixes.
+
+## Common problems
+
+If port `8080` is busy, resolve the local port conflict before starting.
+If secure mode fails because duplicate rows exist, stop and reset into that mode.
+If an old session fails after reset, sign in again.
+Use the service logs to investigate other startup errors.
+
+The build, health, reset, and mode-switch checks passed.
+See the [validation report](validation-report.mdx) for the recorded evidence.

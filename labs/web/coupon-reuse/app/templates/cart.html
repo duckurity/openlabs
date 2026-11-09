@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Your cart | Backstage Merch{% endblock %}
+{% block content %}
+  <p class="eyebrow">Your selection / 03</p>
+  <h1>Your cart.</h1>
+  {% if flag %}
+    <section class="panel success" aria-labelledby="receipt-heading">
+      <p class="eyebrow">Digital pass confirmed</p>
+      <h2 id="receipt-heading">Purchase complete</h2>
+      <p>Receipt #{{ purchase.id }} &middot; Paid {{ purchase.amount }} credits</p>
+      <p>Your digital pass confirmation:</p>
+      <code id="flag">{{ flag }}</code>
+    </section>
+  {% endif %}
+  {% if cart and cart.product_id %}
+    <div class="columns">
+      <section class="panel" aria-labelledby="item-heading">
+        <span class="badge">Digital exclusive</span>
+        <h2 id="item-heading">Exclusive Digital Pass &times; 1</h2>
+        <dl class="totals">
+          <div><dt>Original price</dt><dd>{{ price }} credits</dd></div>
+          {% for discount in discounts %}
+            <div><dt>{{ discount.code }}</dt><dd>&minus;{{ discount.amount }} credits</dd></div>
+          {% endfor %}
+          <div class="total-row"><dt>Total</dt><dd><strong id="total">{{ total }} credits</strong></dd></div>
+        </dl>
+        <form method="post" action="{{ url_for('checkout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Pay with wallet <span aria-hidden="true">&rarr;</span></button>
+        </form>
+      </section>
+      <aside class="panel offer" aria-labelledby="coupon-heading">
+        <p class="eyebrow">Welcome offer</p>
+        <h2 id="coupon-heading">Have a coupon?</h2>
+        <form method="post" action="{{ url_for('apply_coupon') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label for="code">Coupon code</label>
+          <input id="code" name="code" placeholder="WELCOME50" required>
+          <p class="policy">WELCOME50 saves 50 credits. May be applied only once per cart.</p>
+          <button type="submit">Apply coupon</button>
+        </form>
+      </aside>
+    </div>
+  {% else %}
+    <section class="panel"><p>Your cart is empty. <a href="{{ url_for('shop') }}">Explore the shop</a>.</p></section>
+  {% endif %}
+{% endblock %}

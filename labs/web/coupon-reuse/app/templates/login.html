@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Customer login | Backstage Merch{% endblock %}
+{% block content %}
+  <p class="eyebrow">Customer portal / 01</p>
+  <h1>Welcome backstage.</h1>
+  <p class="intro">Sign in to browse digital passes and use your customer wallet.</p>
+  <section class="panel login-panel" aria-labelledby="login-heading">
+    <h2 id="login-heading">Customer login</h2>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="{{ url_for('login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="username">Username</label>
+      <input id="username" name="username" autocomplete="username" required>
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" autocomplete="current-password" required>
+      <button type="submit">Log in</button>
+    </form>
+  </section>
+{% endblock %}
