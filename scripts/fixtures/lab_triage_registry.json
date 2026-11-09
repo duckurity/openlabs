@@ -15,6 +15,12 @@
       "blocker": "",
       "follow_up_title": ""
     },
+ "labs/web/archive-search": {
+      "action": "maintain",
+      "owner": "maintainers",
+      "blocker": "",
+      "follow_up_title": ""
+    },
     "labs/web/cafe-house-rules": {
       "action": "maintain",
       "owner": "maintainers",

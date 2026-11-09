@@ -1,11 +1,19 @@
 {
-  "catalogued_count": 21,
+  "catalogued_count": 22,
   "experimental": [
     {
       "description": "Chained API trust vulnerabilities across REST, GraphQL, and gRPC.",
       "difficulty": "hard",
       "name": "aegis-ctf",
       "path": "labs/web/aegis-ctf",
+      "status": "experimental",
+      "track": "web"
+    },
+    {
+      "description": "An internal catalog for staff to search archived product records.",
+      "difficulty": "medium",
+      "name": "archive-search",
+      "path": "labs/web/archive-search",
       "status": "experimental",
       "track": "web"
     },
@@ -162,10 +170,10 @@
       "track": "web"
     }
   ],
-  "experimental_count": 20,
+  "experimental_count": 21,
   "generator": "scripts/sync_catalog_public.py",
   "maintainer": {
-    "directory_count": 26,
+    "directory_count": 27,
     "uncatalogued_count": 5,
     "uncatalogued_paths": [
       "labs/web/Sayed_Khashana_REST_API_IDOR_CTF",
