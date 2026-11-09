@@ -1,0 +1,9 @@
+contract_version: 1
+name: archive-search
+track: web
+difficulty: medium
+description: An internal catalog for staff to search archived product records.
+flag_hash: a3cd918bebc545a7353b87179c7701b3b9a22fbbff96eb69e9be456c1abeb71c
+status: experimental
+techniques: [sqli]
+port: 8080

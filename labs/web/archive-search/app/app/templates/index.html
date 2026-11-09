@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Backstage Archive API</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; max-width: 720px; margin: 3rem auto; padding: 0 1rem; color: #1a1a1a; }
+    code, pre { background: #f2f2f2; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    pre { padding: 0.75rem 1rem; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { text-align: left; border-bottom: 1px solid #ddd; padding: 0.4rem 0.6rem; }
+  </style>
+</head>
+<body>
+  <h1>Backstage Archive API</h1>
+  <p>Internal API for searching the Backstage merchandise archive. Authenticate with your issued
+     account, then use your session token on subsequent requests.</p>
+
+  <h2>Endpoints</h2>
+  <table>
+    <tr><th>Method</th><th>Path</th><th>Auth</th><th>Purpose</th></tr>
+    <tr><td>POST</td><td>/api/login</td><td>No</td><td>Exchange credentials for a session token</td></tr>
+    <tr><td>GET</td><td>/api/me</td><td>Yes</td><td>Show basic account information</td></tr>
+    <tr><td>GET</td><td>/api/products</td><td>Yes</td><td>List public products</td></tr>
+    <tr><td>GET</td><td>/api/search?q=...</td><td>Yes</td><td>Search products by name</td></tr>
+    <tr><td>POST</td><td>/api/logout</td><td>Yes</td><td>Invalidate the current session token</td></tr>
+    <tr><td>GET</td><td>/health</td><td>No</td><td>Service health check</td></tr>
+  </table>
+
+  <h2>Login</h2>
+  <pre>POST /api/login
+Content-Type: application/json
+
+{
+  "username": "researcher",
+  "password": "&lt;provided-lab-password&gt;"
+}</pre>
+
+  <h2>Authenticated requests</h2>
+  <p>Include the token returned from login on every other request:</p>
+  <pre>Authorization: Bearer &lt;session-token&gt;</pre>
+
+  <h2>Search example</h2>
+  <pre>GET /api/search?q=Hoodie
+Authorization: Bearer &lt;session-token&gt;</pre>
+</body>
+</html>

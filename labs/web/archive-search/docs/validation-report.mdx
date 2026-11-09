@@ -1,0 +1,23 @@
+# Validation Report
+
+## Scope
+
+This report records the available manual and repository checks for Archive Search. No flag value, token, or credential is reproduced here.
+
+## Manual verification
+
+The author reported completing a local HTTP playthrough: authentication succeeded, catalog search returned the protected record, and the challenge proof was delivered in the search result.
+
+## Repository checks
+
+- `python3 scripts/validate.py`: passed with exit status 0.
+- `python3 scripts/validate.py --compose`: passed with exit status 0. Compose configuration parsed successfully; no containers were started.
+- `python3 scripts/score_lab.py labs/web/archive-search --min 70`: passed with exit status 0. No blocking score failure was reported.
+
+## CI contract checks
+
+Repository contract gates have not run yet. They will run in CI after the pull request is opened.
+
+## Not run
+
+No image build or container playtest was performed for this update. Do not treat those checks as passed.

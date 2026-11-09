@@ -8,6 +8,7 @@ Read a page in full at its URL. Open a brief, run the service, find the flag. Ve
 
 - [Labs](https://openlabs.duckurity.com/labs): Every lab is one vulnerable service, one brief, one flag.
 - [Aegis ctf](https://openlabs.duckurity.com/labs/aegis-ctf): Chained API trust vulnerabilities across REST, GraphQL, and gRPC.
+- [Archive search](https://openlabs.duckurity.com/labs/archive-search): An internal catalog for staff to search archived product records.
 - [Cafe house rules](https://openlabs.duckurity.com/labs/cafe-house-rules): A cafe rules site with a report bot and a guarded back-room route.
 - [Cloudvault](https://openlabs.duckurity.com/labs/cloudvault): A GraphQL document-ingestion API whose SSRF chain reaches a privileged internal vault.
 - [Duck cross](https://openlabs.duckurity.com/labs/duck-cross): A reports portal with a missing object-level authorization check.

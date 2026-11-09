@@ -1,0 +1,13 @@
+*
+!app/
+!app/app/
+!app/app/**
+!app/requirements.txt
+!app/seed.py
+!app/manage.py
+!app/app.py
+**/__pycache__/
+**/*.pyc
+**/*.sqlite*
+**/*.db
+**/flag*
